@@ -1,0 +1,27 @@
+CREATE TABLE Personas (
+    idpersona SERIAL PRIMARY KEY,
+    nombres VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(60) NOT NULL,
+    ci VARCHAR(20) NOT NULL,
+    fechareg DATE NOT NULL,
+    estado VARCHAR(20) NOT NULL
+);
+CREATE TABLE Rol (
+idrol SERIAL PRIMARY KEY,
+nombre VARCHAR(25) NOT NULL,
+fechareg DATE NOT NULL,
+estado VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Usuarios (
+    idusuario SERIAL PRIMARY KEY,
+    idpersona INT NULL,
+    idrol INT NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    fechareg DATE NOT NULL,
+    estado VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES Personas(idpersona),
+    CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES Rol(idrol)
+);
