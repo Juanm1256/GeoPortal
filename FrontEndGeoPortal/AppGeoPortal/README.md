@@ -1,6 +1,6 @@
-# AppGeoportal
+# Appgeoportal
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.13.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 
 ## Development server
 
