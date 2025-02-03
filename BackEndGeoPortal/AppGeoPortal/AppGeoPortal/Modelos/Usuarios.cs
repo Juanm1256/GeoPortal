@@ -11,11 +11,13 @@ namespace AppGeoPortal.Modelos
         public int? idpersona { get; set; }
         public string username { get; set; }
         public string password_hash { get; set; }
-        public string rol { get; set; }
+        public int idrol { get; set; }
         public DateOnly fechareg { get; set; }
         public string estado { get; set; }
 
         [ForeignKey("idpersona")]
         public virtual Personas? IdPersonanav { get; set; }
+        [ForeignKey("idrol")]
+        public virtual Rol? IdRolnav { get; set; }
     }
 }

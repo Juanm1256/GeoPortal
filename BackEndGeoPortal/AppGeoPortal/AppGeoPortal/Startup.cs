@@ -47,6 +47,7 @@ namespace AppGeoPortal
             );
 
             services.AddScoped<IUsuarioContrato, UsuarioLogic>();
+            services.AddScoped<IRolesContrato, RolLogic>();
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()

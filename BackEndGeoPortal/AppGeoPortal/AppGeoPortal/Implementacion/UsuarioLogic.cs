@@ -29,7 +29,6 @@ namespace AppGeoPortal.Implementacion
         public async Task<bool> Insertar(Usuarios usuarios)
         {
             bool sw = false;
-
             context.Usuarios.Add(usuarios);
             int response = await context.SaveChangesAsync();
             if (response == 2)
@@ -60,7 +59,7 @@ namespace AppGeoPortal.Implementacion
                 modificar.idpersona = usuarios.idpersona;
                 modificar.username = usuarios.username;
                 modificar.password_hash = usuarios.password_hash;
-                modificar.rol = usuarios.rol;
+                modificar.idrol = usuarios.idrol;
                 modificar.estado = usuarios.estado;
 
                 await context.SaveChangesAsync();

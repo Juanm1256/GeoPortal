@@ -8,6 +8,7 @@ namespace AppGeoPortal.Contexto
         public AppDbContext(DbContextOptions options) : base(options) { }
 
         public virtual DbSet<Personas> Personas { get; set; }
+        public virtual DbSet<Rol> Rol { get; set; }
         public virtual DbSet<Usuarios> Usuarios { get; set; }
     }
 }
