@@ -64,7 +64,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [HttpPut("Modificar")]
+        [HttpPut("Modificar/{id:int}")]
         public async Task<ActionResult> Modificar([FromBody] Usuarios usuarios, int id)
         {
             try

@@ -31,7 +31,7 @@ namespace AppGeoPortal.Implementacion
             bool sw = false;
             context.Rol.Add(roles);
             int response = await context.SaveChangesAsync();
-            if (response == 2)
+            if (response == 1)
             {
                 sw = true;
             }
@@ -40,7 +40,7 @@ namespace AppGeoPortal.Implementacion
 
         public async Task<List<Rol>> Listaractivos()
         {
-            var listaractivo = await context.Rol.Where(x => x.estado == "Activo").OrderByDescending(x => x.fechareg).ToListAsync();
+            var listaractivo = await context.Rol.Where(x => x.estado == "Activo").OrderByDescending(x => x.idrol).ToListAsync();
             return listaractivo;
         }
 

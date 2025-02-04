@@ -1,0 +1,116 @@
+<!-- Abrir Modal -->
+<ng-template #content let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">ROL</h4>
+		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+	</div>
+  <div class="modal-body">
+    <div class="content-viewport">
+        <div class="row">
+          <div class="col-lg-12">
+                <div class="item-wrapper py-2">
+                  <form [formGroup] = "form" (ngSubmit)="Guardar()">
+                    <div class="form-group">
+                      <label for="nombre">Nombre</label>
+                      <input type="text" class="form-control" id="nombre" 
+                      placeholder="Ingresa tu nombre" formControlName="nombre" required/>
+                     <!-- Abrir Mensaje Error -->                    
+                      <div *ngFor="let error of lista.mensajes.rolnom">
+                        <div *ngIf="form.controls['nombre'].hasError(error.type) && (form.controls['nombre'].dirty || form.controls['nombre'].touched)">
+                              <small class="error">{{error.message}}</small>
+                        </div>                     
+                     </div>
+                    <!-- Cerrar Mensaje Error -->
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger" (click)="modal.dismiss()">Cerrar</button>
+                                <button class="btn btn-success" [disabled]="this.form.invalid"
+                                type="submit"
+                                [class.invalidado]="this.form.invalid"
+                                [class.validado]="this.form.valid" (click)="modal.close()">Guardar
+                      </button>
+                    </div>
+                  </form>
+                </div> 
+          </div>
+        </div>
+      </div>
+</div>
+</ng-template>
+<!-- Cerrar Modal -->
+<div class="content-viewport">
+  <div class="row">
+    <div class="col-lg-12">
+        <div class="row py-4">
+          <div class="col-sm-10">
+              <div class="">
+                  <h2>ROL</h2>
+              </div>
+          </div>
+          <div class="col-sm-2 text-right"> 
+              <button type="button" class="btn btn-primary has-icon btn-rounded buttoncolor" (click)="Guardarinstruct(content)">
+              <i class="mdi mdi-plus-circle"></i>AGREGAR</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="row" >
+            <div class="col-md-5 ">                    
+              <label><span class="subtitulos">BUSCAR</span></label>
+            </div>
+          </div>
+        </div>   
+        <div class="form-group row">
+          <div class="col-md-5 ">
+              <div class="input-group">
+                <select class="form-control col-md-3 text-center" [(ngModel)]="criterio">
+                  <option selected value="nombrerol">Nombre</option>
+                </select>
+                <input type="text" class="form-control" name="filter" placeholder="Buscar..."  [(ngModel)]="search" />              
+              </div>
+          </div>
+      
+          <div class="col-md-7 text-right">
+            <button type="button" class="btn btn-success has-icon btn-rounded dropdown-toggle buttoncolor botonUp"  (click)="LimpiarSearch()" clickable>
+            <i class="mdi mdi-reload"></i>LIMPIAR</button>
+          </div>
+        </div>                                                    
+    </div>
+      
+    <div class="col-lg-12">
+      <div class="item-wrapper">
+        <div class="table-responsive">
+             <table class="table info-table table-striped">
+              <thead>
+                      <tr>
+                          <th>#</th>
+                          <th>Nombre</th>
+                          <th>ESTADO</th>
+                          <th></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr *ngFor="let rol of listaRol | filterone:criterio:search | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize; let i = index">
+                        <td>{{rol.idrol}}</td>
+                          <td>{{ rol.nombre }}</td>
+                          <td *ngIf="rol.estado == 1"> <label class="badge badge-success btnacti">ACTIVO</label></td>
+                          <td *ngIf="rol.estado == 0"> <label class="badge badge-danger">INACTIVO</label></td>
+                          <td>
+                            <button type="button" (click)="SeleccionarRol(content,rol)" class="btn btn-dark has-icon btn-rounded" style="margin: 10px">
+                              <i class="mdi mdi-lead-pencil"></i>Modificar</button>
+                            <button type="button" (click)="CambiarEstado(rol, 'Inactivo')" class="btn btn-danger has-icon btn-rounded" *ngIf="rol.estado == 'Activo'">
+                              <i class="mdi mdi-delete"></i>Desactivar</button>
+                            <button type="button" (click)="CambiarEstado(rol, 'Activo')" class="btn btn-success has-icon btn-rounded" *ngIf="rol.estado == 'Inactivo'">
+                              <i class="mdi mdi-arrow-right-bold-circle"></i>Activar</button>
+                          </td>
+                        </tr>
+                  </tbody>
+              </table>
+        </div>
+        <div class="float-end">
+          <ngb-pagination [pageSize] = "pageSize" [collectionSize]="pagesizee" [(page)]="page" [boundaryLinks]="true"></ngb-pagination>
+        </div>
+    </div>
+  </div>
+ </div>
+</div>

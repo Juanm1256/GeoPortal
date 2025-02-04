@@ -40,7 +40,7 @@ namespace AppGeoPortal.Implementacion
 
         public async Task<List<Usuarios>> Listaractivos()
         {
-            var listaractivo = await context.Usuarios.Where(x=>x.estado == "Activo").OrderByDescending(x=>x.fechareg).ToListAsync();
+            var listaractivo = await context.Usuarios.Where(x=>x.estado == "Activo").OrderByDescending(x=>x.idusuario).ToListAsync();
             return listaractivo;
         }
 
