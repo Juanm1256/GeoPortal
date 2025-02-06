@@ -7,21 +7,21 @@ namespace AppGeoPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RolesController : ControllerBase
+    public class UsuariosController : ControllerBase
     {
+        private readonly IUsuariosContrato _usuario;
 
-        private readonly IRolesContrato _roles;
-
-        public RolesController(IRolesContrato roles)
+        public UsuariosController(IUsuariosContrato usuario)
         {
-            _roles = roles;
+            _usuario = usuario;
         }
+
         [HttpGet("ListarTodos")]
-        public async Task<ActionResult<List<Roles>>> ListarTodos()
+        public async Task<ActionResult<List<Usuarios>>> ListarTodos()
         {
             try
             {
-                var listar = await _roles.ListarTodos();
+                var listar = await _usuario.ListarTodos();
                 return Ok(listar);
             }
             catch (Exception ex)
@@ -31,11 +31,11 @@ namespace AppGeoPortal.Controllers
         }
 
         [HttpGet("ListarActivos")]
-        public async Task<ActionResult<List<Roles>>> ListarActivos()
+        public async Task<ActionResult<List<Usuarios>>> ListarActivos()
         {
             try
             {
-                var listar = await _roles.Listaractivos();
+                var listar = await _usuario.Listaractivos();
                 return Ok(listar);
             }
             catch (Exception ex)
@@ -45,42 +45,42 @@ namespace AppGeoPortal.Controllers
         }
 
         [HttpPost("Insertar")]
-        public async Task<ActionResult> Insertar([FromBody] Roles roles)
+        public async Task<ActionResult> Insertar([FromBody] Usuarios usuarios)
         {
             try
             {
-                var insertar = await _roles.Insertar(roles);
+                var insertar = await _usuario.Insertar(usuarios);
                 if (insertar)
                 {
-                    return CreatedAtAction(nameof(ListarTodos), new { id = roles.idrol}, roles);
+                    return CreatedAtAction(nameof(ListarTodos), new { id = usuarios.idusuario }, usuarios);
                 }
 
-                return BadRequest("No se pudo insertar el rol");
+                return BadRequest("No se pudo insertar el usuario");
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al insetar el Rol: {ex.Message}");
+                return StatusCode(500, $"Error al insetar el usuario: {ex.Message}");
             }
         }
 
         [HttpPut("Modificar/{id:int}")]
-        public async Task<ActionResult> Modificar([FromBody] Roles roles, int id)
+        public async Task<ActionResult> Modificar([FromBody] Usuarios usuarios, int id)
         {
             try
             {
-                var modificar = await _roles.Modificar(roles, id);
+                var modificar = await _usuario.Modificar(usuarios, id);
                 if (modificar)
                 {
-                    return CreatedAtAction(nameof(ListarTodos), new { id = roles.idrol }, roles);
+                    return CreatedAtAction(nameof(ListarTodos), new { id = usuarios.idusuario }, usuarios);
                 }
 
-                return BadRequest("No se pudo modificar el rol");
+                return BadRequest("No se pudo modificar el usuario");
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al modificar el rol: {ex.Message}");
+                return StatusCode(500, $"Error al modificar el usuario: {ex.Message}");
             }
         }
 
@@ -89,28 +89,28 @@ namespace AppGeoPortal.Controllers
         {
             try
             {
-                var eliminar = await _roles.Delete(id);
+                var eliminar = await _usuario.Delete(id);
                 if (eliminar)
                 {
                     return Ok();
                 }
 
-                return BadRequest("No se pudo eliminar el rol");
+                return BadRequest("No se pudo eliminar el usuario");
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar el rol: {ex.Message}");
+                return StatusCode(500, $"Error al eliminar el usuario: {ex.Message}");
             }
         }
 
 
         [HttpGet("ObtenerId")]
-        public async Task<ActionResult<Roles>> ObtenerId(int id)
+        public async Task<ActionResult<Usuarios>> ObtenerId(int id)
         {
             try
             {
-                var listar = await _roles.ObtenerById(id);
+                var listar = await _usuario.ObtenerById(id);
                 return Ok(listar);
             }
             catch (Exception ex)

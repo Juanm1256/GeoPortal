@@ -6,7 +6,7 @@ CREATE TABLE Personas (
     fechareg DATE NOT NULL,
     estado VARCHAR(20) NOT NULL
 );
-CREATE TABLE Rol (
+CREATE TABLE Roles (
 idrol SERIAL PRIMARY KEY,
 nombre VARCHAR(25) NOT NULL,
 fechareg DATE NOT NULL,
@@ -19,9 +19,21 @@ CREATE TABLE Usuarios (
     idrol INT NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    rol VARCHAR(20) NOT NULL,
     fechareg DATE NOT NULL,
     estado VARCHAR(20) NOT NULL,
     CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES Personas(idpersona),
-    CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES Rol(idrol)
+    CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES Roles(idrol)
+);
+
+CREATE TABLE Permisos (
+idpermiso SERIAL PRIMARY KEY,
+nombre VARCHAR(25) NOT NULL
+);
+
+CREATE TABLE rol_permiso (
+idrolpermiso SERIAL PRIMARY KEY,
+idrol INT NOT NULL,
+idpermiso INT NOT NULL,
+CONSTRAINT fk_rol_rolpermiso FOREIGN KEY (idrol) REFERENCES Roles(idrol),
+CONSTRAINT fk_permiso_rolpermiso FOREIGN KEY (idpermiso) REFERENCES Permisos(idpermiso)
 );
