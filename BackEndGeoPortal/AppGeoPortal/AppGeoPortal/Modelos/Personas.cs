@@ -11,7 +11,7 @@ namespace AppGeoPortal.Modelos
         public string nombres { get; set; }
         public string apellidos { get; set; }
         public string ci { get; set; }
-        public DateOnly fechareg { get; set; }
+        public DateTime fechareg { get; set; }
         public string estado { get; set; }
     }
 }
