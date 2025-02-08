@@ -29,8 +29,8 @@ export class UsuariosComponent implements OnInit {
   pagesizee: any;
   search = '';
   criterio = 'username';
-  roles: any[] = []; // Lista de roles para el select
-  personas: any[] = []; // Lista de personas para el select
+  roles: any[] = [];
+  personas: any[] = [];
 
   constructor(
     public modalService: NgbModal,
@@ -88,7 +88,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarRoles() {
-    this.rolService.ListarActivos().subscribe(data => {
+    this.rolService.ListarTodos().subscribe(data => {
       this.roles = data;
     });
   }
@@ -106,23 +106,22 @@ export class UsuariosComponent implements OnInit {
       idusuario: this.id || 0,
       username: this.form.get('username')?.value,
       password_hash: this.form.get('password')?.value,
-      fechareg: today,  // Enviamos solo la fecha
+      fechareg: today, 
       idrol: this.form.get('idrol')?.value,
-      idpersona: this.idpersona || 0,  // Se mantiene como 0, ya que no lo estás utilizando
+      idpersona: this.idpersona || 0,
       estado: 'Activo',
       IdPersonanav: {
         idpersona: this.idpersona || 0,
         nombres: this.form.get('nombres')?.value,
         apellidos: this.form.get('apellidos')?.value,
         ci: this.form.get('ci')?.value,
-        fechareg: today,  // Fecha formateada
+        fechareg: today,
         estado: 'Activo',
       },
-      IdRolnav: undefined,  // Aquí lo dejas como undefined, ya que no lo necesitas
+      IdRolnav: undefined, 
     };
 
     if (this.id == undefined) {
-      // Si el ID es undefined, significa que estás agregando un nuevo usuario
       this.usuarioService.PostUsuario(usuario).subscribe(() => {
         Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
         this.listadoUsuarios();
@@ -131,7 +130,6 @@ export class UsuariosComponent implements OnInit {
         Swal.fire({ icon: 'error', title: 'Error en el Formulario', html: error.error.errors[Object.keys(error.error.errors)[0]] });
       });
     } else {
-      // Si el ID está definido, estás modificando un usuario existente
       usuario.idusuario = this.id;
       this.usuarioService.PutUsuario(this.id, usuario).subscribe(() => {
         Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
@@ -159,7 +157,7 @@ export class UsuariosComponent implements OnInit {
     this.idpersona = usuario.idpersona;
     this.form.patchValue({
       username: usuario.username,
-      password: usuario.password_hash,
+      password: "",
       idrol: usuario.idrol,
       idpersona: usuario.idpersona,
       nombres: usuario.IdPersonanav?.nombres,

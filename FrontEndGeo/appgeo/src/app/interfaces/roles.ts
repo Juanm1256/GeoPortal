@@ -3,4 +3,5 @@ export interface Roles {
     nombre: string;
     fechareg?: Date;
     estado: string;
+    permisos?: string[];
 }

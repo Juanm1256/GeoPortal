@@ -40,7 +40,7 @@ namespace AppGeoPortal
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIBibliografia", Version = "v1" });
             });
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(
+                options.UseLazyLoadingProxies().UseNpgsql(
                     Configuration.GetConnectionString("cadenaconexion"),
                     x => x.UseNetTopologySuite()
                 )
@@ -48,6 +48,7 @@ namespace AppGeoPortal
 
             services.AddScoped<IUsuariosContrato, UsuariosLogic>();
             services.AddScoped<IRolesContrato, RolesLogic>();
+            services.AddScoped<IRol_PermisoContrato, Rol_PermisoLogic>();
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()

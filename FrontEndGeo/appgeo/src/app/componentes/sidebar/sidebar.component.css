@@ -1,0 +1,59 @@
+.sidebar {
+    width: 300px;
+    min-height: 100vh;
+    transition: width 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .sidebar.collapsed {
+    width: 80px;
+  }
+  
+  .sidebar.collapsed .text {
+    display: none;
+  }
+  
+  .sidebar.collapsed .accordion-button {
+    justify-content: center;
+  }
+  
+  .sidebar.collapsed .accordion-body {
+    text-align: center;
+  }
+  
+  .sidebar .logos {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+  }
+  
+  .logo {
+    max-width: 60px;
+    height: auto;
+    margin: 5px;
+  }
+  
+  /* Agregar un tooltip cuando el sidebar está contraído */
+  .sidebar.collapsed a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .sidebar.collapsed a:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .accordion-button::after {
+    display: none; /* Esto elimina la flecha del accordion butt */
+  }
