@@ -34,6 +34,7 @@ CREATE TABLE rol_permiso (
 idrolpermiso SERIAL PRIMARY KEY,
 idrol INT NOT NULL,
 idpermiso INT NOT NULL,
+estado VARCHAR(15) NOT NULL,
 CONSTRAINT fk_rol_rolpermiso FOREIGN KEY (idrol) REFERENCES Roles(idrol),
 CONSTRAINT fk_permiso_rolpermiso FOREIGN KEY (idpermiso) REFERENCES Permisos(idpermiso)
 );

@@ -1,6 +1,7 @@
 ﻿using AppGeoPortal.Contexto;
 using AppGeoPortal.Contrato;
 using AppGeoPortal.Modelos;
+using AppGeoPortal.Modelos.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppGeoPortal.Implementacion
@@ -13,62 +14,32 @@ namespace AppGeoPortal.Implementacion
         {
             this.context = context;
         }
-        public async Task<bool> Delete(int id)
+        public async Task<List<Permisos>> ListarPermisos()
         {
-            bool sw = false;
-            Roles eliminar = await context.Rol.FirstOrDefaultAsync(x => x.idrol == id);
-            context.Rol.Remove(eliminar);
-            await context.SaveChangesAsync();
-            if (eliminar != null)
-            {
-                sw = true;
-            }
-            return sw;
-        }
-
-        public async Task<bool> Insertar(Roles roles)
-        {
-            bool sw = false;
-            context.Rol.Add(roles);
-            int response = await context.SaveChangesAsync();
-            if (response == 1)
-            {
-                sw = true;
-            }
-            return sw;
-        }
-
-        public async Task<List<Roles>> Listaractivos()
-        {
-            var listaractivo = await context.Rol.Where(x => x.estado == "Activo").OrderByDescending(x => x.idrol).ToListAsync();
+            var listaractivo = await context.Permisos.OrderBy(x => x.idpermiso).ToListAsync();
             return listaractivo;
         }
 
-        public async Task<List<Roles>> ListarTodos()
+        public async Task<List<RolesDTO>> ListarTodos()
         {
-            var listartodos = await context.Rol.OrderByDescending(x => x.fechareg).ToListAsync();
-            return listartodos;
-        }
+            var roles = await context.Roles.Include(r => r.RolPermisos)
+                                   .ThenInclude(rp => rp.IdPermisonav)
+                                   .ToListAsync();
 
-        public async Task<bool> Modificar(Roles roles, int id)
-        {
-            bool sw = false;
-            Roles modificar = await context.Rol.FirstOrDefaultAsync(x => x.idrol == id);
-            if (modificar != null)
+            var rolesConPermisos = roles.Select(r => new RolesDTO
             {
-                modificar.nombre = roles.nombre;
-                modificar.estado = roles.estado;
+                idrol = r.idrol,
+                nombre = r.nombre,
+                fechareg = r.fechareg,
+                estado = r.estado,
+                permisos = r.RolPermisos
+                    .Where(rp => rp.estado == "Activo")  // Filtramos solo los permisos activos
+                    .Select(rp => rp.IdPermisonav.nombre) // Seleccionamos solo el nombre del permiso
+                    .ToList()
+            }).ToList();
 
-                await context.SaveChangesAsync();
-                sw = true;
-            }
-            return sw;
+            return rolesConPermisos;
         }
 
-        public async Task<Roles> ObtenerById(int id)
-        {
-            var byid = await context.Rol.FirstOrDefaultAsync(x => x.idrol == id);
-            return byid;
-        }
     }
 }

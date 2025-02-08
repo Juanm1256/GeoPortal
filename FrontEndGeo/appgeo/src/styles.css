@@ -1,1 +1,170 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos para el modo normal (por defecto) */
+body {
+    background-color: white;
+    color: black;
+  }
+  
+  /* Estilos para el modo noche */
+  body.dark-theme {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  /* Estilos adicionales para el navbar en modo noche */
+  body.dark-theme .navbar {
+    background-color: #1a1a1a !important;
+    border-bottom: 1px solid #333;
+  }
+  
+  body.dark-theme .navbar-brand,
+  body.dark-theme .navbar-nav .nav-link {
+    color: #ffffff !important;
+  }
+  
+  /* Estilos para el sidebar en modo noche */
+  body.dark-theme .sidebar {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+  }
+  
+  /* Estilos para el sidebar en modo claro (por defecto) */
+  .sidebar {
+    background-color: #f8f9fa; /* Fondo claro */
+    color: #000; /* Texto oscuro */
+  }
+  .sidebar h5 {
+    color: #000; /* Título en modo claro */
+  }
+  
+  .sidebar .accordion-button {
+    background-color: #f8f9fa; /* Fondo del botón en modo claro */
+    color: #000; /* Texto del botón en modo claro */
+  }
+  
+  .sidebar .accordion-body {
+    background-color: #f8f9fa; /* Fondo del cuerpo del acordeón en modo claro */
+  }
+  
+  .sidebar a {
+    color: #000; /* Enlaces en modo claro */
+  }
+  
+  /* Estilos para el sidebar en modo noche */
+  body.dark-theme .sidebar {
+    background-color: #1a1a1a; /* Fondo oscuro */
+    color: #ffffff; /* Texto claro */
+  }
+  
+  body.dark-theme .sidebar h5 {
+    color: #ffffff; /* Título en modo oscuro */
+  }
+  body.dark-theme .sidebar .accordion-button {
+    background-color: #1a1a1a; /* Fondo del botón en modo oscuro */
+    color: #ffffff; /* Texto del botón en modo oscuro */
+  }
+  
+  body.dark-theme .sidebar .accordion-body {
+    background-color: #1a1a1a; /* Fondo del cuerpo del acordeón en modo oscuro */
+  }
+  
+  body.dark-theme .sidebar a {
+    color: #ffffff; /* Enlaces en modo oscuro */
+  }
+  
+  /* Estilos para la tabla en modo noche */
+  body.dark-theme .table {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  body.dark-theme .table th {
+    background-color: #333;
+    color: #fff;
+  }
+  
+  body.dark-theme .table td {
+    background-color: #2b2b2b !important;
+    color: #ddd !important;
+  }
+  
+  body.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #252525 !important;
+  }
+  
+  /* Estilos para cajas de texto en modo noche */
+  body.dark-theme .form-control {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+  }
+  
+  body.dark-theme .form-control::placeholder {
+    color: #bbb;
+  }
+  
+  /* Estilos para el modal en modo noche */
+  body.dark-theme .modal-content {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  body.dark-theme .modal-header {
+    border-bottom: 1px solid #444;
+  }
+  
+  body.dark-theme .modal-footer {
+    border-top: 1px solid #444;
+  }
+  
+  body.dark-theme .btn-close {
+    filter: invert(1);
+  }
+  
+  
+  /* Estilos para la paginación en modo claro (por defecto) */
+  .ngb-pagination {
+    background-color: #ffffff; /* Fondo claro */
+    color: #000000; /* Texto oscuro */
+  }
+  
+  .ngb-pagination .page-item .page-link {
+    color: #000000; /* Color del texto de los enlaces */
+    background-color: #ffffff; /* Fondo de los enlaces */
+    border-color: #dee2e6; /* Color del borde */
+  }
+  
+  .ngb-pagination .page-item.active .page-link {
+    background-color: #007bff; /* Fondo del enlace activo */
+    border-color: #007bff; /* Borde del enlace activo */
+    color: #ffffff; /* Texto del enlace activo */
+  }
+  
+  .ngb-pagination .page-item.disabled .page-link {
+    color: #6c757d; /* Color del texto deshabilitado */
+    background-color: #ffffff; /* Fondo deshabilitado */
+    border-color: #dee2e6; /* Borde deshabilitado */
+  }
+  
+  /* Estilos para la paginación en modo noche */
+  body.dark-theme .ngb-pagination {
+    background-color: #1a1a1a; /* Fondo oscuro */
+    color: #ffffff; /* Texto claro */
+  }
+  
+  body.dark-theme .ngb-pagination .page-item .page-link {
+    color: #ffffff; /* Color del texto de los enlaces */
+    background-color: #1a1a1a; /* Fondo de los enlaces */
+    border-color: #444; /* Color del borde */
+  }
+  
+  body.dark-theme .ngb-pagination .page-item.active .page-link {
+    background-color: #0d6efd; /* Fondo del enlace activo */
+    border-color: #0d6efd; /* Borde del enlace activo */
+    color: #ffffff; /* Texto del enlace activo */
+  }
+  
+  body.dark-theme .ngb-pagination .page-item.disabled .page-link {
+    color: #6c757d; /* Color del texto deshabilitado */
+    background-color: #1a1a1a; /* Fondo deshabilitado */
+    border-color: #444; /* Borde deshabilitado */
+  }
