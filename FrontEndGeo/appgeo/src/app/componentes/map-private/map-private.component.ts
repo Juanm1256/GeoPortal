@@ -53,7 +53,7 @@ export class MapPrivateComponent implements OnInit {
     }).addTo(this.map);
   }
   toggleLayer(layerName: string, event: any) {
-    const button = event.target.closest('.layer-btn'); // Captura el botón
+    const button = event.target.closest('.layer-btn');
 
     if (!this.capas[layerName]) {
         switch (layerName) {
@@ -81,22 +81,19 @@ export class MapPrivateComponent implements OnInit {
             case 'proveedorAsistenciaTecnica':
                 this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica();
                 break;
-            /*case 'redCaminos':
+            case 'redCaminos':
                 this.capas[layerName] = this.CargarRedCaminos();
                 break;
             case 'redHidrica':
                 this.capas[layerName] = this.CargarRedHidrica();
-                break;*/
+                break;
         }
 
-        // Marcar botón como activo
         button.classList.add('active');
     } else {
-        // Si la capa está activa, se quita
         this.map.removeLayer(this.capas[layerName]);
         delete this.capas[layerName];
 
-        // Quitar clase 'active' del botón
         button.classList.remove('active');
     }
 }
