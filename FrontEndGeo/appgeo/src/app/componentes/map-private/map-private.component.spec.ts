@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MapaComponent } from './mapa.component';
+import { MapPrivateComponent } from './map-private.component';
 
-describe('MapaComponent', () => {
-  let component: MapaComponent;
-  let fixture: ComponentFixture<MapaComponent>;
+describe('MapPrivateComponent', () => {
+  let component: MapPrivateComponent;
+  let fixture: ComponentFixture<MapPrivateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MapaComponent]
+      imports: [MapPrivateComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MapaComponent);
+    fixture = TestBed.createComponent(MapPrivateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
