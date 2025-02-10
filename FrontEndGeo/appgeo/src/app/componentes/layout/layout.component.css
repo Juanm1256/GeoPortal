@@ -1,16 +1,49 @@
-.container-layout {
+/* ----------------------------
+   LAYOUT GENERAL
+   ---------------------------- */
+   .container-layout {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-}
+    height: 100vh; /* Asegura que ocupe toda la pantalla */
+    width: 100%;
+  }
   
-.main-content {
+  /* Mantiene el contenido flexible y bien distribuido */
+  .main-content {
     display: flex;
     flex: 1;
-}
+    width: 100%;
+    overflow: hidden; /* Evita desbordamientos laterales */
+  }
   
-.page-content {
+  /* Asegura que el contenido principal tenga desplazamiento vertical */
+  .page-content {
     flex: 1;
     padding: 20px;
-    overflow-y: auto;
-}
+    overflow-y: auto; /* Solo scroll cuando es necesario */
+  }
+  
+  /* ----------------------------
+     MODO NORMAL (CLARO)
+     ---------------------------- */
+  .container-layout {
+    background-color: white;
+    color: black;
+  }
+  
+  /* ----------------------------
+     MODO OSCURO
+     ---------------------------- */
+  .dark-theme .container-layout {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  /* Corrige posibles desbordamientos en el modo oscuro */
+  .dark-theme .page-content {
+    background-color: #121212;
+    overflow-y: auto;
+  }
+  
+  
+  

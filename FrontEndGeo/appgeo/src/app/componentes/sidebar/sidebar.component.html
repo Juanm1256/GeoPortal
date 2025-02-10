@@ -1,6 +1,13 @@
-<nav class="sidebar bg-light p-3" [class.collapsed]="isSidebarCollapsed">
-  
-
+<!-- Botón de Inicio -->
+<div class="sidebar-header">
+  <a href="/" class="btn btn-inicio">
+    <i class="bi bi-house-door-fill"></i>
+    <span *ngIf="!isSidebarCollapsed">Inicio</span>
+  </a>
+</div>
+<nav class="sidebar bg-light p-3" 
+     [class.collapsed]="isSidebarCollapsed" 
+     [class.dark]="isDarkMode">
     <h5 class="text mb-4" *ngIf="!isSidebarCollapsed">
       <i class="bi bi-grid-fill me-2"></i> MÓDULOS
     </h5>

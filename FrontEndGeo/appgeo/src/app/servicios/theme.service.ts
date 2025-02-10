@@ -1,32 +1,22 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
-  private isDarkMode = false;
+  private isDarkModeSubject = new BehaviorSubject<boolean>(false);
+  isDarkMode$ = this.isDarkModeSubject.asObservable(); // Observable para los componentes
 
-  getTheme(): boolean {
-    return this.isDarkMode;
+  constructor() {
+    const savedTheme = sessionStorage.getItem('theme'); // Usamos sessionStorage en vez de localStorage
+    const isDark = savedTheme === 'dark';
+    this.isDarkModeSubject.next(isDark);
   }
 
   toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.applyTheme();
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    const newTheme = !this.isDarkModeSubject.value;
+    this.isDarkModeSubject.next(newTheme);
+    sessionStorage.setItem('theme', newTheme ? 'dark' : 'light'); // Usamos sessionStorage
   }
-
-  private applyTheme(): void {
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
-    }
-  }
-
-  constructor() {
-    const savedTheme = localStorage.getItem('theme');
-    this.isDarkMode = savedTheme === 'dark';
-    this.applyTheme();
-  }
 }
