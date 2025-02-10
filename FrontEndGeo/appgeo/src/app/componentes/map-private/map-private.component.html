@@ -1,1 +1,41 @@
-<div id="map-private"></div>
+<!-- Contenedor del mapa -->
+<div id="map-private" style="height: 600px;">
+<!-- Botón para abrir/cerrar el acordeón -->
+<div class="accordion-container">
+    <button class="accordion-btn bi bi-stack" (click)="toggleAccordion()"></button>
+    <div class="layer-panel" [class.show]="isAccordionOpen">
+      <button class="layer-btn" (click)="toggleLayer('cuencas', $event)">
+        <i class="bi bi-layers"></i> <span>Cuencas</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('mercados', $event)">
+        <i class="bi bi-shop"></i> <span>Mercados</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('capitalesDepartamentales', $event)">
+        <i class="bi bi-geo-alt"></i> <span>Capitales Departamentales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('limitesDepartamentales', $event)">
+        <i class="bi bi-map"></i> <span>Límites Departamentales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('limitesMunicipales', $event)">
+        <i class="bi bi-map-fill"></i> <span>Límites Municipales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAlevines', $event)">
+        <i class="bi bi-box"></i> <span>Alevines</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAlimentos', $event)">
+        <i class="bi bi-basket"></i> <span>Alimentos</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAsistenciaTecnica', $event)">
+        <i class="bi bi-tools"></i> <span>Asistencia Técnica</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('redCaminos', $event)">
+        <i class="bi bi-road"></i> <span>Red de Caminos</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('redHidrica', $event)">
+        <i class="bi bi-water"></i> <span>Red Hídrica</span>
+      </button>
+    </div>
+  </div>
+  
+</div>
+
