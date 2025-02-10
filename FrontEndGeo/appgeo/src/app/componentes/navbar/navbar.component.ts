@@ -1,24 +1,43 @@
-import { Component,EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Importa CommonModule para usar directivas como *ngIf y *ngFor
-import { RouterModule } from '@angular/router'; // Importa RouterModule para usar enlaces de navegación
+import { Component, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ThemeService } from '../../servicios/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true, // Indica que este componente es independiente (standalone)
-  imports: [CommonModule, RouterModule], // Importa los módulos necesarios
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css'] // Usa styleUrls en lugar de styleUrl
+  styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
-  constructor(public themeService: ThemeService) {} // Inyecta el servicio
-  // Cambiar entre modo noche y modo día
-  toggleTheme(): void {
+export class NavbarComponent implements OnInit, OnDestroy {
+  isDarkMode: boolean = false;
+  themeSubscription!: Subscription;
+
+  @Output() sidebarToggle = new EventEmitter<void>();
+
+  constructor(public themeService: ThemeService) {}
+
+  ngOnInit() {
+    // Suscribirse al observable para que la UI se actualice automáticamente
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      (isDark) => {
+        this.isDarkMode = isDark;
+      }
+    );
+  }
+
+  toggleTheme(event: Event) {
+    event.preventDefault(); // ⬅ Evita navegación inesperada
     this.themeService.toggleTheme();
   }
-  @Output() sidebarToggle = new EventEmitter<void>();
 
   toggleSidebar() {
     this.sidebarToggle.emit();
-  }
+  }
+
+  ngOnDestroy() {
+    this.themeSubscription.unsubscribe();
+  }
 }

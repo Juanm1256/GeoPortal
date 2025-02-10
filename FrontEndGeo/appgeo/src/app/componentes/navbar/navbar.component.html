@@ -1,23 +1,39 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <i class="bi bi-globe-americas"></i>
-      <a class="navbar-brand" href="../../../index.html">Geoportal</a>
-      <button class="btn btn-outline-secondary me-2" (click)="toggleSidebar()">
-        <i class="bi bi-list"></i>
-      </button>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-        <form class="d-flex" role="search">
-          <div class="container-fluid">
-            <!-- Botón para cambiar entre modos -->
-            <button class="btn btn-outline-secondary" (click)="toggleTheme()">
-              <i class="bi" [ngClass]="themeService.getTheme() ? 'bi-sun' : 'bi-moon'"></i>
-            </button>
-          </div>
-        </form>
+<nav class="navbar navbar-expand-lg custom-navbar" [ngClass]="{'dark-theme': isDarkMode}">
+  <div class="container-fluid">
+    <!-- Sección de Logos -->
+    <div class="logo-container" >
+      <img  src="assets/img/logo_Bicentenario.webp"  class="logo">
+      <img src="assets/img/logo_iniaf.webp"  class="logo">
+      <img src="assets/img/logo_mdryt.webp"  class="logo3">
+    </div>
+
+    <!-- Botón de Sidebar -->
+    <button class="btn btn-outline-secondary me-2 sidebar-btn" (click)="toggleSidebar()">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Botón Toggler para Responsive -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+
+      <!-- Botones de acciones (Modo oscuro, perfil, logout) -->
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-outline-secondary me-2" (click)="toggleTheme($event)">
+          <i class="bi" [ngClass]="isDarkMode ? 'bi-sun' : 'bi-moon'"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary me-2">
+          <i class="bi bi-person"></i>
+        </button>
+        <button type="button" class="btn btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
-    </div>
-  </nav>
+    </div>
+  </div>
+</nav>

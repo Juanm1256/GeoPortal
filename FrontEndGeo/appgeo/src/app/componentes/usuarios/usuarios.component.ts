@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { UsuariosService } from '../../servicios/usuarios.service';
@@ -8,8 +8,8 @@ import { Usuarios } from '../../interfaces/usuarios';
 import { RolesService } from '../../servicios/roles.service';
 import { CommonModule } from '@angular/common';
 import { FilteronePipe } from '../../Pipes/filterone.pipe';
-
-
+import { ThemeService } from '../../servicios/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-usuarios',
@@ -17,22 +17,26 @@ import { FilteronePipe } from '../../Pipes/filterone.pipe';
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css'
 })
-export class UsuariosComponent implements OnInit {
-  listaUsuarios: any[] = [];
+export class UsuariosComponent implements OnInit, OnDestroy {
+  isLoading: boolean = true; // ⬅ Estado del spinner
+  isDarkMode: boolean = false;
+  listaUsuarios: Usuarios[] = [];
   form: FormGroup;
   accion = "Agregar";
   id: number | undefined;
-  idpersona: number|undefined;
+  idpersona: number | undefined;
   lista: Mensaje = new Mensaje();
   pageSize = 5;
   page = 1;
-  pagesizee: any;
+  pagesizee: number = 0;
   search = '';
   criterio = 'username';
   roles: any[] = [];
   personas: any[] = [];
+  themeSubscription!: Subscription;
 
   constructor(
+    private themeService: ThemeService,
     public modalService: NgbModal,
     private usuarioService: UsuariosService,
     private fb: FormBuilder,
@@ -49,50 +53,61 @@ export class UsuariosComponent implements OnInit {
         Validators.minLength(6)
       ]],
       idrol: ['', Validators.required],
-      nombres:['', [
+      nombres: ['', [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+)*$')
+        Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$')
       ]],
-      apellidos:['', [
+      apellidos: ['', [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+)*$')
+        Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$')
       ]],
-      ci:['', [
+      ci: ['', [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+)*$')
+        Validators.pattern('^[A-Za-z0-9]+$')
       ]],
     });
   }
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      nombres: ['', Validators.required],
-      apellidos: ['', Validators.required],
-      ci: ['', Validators.required],
-      idrol: ['', Validators.required],
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-    });
-    this.listadoUsuarios();
+    // Suscribirse al observable para cambios de tema
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      (isDark) => {
+        this.isDarkMode = isDark;
+      }
+    );
+
+    this.cargarUsuarios();
     this.cargarRoles();
   }
+  cargarUsuarios() {
+    this.isLoading = true;
 
-  listadoUsuarios() {
-    this.usuarioService.ListarTodos().subscribe(data => {
-      this.listaUsuarios = data;
-      this.pagesizee = this.listaUsuarios.length;
-    });
+    this.usuarioService.ListarTodos().subscribe(
+      (data) => {
+        this.listaUsuarios = data;
+        this.isLoading = false;
+        this.pagesizee = this.listaUsuarios.length;
+      },
+      (error) => {
+        console.error('Error al obtener los usuarios:', error);
+        this.isLoading = false;
+      }
+    );
   }
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
+ 
 
   cargarRoles() {
     this.rolService.ListarTodos().subscribe(data => {
       this.roles = data;
     });
   }
-  
 
   LimpiarSearch() {
     this.search = '';
@@ -121,10 +136,10 @@ export class UsuariosComponent implements OnInit {
       IdRolnav: undefined, 
     };
 
-    if (this.id == undefined) {
+    if (!this.id) {
       this.usuarioService.PostUsuario(usuario).subscribe(() => {
         Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
-        this.listadoUsuarios();
+        this.cargarUsuarios();
         this.form.reset();
       }, error => {
         Swal.fire({ icon: 'error', title: 'Error en el Formulario', html: error.error.errors[Object.keys(error.error.errors)[0]] });
@@ -133,12 +148,12 @@ export class UsuariosComponent implements OnInit {
       usuario.idusuario = this.id;
       this.usuarioService.PutUsuario(this.id, usuario).subscribe(() => {
         Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
-        this.listadoUsuarios();
+        this.cargarUsuarios();
       }, error => {
         Swal.fire({ icon: 'error', title: 'Error', text: 'Algo salió mal.' });
       });
     }
-}
+  }
 
   Guardarinstruct(content: any) {
     this.modalService.open(content);
@@ -150,7 +165,6 @@ export class UsuariosComponent implements OnInit {
   }
 
   SeleccionarUsuario(content: any, usuario: Usuarios) {
-    
     this.modalService.open(content);
     this.accion = "Editar";
     this.id = usuario.idusuario;
@@ -159,7 +173,6 @@ export class UsuariosComponent implements OnInit {
       username: usuario.username,
       password: "",
       idrol: usuario.idrol,
-      idpersona: usuario.idpersona,
       nombres: usuario.IdPersonanav?.nombres,
       apellidos: usuario.IdPersonanav?.apellidos,
       ci: usuario.IdPersonanav?.ci
@@ -173,12 +186,16 @@ export class UsuariosComponent implements OnInit {
         icon: accion === 'Activo' ? 'success' : 'error',
         title: accion === 'Activo' ? 'Usuario Activado!' : 'Usuario Desactivado!',
       });
-      this.listadoUsuarios();
+      this.cargarUsuarios();
     });
   }
+
   obtenerNombreRol(idrol: number): string {
     const rol = this.roles.find(r => r.idrol === idrol);
     return rol ? rol.nombre : 'Sin rol';
   }
-  
+
+  ngOnDestroy() {
+    this.themeSubscription.unsubscribe();
+  }
 }

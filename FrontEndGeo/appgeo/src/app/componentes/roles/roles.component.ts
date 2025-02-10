@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder, FormsModule, ReactiveFormsModule, FormArray, FormControl} from '@angular/forms'
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormGroup, Validators, FormBuilder, FormsModule, ReactiveFormsModule, FormArray, FormControl } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Roles } from '../../interfaces/roles';
@@ -9,7 +9,9 @@ import { CommonModule } from '@angular/common';
 import { FilteronePipe } from "../../Pipes/filterone.pipe";
 import { RolPermisoDTO } from '../../interfaces/rol-permiso-dto';
 import { RolesPermisoService } from '../../servicios/roles-permiso.service';
+import { ThemeService } from '../../servicios/theme.service';
 import { Permisos } from '../../interfaces/permisos';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-roles',
@@ -17,9 +19,11 @@ import { Permisos } from '../../interfaces/permisos';
   templateUrl: './roles.component.html',
   styleUrl: './roles.component.css'
 })
-export class RolesComponent implements OnInit {
+export class RolesComponent implements OnInit, OnDestroy {
+  isLoading: boolean = true; 
+  isDarkMode: boolean = false;
   listaRol: Roles[] = [];
-  permisosList: Permisos[] =[];
+  permisosList: Permisos[] = [];
   form: FormGroup;
   accion = "Agregar";
   id: string | undefined;
@@ -29,8 +33,10 @@ export class RolesComponent implements OnInit {
   pagesizee: any;
   search = '';
   criterio = 'nombrerol';
+  themeSubscription!: Subscription;
 
   constructor(
+    public themeService: ThemeService, 
     public modalService: NgbModal,
     private rolpermisoservice: RolesPermisoService,
     private rolservice: RolesService,
@@ -48,43 +54,64 @@ export class RolesComponent implements OnInit {
       permisos: this.fb.array([])
     });
   }
+  cargarRoles() {
+    this.isLoading = true; // ⬅ Mostrar spinner antes de la carga
 
-  ListaRol() {
     this.rolservice.ListarTodos().subscribe(
+      (data) => {
+        this.listaRol = data;
+        this.isLoading = false; // ⬅ Ocultar spinner después de la carga
+        this.pagesizee = this.listaRol.length;
+      },
+      (error) => {
+        console.error('Error al obtener los roles:', error);
+        this.isLoading = false; // ⬅ Ocultar spinner incluso si hay error
+      }
+    );
+  }
+  ngOnInit(): void {
+    this.cargarRoles();
+    // Suscribirse al observable para cambios de tema
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      (isDark) => {
+        this.isDarkMode = isDark;
+      }
+    );
+
+    this.listadoRol();
+    this.ListaPermiso();
+
+    // Asegurar que 'permisos' está en el formulario
+    if (!this.form.contains('permisos')) {
+      this.form.addControl('permisos', this.fb.array([])); 
+    }
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
+  async listadoRol() {
+    await this.rolservice.ListarTodos().subscribe(
       (data: Roles[]) => {
         this.listaRol = data;
         this.pagesizee = this.listaRol.length;
       },
       (error) => {
-        //console.error('Error al obtener los roles:', error);
+        console.error('Error al obtener los roles:', error);
       }
     );
   }
 
-  ListaPermiso(){
+  ListaPermiso() {
     this.rolservice.ListarPermiso().subscribe(
       (data: Permisos[]) => {
         this.permisosList = data;
       },
       (error) => {
-        //console.error('Error al obtener los roles:', error);
+        console.error('Error al obtener los permisos:', error);
       }
     );
-  }
-
-
-  LimpiarSearch() {
-    this.search = '';
-  }
-
-  ngOnInit(): void {
-    this.listadoRol();
-    this.ListaPermiso();
-
-  if (!this.form.contains('permisos')) {
-    this.form.addControl('permisos', this.fb.array([])); 
-  }
-    
   }
 
   Guardar() {
@@ -95,43 +122,32 @@ export class RolesComponent implements OnInit {
     };
   
     if (this.id == undefined) {
-      console.log(rolDTO);
       this.rolpermisoservice.insertar(rolDTO).subscribe(data => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Rol Registrado!'
-        });
-        this.ListaRol();
+        Swal.fire({ icon: 'success', title: 'Rol Registrado!' });
+        this.listadoRol();
         this.form.reset();
       }, error => {
         Swal.fire({
           icon: 'error',
           title: 'Error en el Formulario',
           html: error.error.errors[Object.keys(error.error.errors)[0]]
-        })
+        });
       });
     } else {
       this.rolpermisoservice.modificar(rolDTO, this.id).subscribe(data => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Rol Modificado!'
-        });
-        this.ListaRol();
+        Swal.fire({ icon: 'success', title: 'Rol Modificado!' });
+        this.listadoRol();
         this.form.reset();
       });
     }
   }
-  
 
   Guardarinstruct(content: any) {
     this.modalService.open(content);
     this.form.markAsUntouched();
     this.form.markAsPristine();
-
     this.id = undefined;
-    this.form.patchValue({
-      nombre: ""
-    })
+    this.form.patchValue({ nombre: "" });
   }
 
   SeleccionarRol(content: any, rol: Roles) {
@@ -152,8 +168,6 @@ export class RolesComponent implements OnInit {
       });
     }
   }
-  
-
 
   CambiarEstado(rol: Roles, accion: string) {
     const dto: RolPermisoDTO = {
@@ -169,18 +183,15 @@ export class RolesComponent implements OnInit {
             icon: accion === 'Inactivo' ? 'error' : 'success',
             title: `El rol ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
           });
-          this.ListaRol();
+          this.listadoRol();
           this.form.reset();
         },
         (error) => {
-          //console.error('Error al modificar el rol:', error);
+          console.error('Error al modificar el rol:', error);
         }
       );
     }
   }
-  
-
-  
 
   get permisos(): FormArray {
     return this.form.get('permisos') as FormArray;
@@ -198,16 +209,11 @@ export class RolesComponent implements OnInit {
       }
     }
   }
-  
-  async listadoRol() {
-    await this.rolservice.ListarTodos().subscribe(
-      (data: Roles[]) => {
-        this.listaRol = data;
-        this.pagesizee = this.listaRol.length;
-      },
-      (error) => {
-        //console.error('Error al obtener los roles:', error);
-      }
-    );
+  LimpiarSearch() {
+    this.search = '';
   }
+  ngOnDestroy() {
+    this.themeSubscription.unsubscribe();
+  }
+  
 }
