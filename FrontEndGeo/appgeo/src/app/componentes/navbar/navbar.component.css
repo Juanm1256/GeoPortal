@@ -78,14 +78,14 @@
   gap: 20px; /* Espaciado horizontal entre los logos */
 }
 .logo3 {
-  height: 70px;
-  max-width: 190px; /* Tamaño máximo para evitar que se distorsionen */
+  height: 45px;
+  max-width: 150px; /* Tamaño máximo para evitar que se distorsionen */
   object-fit: contain; /* Mantiene la proporción sin deformar */
   padding: 5px; /* Espacio dentro del contenedor del logo */
 }
 .logo {
 
-  height: 55px;
+  height: 45px;
   max-width: 120px; /* Tamaño máximo para evitar que se distorsionen */
   object-fit: contain; /* Mantiene la proporción sin deformar */
   padding: 5px; /* Espacio dentro del contenedor del logo */

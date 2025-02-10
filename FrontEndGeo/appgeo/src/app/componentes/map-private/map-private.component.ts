@@ -26,20 +26,23 @@ import proj4 from 'proj4';
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit {
+  isAccordionOpen = false;
   private map!: L.Map;
+  private capas: { [key: string]: L.Layer } = {};
+  constructor(private cap_depservice: CapitalesDepartamentalesService,
+    private cuencasService: CuencasService,
+    private limitesdepservice: LimitesDepartamentalesService,
+    private limitesmuservice: LimitesMunicipalesService,
+    private mercadoservices: MercadosService,
+    private proveedoralevinesservice: ProveedoralevinesService,
+    private proveedoralimentoservice: ProveedoralimentosService,
+    private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService) { }
 
-  constructor(private cap_depservice: CapitalesDepartamentalesService, 
-              private cuencasService: CuencasService,
-              private limitesdepservice: LimitesDepartamentalesService,
-              private limitesmuservice: LimitesMunicipalesService,
-              private mercadoservices: MercadosService,
-              private proveedoralevinesservice: ProveedoralevinesService,
-              private proveedoralimentoservice: ProveedoralimentosService,
-              private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService) {}
-
+    toggleAccordion() {
+      this.isAccordionOpen = !this.isAccordionOpen;
+    }
   ngOnInit(): void {
     this.initMap();
-    this.cargarredhidrica();
   }
 
   initMap(): void {
@@ -49,8 +52,59 @@ export class MapPrivateComponent implements OnInit {
       maxZoom: 18
     }).addTo(this.map);
   }
+  toggleLayer(layerName: string, event: any) {
+    const button = event.target.closest('.layer-btn'); // Captura el botón
 
-  CargarCapitalesDepartamentales(): void {
+    if (!this.capas[layerName]) {
+        switch (layerName) {
+            case 'cuencas':
+                this.capas[layerName] = this.CargarCuencas();
+                break;
+            case 'mercados':
+                this.capas[layerName] = this.Cargarmercados();
+                break;
+            case 'capitalesDepartamentales':
+                this.capas[layerName] = this.CargarCapitalesDepartamentales();
+                break;
+            case 'limitesDepartamentales':
+                this.capas[layerName] = this.CargarLimitesDepartamentales();
+                break;
+            case 'limitesMunicipales':
+                this.capas[layerName] = this.CargarLimitesMunicipales();
+                break;
+            case 'proveedorAlevines':
+                this.capas[layerName] = this.CargarProveedorAlevines();
+                break;
+            case 'proveedorAlimentos':
+                this.capas[layerName] = this.CargarProveedorAlimentos();
+                break;
+            case 'proveedorAsistenciaTecnica':
+                this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica();
+                break;
+            /*case 'redCaminos':
+                this.capas[layerName] = this.CargarRedCaminos();
+                break;
+            case 'redHidrica':
+                this.capas[layerName] = this.CargarRedHidrica();
+                break;*/
+        }
+
+        // Marcar botón como activo
+        button.classList.add('active');
+    } else {
+        // Si la capa está activa, se quita
+        this.map.removeLayer(this.capas[layerName]);
+        delete this.capas[layerName];
+
+        // Quitar clase 'active' del botón
+        button.classList.remove('active');
+    }
+}
+
+
+  CargarCapitalesDepartamentales(): L.Layer {
+    const layerGroup = L.layerGroup();
+
     this.cap_depservice.listarTodos().subscribe((cap_dep: CapitalesDepartamentales[]) => {
       cap_dep.forEach(cap_deps => {
         if (cap_deps.geom) {
@@ -58,48 +112,54 @@ export class MapPrivateComponent implements OnInit {
 
           if (geojson.type === 'Point') {
             const [lon, lat] = geojson.coordinates;
-            
+
             const icono = L.icon({
               iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32], 
+              iconSize: [32, 32],
               iconAnchor: [16, 32],
               popupAnchor: [0, -32]
             });
 
-            L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${cap_deps.cap_dep}</strong><br><strong>${cap_deps.cod_ine}</strong>`)
-              .addTo(this.map);
+            const marker = L.marker([lat, lon], { icon: icono })
+              .bindPopup(`<strong>${cap_deps.cap_dep}</strong><br><strong>${cap_deps.cod_ine}</strong>`);
+
+            layerGroup.addLayer(marker);
           }
         }
       });
     });
+
+    this.map.addLayer(layerGroup);
+    return layerGroup;
   }
 
-  CargarCuencas(): void {
+  CargarCuencas(): L.Layer {
+    const layerGroup = L.layerGroup();
+
     this.cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
       cuencas.forEach(cuenca => {
         if (cuenca.geom) {
           const geojson = JSON.parse(cuenca.geom);
-  
+
           if (geojson.type === 'MultiPolygon') {
             const estiloPoligono = {
-              color: '#2196F3',    
-              weight: 2,           
-              opacity: 1,          
+              color: '#2196F3',
+              weight: 2,
+              opacity: 1,
               fillColor: '#64B5F6',
               fillOpacity: 0.5
             };
-  
-            L.geoJSON(geojson, {
+
+            const polygon = L.geoJSON(geojson, {
               style: estiloPoligono,
               onEachFeature: (feature, layer) => {
                 layer.bindPopup(`
-                  <div class="popup-content">
-                    <h4>${cuenca.cuenca}</h4>
-                    <p>Superficie: ${cuenca.sup_km2} km²</p>
-                  </div>
-                `);
-  
+                              <div class="popup-content">
+                                  <h4>${cuenca.cuenca}</h4>
+                                  <p>Superficie: ${cuenca.sup_km2} km²</p>
+                              </div>
+                          `);
+
                 layer.on({
                   mouseover: (e) => {
                     const layer = e.target;
@@ -114,38 +174,45 @@ export class MapPrivateComponent implements OnInit {
                   }
                 });
               }
-            }).addTo(this.map);
+            });
+
+            layerGroup.addLayer(polygon);
           }
         }
       });
     });
+
+    this.map.addLayer(layerGroup);
+    return layerGroup;
   }
 
-  CargarLimitesDepartamentales(): void {
+  CargarLimitesDepartamentales(): L.Layer {
+    const layerGroup = L.layerGroup();
+
     this.limitesdepservice.listarTodos().subscribe((lim_deps: LimitesDepartamentales[]) => {
       lim_deps.forEach(lim_dep => {
         if (lim_dep.geom) {
           const geojson = JSON.parse(lim_dep.geom);
-  
+
           if (geojson.type === 'MultiPolygon') {
             const estiloPoligono = {
-              color: '#2196F3',    
-              weight: 2,           
-              opacity: 1,          
+              color: '#2196F3',
+              weight: 2,
+              opacity: 1,
               fillColor: '#64B5F6',
               fillOpacity: 0.5
             };
-  
-            L.geoJSON(geojson, {
+
+            const polygon = L.geoJSON(geojson, {
               style: estiloPoligono,
               onEachFeature: (feature, layer) => {
                 layer.bindPopup(`
-                  <div class="popup-content">
-                    <h4>${lim_dep.dep}</h4>
-                    <p>Superficie: ${lim_dep.cod_dep} km²</p>
-                  </div>
-                `);
-  
+                              <div class="popup-content">
+                                  <h4>${lim_dep.dep}</h4>
+                                  <p>Superficie: ${lim_dep.cod_dep} km²</p>
+                              </div>
+                          `);
+
                 layer.on({
                   mouseover: (e) => {
                     const layer = e.target;
@@ -160,39 +227,46 @@ export class MapPrivateComponent implements OnInit {
                   }
                 });
               }
-            }).addTo(this.map);
+            });
+
+            layerGroup.addLayer(polygon);
           }
         }
       });
     });
+
+    this.map.addLayer(layerGroup);
+    return layerGroup;
   }
 
-  CargarLimitesMunicipales(): void {
+  CargarLimitesMunicipales(): L.Layer {
+    const layerGroup = L.layerGroup();
+
     this.limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
       lim_muns.forEach(lim_mun => {
         if (lim_mun.geom) {
           const geojson = JSON.parse(lim_mun.geom);
-  
+
           if (geojson.type === 'MultiPolygon') {
             const estiloPoligono = {
-              color: '#2196F3',    
-              weight: 2,           
-              opacity: 1,          
+              color: '#2196F3',
+              weight: 2,
+              opacity: 1,
               fillColor: '#64B5F6',
               fillOpacity: 0.5
             };
-  
-            L.geoJSON(geojson, {
+
+            const polygon = L.geoJSON(geojson, {
               style: estiloPoligono,
               onEachFeature: (feature, layer) => {
                 layer.bindPopup(`
-                  <div class="popup-content">
-                    <h4>${lim_mun.dep}</h4>
-                    <h4>${lim_mun.prov}</h4>
-                    <h4>${lim_mun.mun}</h4>
-                  </div>
-                `);
-  
+                              <div class="popup-content">
+                                  <h4>${lim_mun.dep}</h4>
+                                  <h4>${lim_mun.prov}</h4>
+                                  <h4>${lim_mun.mun}</h4>
+                              </div>
+                          `);
+
                 layer.on({
                   mouseover: (e) => {
                     const layer = e.target;
@@ -207,102 +281,122 @@ export class MapPrivateComponent implements OnInit {
                   }
                 });
               }
-            }).addTo(this.map);
+            });
+
+            layerGroup.addLayer(polygon);
           }
         }
       });
     });
-  }
-  
-  Cargarmercados(): void {
-    this.mercadoservices.listarTodos().subscribe((cap_dep: Mercados[]) => {
-      cap_dep.forEach(cap_deps => {
-        if (cap_deps.geom) {
-          const geojson = JSON.parse(cap_deps.geom);
 
+    this.map.addLayer(layerGroup);
+    return layerGroup;
+  }
+  Cargarmercados(): L.Layer {
+    const markerCluster = L.markerClusterGroup();
+
+    this.mercadoservices.listarTodos().subscribe((mercados: Mercados[]) => {
+      mercados.forEach(mercado => {
+        if (mercado.geom) {
+          const geojson = JSON.parse(mercado.geom);
+          if (geojson.type === 'Point') {
+            const [lon, lat] = geojson.coordinates;
+            const icono = L.icon({
+              iconUrl: '../assets/leaflet/marker-icon-2x.png',
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+              popupAnchor: [0, -32]
+            });
+
+            const marker = L.marker([lat, lon], { icon: icono })
+              .bindPopup(`<strong>${mercado.nombre}</strong><br>${mercado.provincia}`);
+
+            markerCluster.addLayer(marker);
+          }
+        }
+      });
+
+      this.map.addLayer(markerCluster);
+    });
+
+    return markerCluster;
+  }
+
+  CargarProveedorAlevines(): L.Layer {
+    const layerGroup = L.layerGroup();
+
+    this.proveedoralevinesservice.listarTodos().subscribe((proveedores: ProveedorAlevines[]) => {
+      proveedores.forEach(proveedor => {
+        if (proveedor.geom) {
+          const geojson = JSON.parse(proveedor.geom);
           if (geojson.type === 'Point') {
             const [lon, lat] = geojson.coordinates;
 
             const icono = L.icon({
               iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32], 
+              iconSize: [32, 32],
               iconAnchor: [16, 32],
               popupAnchor: [0, -32]
             });
 
-            L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${cap_deps.nombre}</strong><br><strong>${cap_deps.provincia}</strong>`)
-              .addTo(this.map);
+            const marker = L.marker([lat, lon], { icon: icono })
+              .bindPopup(`<strong>${proveedor.name}</strong>`);
+
+            layerGroup.addLayer(marker);
           }
         }
       });
+
+      this.map.addLayer(layerGroup);
     });
+
+    return layerGroup;
   }
 
+  CargarProveedorAlimentos(): L.Layer {
+    const layerGroup = L.layerGroup();
 
-
-  CargarProveedorAlevines(): void {
-    this.proveedoralevinesservice.listarTodos().subscribe((cap_dep: ProveedorAlevines[]) => {
-      cap_dep.forEach(cap_deps => {
-        if (cap_deps.geom) {
-          const geojson = JSON.parse(cap_deps.geom);
-
-          if (geojson.type === 'Point') {
-            const [lon, lat] = geojson.coordinates;
-
-            const icono = L.icon({
-              iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32], 
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -32]
-            });
-
-            L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${cap_deps.name}</strong>`)
-              .addTo(this.map);
-          }
-        }
-      });
-    });
-}
-
-
-  CargarProveedorAlimentos(): void {
     this.proveedoralimentoservice.listarTodos().subscribe((datos: ProveedorAlimentos[]) => {
       datos.forEach(dato => {
         if (dato.geom) {
           const geojson = JSON.parse(dato.geom);
-
           if (geojson.type === 'Point') {
             const [lon, lat] = geojson.coordinates;
 
             const icono = L.icon({
               iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32], 
+              iconSize: [32, 32],
               iconAnchor: [16, 32],
               popupAnchor: [0, -32]
             });
 
-            L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${dato.name}</strong>`)
-              .addTo(this.map);
+            const marker = L.marker([lat, lon], { icon: icono })
+              .bindPopup(`<strong>${dato.name}</strong>`);
+
+            layerGroup.addLayer(marker);
           }
         }
       });
+
+      this.map.addLayer(layerGroup);
     });
+
+    return layerGroup;
   }
-  
-  private cargarProveedoresAsistenciaTecnica(): void {
+
+  CargarProveedoresAsistenciaTecnica(): L.Layer {
+    const layerGroup = L.layerGroup();
+
     this.proveedorasistenciatecnicaservice.listarTodos().subscribe(proveedores => {
       proveedores.forEach(proveedor => {
         if (proveedor.geom) {
           try {
             const geojson = JSON.parse(proveedor.geom);
-            
+
             if (geojson.type === 'Point') {
-              const lat = geojson.coordinates[1]; 
-              const lon = geojson.coordinates[0]; 
-              
+              const lat = geojson.coordinates[1];
+              const lon = geojson.coordinates[0];
+
               const icono = L.icon({
                 iconUrl: '../assets/leaflet/marker-icon-2x.png',
                 iconSize: [25, 41],
@@ -310,17 +404,18 @@ export class MapPrivateComponent implements OnInit {
                 popupAnchor: [1, -34]
               });
 
-              L.marker([lat, lon], { icon: icono })
+              const marker = L.marker([lat, lon], { icon: icono })
                 .bindPopup(`
-                  <div class="popup-content">
-                    <h3>${proveedor.name || 'Sin nombre'}</h3>
-                    <p><strong>ID:</strong> ${proveedor.gid}</p>
-                    <p><strong>Coordenadas:</strong></p>
-                    <p>Lat: ${lat.toFixed(6)}</p>
-                    <p>Lon: ${lon.toFixed(6)}</p>
-                  </div>
-                `)
-                .addTo(this.map);
+                              <div class="popup-content">
+                                  <h3>${proveedor.name || 'Sin nombre'}</h3>
+                                  <p><strong>ID:</strong> ${proveedor.gid}</p>
+                                  <p><strong>Coordenadas:</strong></p>
+                                  <p>Lat: ${lat.toFixed(6)}</p>
+                                  <p>Lon: ${lon.toFixed(6)}</p>
+                              </div>
+                          `);
+
+              layerGroup.addLayer(marker);
             }
           } catch (error) {
             console.error(`Error procesando proveedor ${proveedor.gid}:`, error);
@@ -328,65 +423,36 @@ export class MapPrivateComponent implements OnInit {
         }
       });
 
-      const style = document.createElement('style');
-      style.textContent = `
-        .popup-content {
-          padding: 10px;
-        }
-        .popup-content h3 {
-          margin: 0 0 10px 0;
-          color: #2196F3;
-          font-size: 16px;
-        }
-        .popup-content p {
-          margin: 5px 0;
-          font-size: 13px;
-        }
-        .popup-content strong {
-          color: #666;
-        }
-      `;
-      document.head.appendChild(style);
+      this.map.addLayer(layerGroup);
     });
+
+    return layerGroup;
   }
 
-  cargarredcaminos() {
+  CargarRedCaminos(): L.Layer {
     const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
-        layers: 'capas_geo:red_caminos',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8
-    }).addTo(this.map);
+      layers: 'capas_geo:red_caminos',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8
+    });
 
-    const baseMaps = {
-        "OpenStreetMap": L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png')
-    };
-
-    const overlayMaps = {
-        "Red de Caminos": redCaminos
-    };
-
-    L.control.layers(baseMaps, overlayMaps).addTo(this.map);
+    this.map.addLayer(redCaminos);
+    return redCaminos;
   }
 
-  cargarredhidrica() {
-    const redhidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
-        layers: 'capas_geo:red_hidrica',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8
-    }).addTo(this.map);
+  CargarRedHidrica(): L.Layer {
+    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+      layers: 'capas_geo:red_hidrica',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8
+    });
 
-    const baseMaps = {
-        "OpenStreetMap": L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png')
-    };
-
-    const overlayMaps = {
-        "Red Hídrica": redhidrica
-    };
-
-    L.control.layers(baseMaps, overlayMaps).addTo(this.map);
+    this.map.addLayer(redHidrica);
+    return redHidrica;
   }
+
 }
