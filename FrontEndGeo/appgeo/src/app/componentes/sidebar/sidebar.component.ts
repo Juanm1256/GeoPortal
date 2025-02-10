@@ -1,20 +1,43 @@
-import { Component, Input} from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ThemeService } from '../../servicios/theme.service';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
+  isDarkMode: boolean = false;
+  themeSubscription!: Subscription;
+
   @Input() isSidebarCollapsed = false;
   @Input() isSidebarGeo = false;
+
+  constructor(public themeService: ThemeService) {}
+
+  ngOnInit() {
+    // Suscribirse al observable del servicio
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      (isDark) => {
+        this.isDarkMode = isDark;
+      }
+    );
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
 
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
     this.isSidebarGeo = !this.isSidebarGeo;
   }
-  
-  constructor(public themeService: ThemeService) {}
+
+  ngOnDestroy() {
+    this.themeSubscription.unsubscribe();
+  }
 }

@@ -1,7 +1,8 @@
 <!-- Abrir Modal -->
 <ng-template #content let-modal>
+  <div class="modal-content" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">USUARIO</h4>
+    <h4 class="modal-title">USUARIO</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
@@ -14,36 +15,49 @@
               <div class="form-group mb-3">
                 <label for="nombres">Nombres</label>
                 <input type="text" class="form-control" id="nombres" placeholder="Ingresa los nombres" formControlName="nombres" required />
+                <small class="text-danger" *ngIf="form.get('nombres')?.invalid && form.get('nombres')?.touched">
+                  Nombre es obligatorio y solo acepta letras.
+                </small>
               </div>
               <div class="form-group mb-3">
-                <label for="apellidaos">Apellidos</label>
+                <label for="apellidos">Apellidos</label>
                 <input type="text" class="form-control" id="apellidos" placeholder="Ingresa los apellidos" formControlName="apellidos" required />
+                <small class="text-danger" *ngIf="form.get('apellidos')?.invalid && form.get('apellidos')?.touched">
+                  Apellido es obligatorio y solo acepta letras.
+                </small>
               </div>
               <div class="form-group mb-3">
                 <label for="ci">CI</label>
                 <input type="text" class="form-control" id="ci" placeholder="Ingresa el CI" formControlName="ci" required />
+                <small class="text-danger" *ngIf="form.get('ci')?.invalid && form.get('ci')?.touched">
+                  CI es obligatorio y solo acepta caracteres alfanuméricos.
+                </small>
               </div>
               <!-- Campo: Rol -->
               <div class="form-group mb-3">
                 <label for="idrol">Rol</label>
                 <select class="form-control" id="idrol" formControlName="idrol">
-                  <option selected *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombre }}</option>
+                  <option *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombre }}</option>
                 </select>
               </div>
               <!-- Campo: Username -->
               <div class="form-group mb-3">
                 <label for="username">Usuario</label>
                 <input type="text" class="form-control" id="username" placeholder="Ingresa el Nombre de usuario" formControlName="username" required />
+                <small class="text-danger" *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
+                  Usuario es obligatorio.
+                </small>
               </div>
               <!-- Campo: Contraseña -->
               <div class="form-group mb-3">
                 <label for="password">Contraseña</label>
                 <input type="password" class="form-control" id="password" placeholder="Ingresa la contraseña" formControlName="password" required />
+                <small class="text-danger" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+                  La contraseña debe tener al menos 6 caracteres.
+                </small>
               </div>
-              <!-- Botones del modal -->
               <div class="modal-footer">
                 <button type="button" class="btn btn-danger" (click)="modal.dismiss()">Cerrar</button>
-                
                 <button class="btn btn-success" [disabled]="form.invalid" type="submit" [class.invalidado]="form.invalid" [class.validado]="form.valid" (click)="modal.close()">Guardar</button>
               </div>
             </form>
@@ -52,11 +66,11 @@
       </div>
     </div>
   </div>
+</div>
 </ng-template>
-<!-- Cerrar Modal -->
 
 <!-- Contenido Principal -->
-<div class="content-viewport">
+<div class="content-viewport" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="row">
     <div class="col-lg-12">
       <!-- Encabezado -->
@@ -89,10 +103,15 @@
           </button>
         </div>
       </div>
-
+       <!-- 🔹 Spinner de carga -->
+       <div *ngIf="isLoading" class="d-flex justify-content-center mt-3">
+        <div class="spinner-grow" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
       <!-- Tabla de Usuarios -->
       <div class="item-wrapper">
-        <div class="table-responsive">
+        <div class="table-responsive" *ngIf="!isLoading">
           <table class="table info-table table-striped">
             <thead>
               <tr>
@@ -110,14 +129,14 @@
                 <td>{{ usuario.idusuario }}</td>
                 <td>{{ usuario.username }}</td>
                 <td>{{ obtenerNombreRol(usuario.idrol) }}</td>
-                <td>{{ usuario.IdPersonanav.nombres }} {{ usuario.IdPersonanav.apellidos }}</td>
+                <td>{{ usuario.IdPersonanav?.nombres }} {{ usuario.IdPersonanav?.apellidos }}</td>
                 <td>{{ usuario.fechareg | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <label *ngIf="usuario.estado == 'Activo'" class="">Activo</label>
                   <label *ngIf="usuario.estado == 'Inactivo'" class="">Inactivo</label>
                 </td>
                 <td>
-                  <button type="button" (click)="SeleccionarUsuario(content, usuario)" class="btn btn-dark has-icon btn-rounded me-2">
+                  <button type="button" (click)="SeleccionarUsuario(content, usuario)" class="btn has-icon btn-rounded me-2" [ngClass]="isDarkMode ? 'btn-light' : 'btn-dark'">
                     <i class="mdi mdi-lead-pencil"></i> Modificar
                   </button>
                   <button type="button" (click)="CambiarEstado(usuario, 'Inactivo')" class="btn btn-danger has-icon btn-rounded me-2" *ngIf="usuario.estado == 'Activo'">
@@ -131,11 +150,11 @@
             </tbody>
           </table>
         </div>
-        <!-- Paginación -->
         <div class="float-end mt-3">
           <ngb-pagination [pageSize]="pageSize" [collectionSize]="pagesizee" [(page)]="page" [boundaryLinks]="true"></ngb-pagination>
         </div>
       </div>
     </div>
-  </div>
+  </div>
 </div>
+

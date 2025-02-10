@@ -1,59 +1,114 @@
+/* Modo día */
 .sidebar {
-    width: 300px;
-    min-height: 100vh;
-    transition: width 0.3s ease;
-    overflow: hidden;
-  }
-  
-  .sidebar.collapsed {
-    width: 80px;
-  }
-  
-  .sidebar.collapsed .text {
-    display: none;
-  }
-  
-  .sidebar.collapsed .accordion-button {
-    justify-content: center;
-  }
-  
-  .sidebar.collapsed .accordion-body {
-    text-align: center;
-  }
-  
-  .sidebar .logos {
-    display: flex;
-    justify-content: center;
-    padding: 10px;
-  }
-  
-  .logo {
-    max-width: 60px;
-    height: auto;
-    margin: 5px;
-  }
-  
-  /* Agregar un tooltip cuando el sidebar está contraído */
-  .sidebar.collapsed a {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .sidebar.collapsed a:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.75);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-    font-size: 12px;
-  }
-  .accordion-button::after {
-    display: none; /* Esto elimina la flecha del accordion butt */
-  }
+  width: 300px;
+  min-height: 100vh;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  color: #000;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.collapsed .text {
+  display: none;
+}
+
+.sidebar.collapsed .accordion-button {
+  justify-content: center;
+}
+
+.sidebar.collapsed .accordion-body {
+  text-align: center;
+}
+
+.sidebar .logos {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.logo {
+  max-width: 60px;
+  height: auto;
+  margin: 5px;
+}
+.sidebar a {
+  color: #000;
+}
+/* Tooltip cuando el sidebar está contraído */
+.sidebar.collapsed a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed a:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+/* Modo noche */
+.sidebar.dark {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.sidebar.dark h5 {
+  color: #ffffff;
+}
+
+.sidebar.dark .accordion-button {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.sidebar.dark .accordion-body {
+  background-color: #1a1a1a;
+}
+
+.sidebar.dark a {
+  color: #ffffff;
+}
+.accordion-button::after {
+  display: none; /* Esto elimina la flecha del accordion butt */
+}
+
+/* 🎨 Botón de Inicio - Modo Claro */
+.sidebar-header .btn-inicio {
+  background-color: #2C5384 !important; /* Azul oscuro */
+  color: white !important; /* Letras blancas */
+  width: 100%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 0px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🎨 Icono del Botón */
+.sidebar-header .btn-inicio i {
+  font-size: 1.2rem;
+  margin-right: 8px;
+}
+/* 🎨 Estilo cuando el accordion está abierto */
+.accordion-button:not(.collapsed) {
+  background-color: #2C5384 !important; /* Azul más oscuro cuando está expandido */
+  color: white !important;
+}
+
+
+

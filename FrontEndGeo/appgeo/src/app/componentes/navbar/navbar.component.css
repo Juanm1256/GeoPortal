@@ -1,0 +1,113 @@
+/* 🌞 Estilos del navbar en modo claro (por defecto) */
+.navbar {
+  background-color: #ffffff;
+  color: black;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar a {
+  color: black;
+}
+
+.navbar .navbar-toggler-icon {
+  color: black(170, 30, 30);
+}
+
+.navbar button i {
+  color: rgb(0, 0, 0);
+}
+
+/* 🌙 Estilos para el navbar en modo noche */
+.navbar.dark-theme {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333;
+  color: #ffffff;
+}
+
+.navbar.dark-theme .navbar-brand,
+.navbar.dark-theme .navbar-nav .nav-link {
+  color: #ffffff !important;
+}
+
+.navbar.dark-theme button {
+  color: #ffffff;
+}
+
+.navbar.dark-theme button:hover {
+  color: #f8f9fa;
+}
+
+.navbar.dark-theme button i {
+  color: #ffffff;
+}
+
+.navbar.dark-theme .navbar-brand i,
+.navbar.dark-theme .navbar-brand {
+  color: #ffffff !important;
+}
+
+/* 🔹 Estilos adicionales para la navbar */
+.custom-navbar {
+  background-color: #ffffff;
+  border-bottom: 2px solid #2C5384;
+  padding: 10px 20px;
+}
+
+/* 🔹 Botones de la navbar */
+.btn-outline-secondary {
+  border-color: #2C5384;
+  color: #ffffff;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #2C5384;
+  color: white;
+}
+.btn-outline-danger:hover {
+  background-color: red;
+  color: white;
+}
+
+.logo-container {
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Espaciado horizontal entre los logos */
+}
+.logo3 {
+  height: 70px;
+  max-width: 190px; /* Tamaño máximo para evitar que se distorsionen */
+  object-fit: contain; /* Mantiene la proporción sin deformar */
+  padding: 5px; /* Espacio dentro del contenedor del logo */
+}
+.logo {
+
+  height: 55px;
+  max-width: 120px; /* Tamaño máximo para evitar que se distorsionen */
+  object-fit: contain; /* Mantiene la proporción sin deformar */
+  padding: 5px; /* Espacio dentro del contenedor del logo */
+}
+
+/* 📱 Ajustes responsivos para reducir el espaciado en pantallas pequeñas */
+@media (max-width: 768px) {
+  .logo-container {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-container {
+    gap: 10px;
+    flex-wrap: wrap; /* Permite que los logos bajen si no caben */
+    justify-content: center;
+  }
+
+  .logo {
+    height: 45px;
+    max-width: 100px;
+  }
+}
+
