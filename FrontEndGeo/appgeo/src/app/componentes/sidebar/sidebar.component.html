@@ -40,29 +40,29 @@
         </div>
       </div>
     </div>
-    <div class="accordion" id="menuGeo">
+    <div class="accordion" id="menuAccordion">
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingOne">
           <button class="accordion-button" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseAccordionGeo" [attr.aria-expanded]="!isSidebarGeo">
+            data-bs-target="#collapseAccordionGeo" [attr.aria-expanded]="!isSidebarCollapsed">
             <i class="bi bi-globe-americas me-2"></i>
-            <span *ngIf="!isSidebarGeo">Geovisor</span>
+            <span *ngIf="!isSidebarCollapsed">Geovisor</span>
           </button>
         </h2>
         <div id="collapseAccordionGeo" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-          data-bs-parent="#menuGeo">
+          data-bs-parent="#menuAccordion">
           <div class="accordion-body">
             <ul class="list-unstyled">
               <li class="mb-2">
-                <a href="usuarios" class="text-decoration-none">
+                <a href="map-private" class="text-decoration-none">
                   <i class="bi bi-map me-2"></i>
-                  <span *ngIf="!isSidebarGeo">Geovisor Privado</span>
+                  <span *ngIf="!isSidebarCollapsed">Geovisor Privado</span>
                 </a>
               </li>
               <li class="mb-2">
-                <a href="roles" class="text-decoration-none">
+                <a href="map-public" class="text-decoration-none">
                   <i class="bi bi-map me-2"></i>
-                  <span *ngIf="!isSidebarGeo">Geovisor Publico</span>
+                  <span *ngIf="!isSidebarCollapsed">Geovisor Publico</span>
                 </a>
               </li>
             </ul>

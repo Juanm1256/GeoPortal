@@ -49,6 +49,14 @@ namespace AppGeoPortal
             services.AddScoped<IUsuariosContrato, UsuariosLogic>();
             services.AddScoped<IRolesContrato, RolesLogic>();
             services.AddScoped<IRol_PermisoContrato, Rol_PermisoLogic>();
+            services.AddScoped<ICap_DepContrato, Cap_DepLogic>();
+            services.AddScoped<ICuencasContrato, CuencasLogic>();
+            services.AddScoped<ILim_DepartContrato, Limites_DepartamentalesLogic>();
+            services.AddScoped<ILim_MunContrato, Limites_MunicipalesLogic>();
+            services.AddScoped<IMercadoContrato, MercadosLogic>();
+            services.AddScoped<IProveedorAContrato, Proveedor_AlevinesLogic>();
+            services.AddScoped<IProveedorAliContrato, Proveedor_AlimentosLogic>();
+            services.AddScoped<IProveedorAsisTecContrato, Proveedor_AsistTecLogic>();
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()
