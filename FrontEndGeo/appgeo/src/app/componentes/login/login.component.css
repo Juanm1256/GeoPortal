@@ -56,13 +56,13 @@ section{
     font-size: 24px;
     font-weight: 600;
     letter-spacing: 1px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
 .form .inputBox {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .form .inputBox input {
@@ -93,7 +93,7 @@ section{
     background: #2196f3;
     color: #fff;
     max-width: 100px;
-    margin: 20px auto;
+    margin: 0 auto;
     display: block;
     cursor: pointer;
     font-weight: 600;
@@ -112,6 +112,7 @@ section{
     max-width: 320px;
     margin: 0 auto;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 .images-container.bottom {
@@ -157,7 +158,7 @@ section{
 .square {
     position: absolute;
     backdrop-filter: blur(5px);
-    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-right: 1px solid rgba(255, 255, 255, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -199,16 +200,16 @@ section{
 .color:nth-child(2) {
     bottom: 10px;
     left: 100px;
-    width: 400px;
-    height: 400px;
+    width: 450px;
+    height: 450px;
     background: #2C5384;
 }
 
 .color:nth-child(3) {
     bottom: 50px;
     right: 100px;
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     background: #2C5384;
 }
 
