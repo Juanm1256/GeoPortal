@@ -1,80 +1,108 @@
-/* Contenedor del acordeón */
-.accordion-container {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    z-index: 1000;
-  }
+/* Contenedor de herramientas */
+.toolbar {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Botones de herramientas */
+.tool-btn {
+  background: #2C5384;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  transition: background 0.3s;
+  position: relative;
+}
+
+/* Ocultar el texto de los botones normales */
+.tool-btn span {
+  display: none;
+}
+
+/* Mostrar el texto cuando el mouse pasa sobre el botón */
+.tool-btn:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 50px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Íconos */
+.tool-btn i {
+  font-size: 18px;
+}
+
+/* Cambio de color al pasar el mouse */
+.tool-btn:hover {
+  background: #142944;
+}
+
+/* Panel de capas oculto por defecto */
+.layer-panel {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
   
-  /* Botón del acordeón */
-  .accordion-btn {
-    background: #1a4876;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 5px;
-    transition: background 0.3s;
-    width: 100px;
-    text-align: center;
-  }
-  
-  .accordion-btn:hover {
-    background: #2C5384;
-  }
-  
-  /* Panel de capas oculto por defecto */
-  .layer-panel {
-    background: rgb(218, 218, 218);
-    padding: 10px;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 5px;
-    width: 150px;
-  }
-  
-  /* Mostrar el panel cuando se activa */
-  .layer-panel.show {
-    display: flex;
-  }
-  
-  /* Botones dentro del panel */
-  .layer-btn {
-    background: #2C5384;
-    border: none;
-    padding: 8px 10px;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: bold;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 15px;
-    transition: background 0.3s, color 0.3s;
-    width: 100%;
-    text-align: left;
-  }
-  
-  /* Íconos */
-  .layer-btn i {
-    font-size: 18px;
-  }
-  
-  /* Efecto hover */
-  .layer-btn:hover {
-    background: #0f2e4f;
-  }
-  
-  /* Estilo de botón activo */
-  .layer-btn.active {
-    background: #28a745; /* Verde cuando está activo */
-    color: white;
-  }
-  
+}
+
+/* Mostrar el panel de capas cuando "Capas" está activo */
+.showLayers .tools {
+  display: none;
+}
+
+.showLayers .layer-panel {
+  display: flex;
+}
+
+/* Botones de capas */
+.layer-btn {
+  background: #1a4876;
+  border: none;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 5px;
+}
+
+/* Mantener visible el texto en la lista de capas */
+.layer-btn span {
+  display: inline;
+}
+
+/* Efecto hover */
+.layer-btn:hover {
+  background: #0f2e4f;
+}
+
+/* Mantener los botones en verde cuando la capa está activa */
+.layer-btn.active {
+  background: #28a745 !important;
+}
