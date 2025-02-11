@@ -10,98 +10,276 @@ import { LimitesMunicipalesService } from '../../servicios/maps/limites-municipa
 import { LimitesMunicipales } from '../../interfaces/limites-municipales';
 import { MercadosService } from '../../servicios/maps/mercados.service';
 import { Mercados } from '../../interfaces/mercados';
-import 'leaflet.markercluster';
 import { ProveedoralevinesService } from '../../servicios/maps/proveedoralevines.service';
 import { ProveedorAlevines } from '../../interfaces/proveedor-alevines';
 import { ProveedoralimentosService } from '../../servicios/maps/proveedoralimentos.service';
 import { ProveedorasistenciatecnicaService } from '../../servicios/maps/proveedorasistenciatecnica.service';
 import { ProveedorAlimentos } from '../../interfaces/proveedor-alimentos';
 import { ProveedorAsistenciaTecnica } from '../../interfaces/proveedor-asistencia-tecnica';
+import { CommonModule } from '@angular/common';
+import 'leaflet.markercluster';
+import html2canvas from 'html2canvas';
 import proj4 from 'proj4';
+import Swal from 'sweetalert2';
 
 @Component({
+
   selector: 'app-map-private',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './map-private.component.html',
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit {
-  isAccordionOpen = false;
+  /*** VARIABLES ***/
   private map!: L.Map;
+  private markerLayer = L.layerGroup(); // Capa para los marcadores
+  private markers: L.Marker[] = [];
   private capas: { [key: string]: L.Layer } = {};
-  constructor(private cap_depservice: CapitalesDepartamentalesService,
+  activeLayers: { [key: string]: boolean } = {};
+
+  /*** MAPAS BASE ***/
+  private baseMaps: { [key: string]: L.TileLayer } = {};
+  private baseMapNames: Map<L.TileLayer, string> = new Map();
+  private activeBaseLayer!: L.TileLayer;
+
+  /*** ESTADOS UI ***/
+  isAccordionOpen = false;
+  isLayersOpen = false;
+
+  /*** SERVICIOS ***/
+  constructor(
+    private cap_depservice: CapitalesDepartamentalesService,
     private cuencasService: CuencasService,
     private limitesdepservice: LimitesDepartamentalesService,
     private limitesmuservice: LimitesMunicipalesService,
     private mercadoservices: MercadosService,
     private proveedoralevinesservice: ProveedoralevinesService,
     private proveedoralimentoservice: ProveedoralimentosService,
-    private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService) { }
+    private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService
+  ) {}
 
-    toggleAccordion() {
-      this.isAccordionOpen = !this.isAccordionOpen;
-    }
+  /*** MÉTODOS DE INICIALIZACIÓN ***/
   ngOnInit(): void {
+    (window as any).removeMarker = this.removeMarker.bind(this);
     this.initMap();
   }
 
-  initMap(): void {
-    this.map = L.map('map-private').setView([-16.54529, -64.7400], 6);
+  private initMap(): void {
+    this.map = L.map('map-private', {
+      center: [-16.54529, -64.7400],
+      zoom: 6,
+      zoomControl: false
+    });
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18
-    }).addTo(this.map);
+    // Definir mapas base
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
+    const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 });
+
+    // Asociar nombres con los mapas
+    this.baseMaps = { "Mapa OSM": osm, "Satélite": satellite, "Topográfico": topo, "Cartográfico": carto };
+    this.baseMapNames.set(osm, "Mapa OSM");
+    this.baseMapNames.set(satellite, "Satélite");
+    this.baseMapNames.set(topo, "Topográfico");
+    this.baseMapNames.set(carto, "Cartográfico");
+
+    // Agregar OSM por defecto
+    osm.addTo(this.map);
+    this.activeBaseLayer = osm;
+
+    // Agregar control de capas
+    L.control.layers(this.baseMaps).addTo(this.map);
   }
+
+  /*** CONTROL DE CAPAS ***/
+  toggleAccordion() {
+    this.isAccordionOpen = !this.isAccordionOpen;
+  }
+
+  toggleLayers() {
+    this.isLayersOpen = !this.isLayersOpen;
+  }
+
   toggleLayer(layerName: string, event: any) {
-    const button = event.target.closest('.layer-btn'); // Captura el botón
+    const button = event.target.closest('.layer-btn');
 
     if (!this.capas[layerName]) {
-        switch (layerName) {
-            case 'cuencas':
-                this.capas[layerName] = this.CargarCuencas();
-                break;
-            case 'mercados':
-                this.capas[layerName] = this.Cargarmercados();
-                break;
-            case 'capitalesDepartamentales':
-                this.capas[layerName] = this.CargarCapitalesDepartamentales();
-                break;
-            case 'limitesDepartamentales':
-                this.capas[layerName] = this.CargarLimitesDepartamentales();
-                break;
-            case 'limitesMunicipales':
-                this.capas[layerName] = this.CargarLimitesMunicipales();
-                break;
-            case 'proveedorAlevines':
-                this.capas[layerName] = this.CargarProveedorAlevines();
-                break;
-            case 'proveedorAlimentos':
-                this.capas[layerName] = this.CargarProveedorAlimentos();
-                break;
-            case 'proveedorAsistenciaTecnica':
-                this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica();
-                break;
-            /*case 'redCaminos':
-                this.capas[layerName] = this.CargarRedCaminos();
-                break;
-            case 'redHidrica':
-                this.capas[layerName] = this.CargarRedHidrica();
-                break;*/
-        }
-
-        // Marcar botón como activo
-        button.classList.add('active');
+      switch (layerName) {
+        case 'cuencas': this.capas[layerName] = this.CargarCuencas(); break;
+        case 'mercados': this.capas[layerName] = this.Cargarmercados(); break;
+        case 'capitalesDepartamentales': this.capas[layerName] = this.CargarCapitalesDepartamentales(); break;
+        case 'limitesDepartamentales': this.capas[layerName] = this.CargarLimitesDepartamentales(); break;
+        case 'limitesMunicipales': this.capas[layerName] = this.CargarLimitesMunicipales(); break;
+        case 'proveedorAlevines': this.capas[layerName] = this.CargarProveedorAlevines(); break;
+        case 'proveedorAlimentos': this.capas[layerName] = this.CargarProveedorAlimentos(); break;
+        case 'proveedorAsistenciaTecnica': this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica(); break;
+      }
+      this.activeLayers[layerName] = true;
+      button.classList.add('active');
     } else {
-        // Si la capa está activa, se quita
-        this.map.removeLayer(this.capas[layerName]);
-        delete this.capas[layerName];
-
-        // Quitar clase 'active' del botón
-        button.classList.remove('active');
+      this.map.removeLayer(this.capas[layerName]);
+      delete this.capas[layerName];
+      this.activeLayers[layerName] = false;
+      button.classList.remove('active');
     }
-}
+  }
+
+  /*** FUNCIONES DE MAPA ***/
+  getUserLocation() {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      this.map.setView([latitude, longitude], 15);
+    });
+  }
+
+  mapZoomIn() {
+    this.map.zoomIn();
+  }
+
+  mapZoomOut() {
+    this.map.zoomOut();
+  }
+
+  toggleBaseMap() {
+    const baseLayers = Array.from(this.baseMapNames.values());
+    let currentIndex = baseLayers.indexOf(this.baseMapNames.get(this.activeBaseLayer)!);
+    const nextIndex = (currentIndex + 1) % baseLayers.length;
+    const nextLayerName = baseLayers[nextIndex];
+
+    this.map.removeLayer(this.activeBaseLayer);
+    this.activeBaseLayer = this.baseMaps[nextLayerName];
+    this.map.addLayer(this.activeBaseLayer);
+  }
+
+  /*** MARCADORES ***/
+  addCustomMarker() {
+    const center = this.map.getCenter();
+    const { lat, lng } = center;
+
+    const customIcon = L.icon({
+      iconUrl: 'assets/leaflet/marker-icon-2x.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
+
+    marker.bindPopup(`
+      <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+        <p>Marcador en:</p>
+        <p><strong>Lat:</strong> ${lat.toFixed(5)}, <strong>Lng:</strong> ${lng.toFixed(5)}</p>
+        <button class="delete-marker-btn" style="background: red; color: white; padding: 8px 12px; cursor: pointer;">
+          Eliminar Marcador
+        </button>
+      </div>
+    `);
+
+    marker.addTo(this.markerLayer);
+    this.markerLayer.addTo(this.map);
+    this.markers.push(marker);
+
+    marker.on("popupopen", () => {
+      const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", () => this.removeMarker(marker));
+      }
+    });
+  }
+
+  removeMarker(marker: L.Marker) {
+    this.map.removeLayer(marker);
+    this.markers = this.markers.filter(m => m !== marker);
+  }
+
+  /*Hacer Captura del mapa*/
+  captureMap() {
+    const mapElement = document.getElementById('map-private'); // Obtener el div del mapa
+    if (!mapElement) {
+      console.error("No se encontró el mapa.");
+      return;
+    }
+    html2canvas(mapElement, {
+      useCORS: true, // Permitir capturar imágenes externas (OSM, Google, etc.)
+      allowTaint: true, // Evita bloqueos por CORS en algunos navegadores
+      logging: false,
+      scale: 2 // Aumenta la calidad de la imagen capturada
+    }).then(canvas => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "mapa_captura.png";
+      link.click();
+    }).catch(err => {
+      console.error("Error al capturar el mapa:", err);
+    });
+  }
+   /*Funcion para restablecer los cambios*/
+   resetMapView() {
+    Swal.fire({
+      title: "¿Restablecer el mapa?",
+      text: "Se restablecerán todas las capas y volverás a la vista inicial.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, restablecer",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Reiniciar la vista del mapa
+        this.map.setView([-16.54529, -64.7400], 6);
+
+        // Eliminar todas las capas añadidas
+        this.markerLayer.clearLayers(); // Borra los marcadores
+
+        Object.keys(this.capas).forEach(layerName => {
+          if (this.capas[layerName]) {
+            this.map.removeLayer(this.capas[layerName]); // Quitar cada capa activa
+          }
+        });
+
+        this.capas = {}; // Limpiar la referencia de capas activas
+        this.activeLayers = {}; // **Vaciar el estado de capas activas**
+
+        // Restaurar mapa base (OSM como predeterminado)
+        this.map.eachLayer(layer => {
+          if (layer instanceof L.TileLayer) {
+            this.map.removeLayer(layer);
+          }
+        });
+        this.activeBaseLayer = this.baseMaps["Mapa OSM"];
+        this.map.addLayer(this.activeBaseLayer);
+
+        // **Restablecer los botones de capas (quitar clase 'active')**
+        document.querySelectorAll(".layer-btn").forEach(btn => {
+          btn.classList.remove("active");
+        });
+
+        // Mostrar mensaje de éxito
+        Swal.fire(
+          "Mapa Restablecido",
+          "El mapa ha vuelto a su estado inicial.",
+          "success"
+        );
+      }
+    });
+  }
+  // Función para restaurar los estilos de los botones cuando se abre el panel de capas
+  restoreLayerButtonStyles() {
+    setTimeout(() => {
+      document.querySelectorAll('.layer-btn').forEach(button => {
+        const layerName = button.getAttribute('data-layer');
+        if (layerName && this.activeLayers[layerName]) {
+          button.classList.add('active');
+        }
+      });
+    }, 100); // Pequeño retraso para asegurarnos de que los botones están listos
+  }
 
 
+  /*Funciones de las capas en el geovisor*/
   CargarCapitalesDepartamentales(): L.Layer {
     const layerGroup = L.layerGroup();
 
