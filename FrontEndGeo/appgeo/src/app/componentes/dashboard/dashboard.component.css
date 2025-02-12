@@ -1,0 +1,37 @@
+.dashboard-container {
+  padding: 20px;
+}
+
+.dashboard-cards {
+  display: flex;
+  justify-content: space-around;
+}
+
+.card {
+  background: #1a4876;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 155px;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.filters input, .filters select {
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.data-layer {
+  margin-top: 20px;
+}
+
+.chart-container {
+  width: 400px;
+  margin: auto;
+}
