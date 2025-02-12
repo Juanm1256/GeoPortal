@@ -19,8 +19,12 @@ import { ProveedorAsistenciaTecnica } from '../../interfaces/proveedor-asistenci
 import { CommonModule } from '@angular/common';
 import 'leaflet.markercluster';
 import html2canvas from 'html2canvas';
-import proj4 from 'proj4';
+import { map, filter, mergeMap, bufferCount, delay, take } from 'rxjs/operators';
+import { from } from 'rxjs';
 import Swal from 'sweetalert2';
+import { ColoresMapaUtil } from '../../Colores/Colores';
+// @ts-ignore
+import domtoimage from 'dom-to-image';
 
 @Component({
 
@@ -30,23 +34,19 @@ import Swal from 'sweetalert2';
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit {
-  /*** VARIABLES ***/
   private map!: L.Map;
-  private markerLayer = L.layerGroup(); // Capa para los marcadores
+  private markerLayer = L.layerGroup();
   private markers: L.Marker[] = [];
   private capas: { [key: string]: L.Layer } = {};
   activeLayers: { [key: string]: boolean } = {};
 
-  /*** MAPAS BASE ***/
   private baseMaps: { [key: string]: L.TileLayer } = {};
   private baseMapNames: Map<L.TileLayer, string> = new Map();
   private activeBaseLayer!: L.TileLayer;
 
-  /*** ESTADOS UI ***/
   isAccordionOpen = false;
   isLayersOpen = false;
 
-  /*** SERVICIOS ***/
   constructor(
     private cap_depservice: CapitalesDepartamentalesService,
     private cuencasService: CuencasService,
@@ -58,7 +58,6 @@ export class MapPrivateComponent implements OnInit {
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService
   ) {}
 
-  /*** MÉTODOS DE INICIALIZACIÓN ***/
   ngOnInit(): void {
     (window as any).removeMarker = this.removeMarker.bind(this);
     this.initMap();
@@ -71,28 +70,23 @@ export class MapPrivateComponent implements OnInit {
       zoomControl: false
     });
 
-    // Definir mapas base
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
     const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
     const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 });
 
-    // Asociar nombres con los mapas
     this.baseMaps = { "Mapa OSM": osm, "Satélite": satellite, "Topográfico": topo, "Cartográfico": carto };
     this.baseMapNames.set(osm, "Mapa OSM");
     this.baseMapNames.set(satellite, "Satélite");
     this.baseMapNames.set(topo, "Topográfico");
     this.baseMapNames.set(carto, "Cartográfico");
 
-    // Agregar OSM por defecto
     osm.addTo(this.map);
     this.activeBaseLayer = osm;
 
-    // Agregar control de capas
     L.control.layers(this.baseMaps).addTo(this.map);
   }
 
-  /*** CONTROL DE CAPAS ***/
   toggleAccordion() {
     this.isAccordionOpen = !this.isAccordionOpen;
   }
@@ -114,6 +108,8 @@ export class MapPrivateComponent implements OnInit {
         case 'proveedorAlevines': this.capas[layerName] = this.CargarProveedorAlevines(); break;
         case 'proveedorAlimentos': this.capas[layerName] = this.CargarProveedorAlimentos(); break;
         case 'proveedorAsistenciaTecnica': this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica(); break;
+        case 'redCaminos': this.capas[layerName] = this.CargarRedCaminos();break;
+        case 'redHidrica': this.capas[layerName] = this.CargarRedHidrica();break;
       }
       this.activeLayers[layerName] = true;
       button.classList.add('active');
@@ -194,28 +190,33 @@ export class MapPrivateComponent implements OnInit {
     this.markers = this.markers.filter(m => m !== marker);
   }
 
-  /*Hacer Captura del mapa*/
   captureMap() {
-    const mapElement = document.getElementById('map-private'); // Obtener el div del mapa
+    const mapElement = document.getElementById('map-private');
     if (!mapElement) {
-      console.error("No se encontró el mapa.");
-      return;
+        console.error("No se encontró el mapa");
+        return;
     }
-    html2canvas(mapElement, {
-      useCORS: true, // Permitir capturar imágenes externas (OSM, Google, etc.)
-      allowTaint: true, // Evita bloqueos por CORS en algunos navegadores
-      logging: false,
-      scale: 2 // Aumenta la calidad de la imagen capturada
-    }).then(canvas => {
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = "mapa_captura.png";
-      link.click();
-    }).catch(err => {
-      console.error("Error al capturar el mapa:", err);
+
+    domtoimage.toPng(mapElement, {
+        quality: 1,
+        bgcolor: '#fff',
+        style: {
+            transform: 'scale(1)',
+            'transform-origin': 'top left'
+        }
+    })
+    .then((dataUrl: string) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `mapa_${new Date().getTime()}.png`;
+        link.click();
+    })
+    .catch((error: any) => {
+        console.error('Error al capturar el mapa:', error);
     });
-  }
-   /*Funcion para restablecer los cambios*/
+}
+
+  
    resetMapView() {
     Swal.fire({
       title: "¿Restablecer el mapa?",
@@ -228,22 +229,19 @@ export class MapPrivateComponent implements OnInit {
       cancelButtonText: "Cancelar"
     }).then((result) => {
       if (result.isConfirmed) {
-        // Reiniciar la vista del mapa
         this.map.setView([-16.54529, -64.7400], 6);
 
-        // Eliminar todas las capas añadidas
-        this.markerLayer.clearLayers(); // Borra los marcadores
+        this.markerLayer.clearLayers();
 
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
-            this.map.removeLayer(this.capas[layerName]); // Quitar cada capa activa
+            this.map.removeLayer(this.capas[layerName]);
           }
         });
 
-        this.capas = {}; // Limpiar la referencia de capas activas
-        this.activeLayers = {}; // **Vaciar el estado de capas activas**
+        this.capas = {};
+        this.activeLayers = {};
 
-        // Restaurar mapa base (OSM como predeterminado)
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -252,12 +250,10 @@ export class MapPrivateComponent implements OnInit {
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
 
-        // **Restablecer los botones de capas (quitar clase 'active')**
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
 
-        // Mostrar mensaje de éxito
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",
@@ -266,7 +262,7 @@ export class MapPrivateComponent implements OnInit {
       }
     });
   }
-  // Función para restaurar los estilos de los botones cuando se abre el panel de capas
+
   restoreLayerButtonStyles() {
     setTimeout(() => {
       document.querySelectorAll('.layer-btn').forEach(button => {
@@ -275,11 +271,10 @@ export class MapPrivateComponent implements OnInit {
           button.classList.add('active');
         }
       });
-    }, 100); // Pequeño retraso para asegurarnos de que los botones están listos
+    }, 100);
   }
 
 
-  /*Funciones de las capas en el geovisor*/
   CargarCapitalesDepartamentales(): L.Layer {
     const layerGroup = L.layerGroup();
 
@@ -311,56 +306,62 @@ export class MapPrivateComponent implements OnInit {
     return layerGroup;
   }
 
-  CargarCuencas(): L.Layer {
+  CargarCuencas(): L.LayerGroup {
     const layerGroup = L.layerGroup();
-
-    this.cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
-      cuencas.forEach(cuenca => {
-        if (cuenca.geom) {
-          const geojson = JSON.parse(cuenca.geom);
-
-          if (geojson.type === 'MultiPolygon') {
-            const estiloPoligono = {
-              color: '#2196F3',
-              weight: 2,
-              opacity: 1,
-              fillColor: '#64B5F6',
-              fillOpacity: 0.5
-            };
-
-            const polygon = L.geoJSON(geojson, {
-              style: estiloPoligono,
-              onEachFeature: (feature, layer) => {
-                layer.bindPopup(`
-                              <div class="popup-content">
-                                  <h4>${cuenca.cuenca}</h4>
-                                  <p>Superficie: ${cuenca.sup_km2} km²</p>
-                              </div>
-                          `);
-
-                layer.on({
-                  mouseover: (e) => {
-                    const layer = e.target;
-                    layer.setStyle({
-                      weight: 3,
-                      fillOpacity: 0.7
-                    });
-                  },
-                  mouseout: (e) => {
-                    const layer = e.target;
-                    layer.setStyle(estiloPoligono);
-                  }
+  
+    this.cuencasService.listarTodos().pipe(
+      mergeMap((cuencas: Cuencas[]) => from(cuencas)),
+      filter(cuenca => cuenca.geom && 
+        JSON.parse(cuenca.geom).type === 'MultiPolygon'),
+      map(cuenca => {
+        const geojson = JSON.parse(cuenca.geom);
+        const estiloPoligono = {
+          color: '#2196F3',
+          weight: 2,
+          opacity: 1,
+          fillColor: '#64B5F6',
+          fillOpacity: 0
+        };
+  
+        const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio();
+  
+        return L.geoJSON(geojson, {
+          style: estiloPoligono,
+          onEachFeature: (feature, layer) => {
+            layer.bindPopup(`
+              <div class="popup-content">
+                <h4>${cuenca.cuenca}</h4>
+                <p>Superficie: ${cuenca.sup_km2} km²</p>
+              </div>
+            `);
+  
+            layer.on({
+              mouseover: (e) => {
+                const targetLayer = e.target;
+                targetLayer.setStyle({
+                  weight: 3,
+                  fillOpacity: 0.7,
+                  color: colorMouseOver,
+                  fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
                 });
+              },
+              mouseout: (e) => {
+                const targetLayer = e.target;
+                targetLayer.setStyle(estiloPoligono);
               }
             });
-
-            layerGroup.addLayer(polygon);
+  
+            return layer;
           }
-        }
-      });
+        });
+      }),
+      bufferCount(10),
+      delay(100)
+    ).subscribe(layers => {
+      layers.forEach(layer => layerGroup.addLayer(layer));
+      this.map.addLayer(layerGroup);
     });
-
-    this.map.addLayer(layerGroup);
+  
     return layerGroup;
   }
 
@@ -374,12 +375,14 @@ export class MapPrivateComponent implements OnInit {
 
           if (geojson.type === 'MultiPolygon') {
             const estiloPoligono = {
-              color: '#2196F3',
+              color: '#191b1c',
               weight: 2,
               opacity: 1,
               fillColor: '#64B5F6',
-              fillOpacity: 0.5
+              fillOpacity: 0
             };
+
+            const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
 
             const polygon = L.geoJSON(geojson, {
               style: estiloPoligono,
@@ -396,7 +399,9 @@ export class MapPrivateComponent implements OnInit {
                     const layer = e.target;
                     layer.setStyle({
                       weight: 3,
-                      fillOpacity: 0.7
+                      fillOpacity: 0.7,
+                      color: colorMouseOver,
+                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
                     });
                   },
                   mouseout: (e) => {
@@ -419,57 +424,60 @@ export class MapPrivateComponent implements OnInit {
 
   CargarLimitesMunicipales(): L.Layer {
     const layerGroup = L.layerGroup();
-
-    this.limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
-      lim_muns.forEach(lim_mun => {
-        if (lim_mun.geom) {
-          const geojson = JSON.parse(lim_mun.geom);
-
-          if (geojson.type === 'MultiPolygon') {
-            const estiloPoligono = {
-              color: '#2196F3',
-              weight: 2,
-              opacity: 1,
-              fillColor: '#64B5F6',
-              fillOpacity: 0.5
-            };
-
-            const polygon = L.geoJSON(geojson, {
-              style: estiloPoligono,
-              onEachFeature: (feature, layer) => {
-                layer.bindPopup(`
-                              <div class="popup-content">
-                                  <h4>${lim_mun.dep}</h4>
-                                  <h4>${lim_mun.prov}</h4>
-                                  <h4>${lim_mun.mun}</h4>
-                              </div>
-                          `);
-
-                layer.on({
-                  mouseover: (e) => {
-                    const layer = e.target;
-                    layer.setStyle({
-                      weight: 3,
-                      fillOpacity: 0.7
-                    });
-                  },
-                  mouseout: (e) => {
-                    const layer = e.target;
-                    layer.setStyle(estiloPoligono);
-                  }
+  
+    this.limitesmuservice.listarTodos().pipe(
+      mergeMap((lim_muns: LimitesMunicipales[]) => from(lim_muns)),
+      filter(lim_mun => lim_mun.geom && 
+        JSON.parse(lim_mun.geom).type === 'MultiPolygon'),
+      map(lim_mun => {
+        const geojson = JSON.parse(lim_mun.geom);
+        const estiloPoligono = {
+          color: '#191b1c',
+          weight: 2,
+          opacity: 1,
+          fillColor: '#64B5F6',
+          fillOpacity: 0
+        };
+  
+        const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+  
+        return L.geoJSON(geojson, {
+          style: estiloPoligono,
+          onEachFeature: (feature, layer) => {
+            layer.bindPopup(`
+              <div class="popup-content">
+                <p>Departamento: ${lim_mun.dep}</p>
+                <p>Provincia: ${lim_mun.prov}</p>
+                <p>Municipio: ${lim_mun.mun}</p>
+              </div>
+            `);
+  
+            layer.on({
+              mouseup: (e) => {
+                const targetLayer = e.target;
+                targetLayer.setStyle({
+                  weight: 3,
+                  fillOpacity: 0.7,
+                  color: colorMouseOver,
+                  fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
                 });
               }
             });
-
-            layerGroup.addLayer(polygon);
+  
+            return layer;
           }
-        }
-      });
+        });
+      }),
+      bufferCount(10),
+      delay(100)
+    ).subscribe(layers => {
+      layers.forEach(layer => layerGroup.addLayer(layer));
+      this.map.addLayer(layerGroup);
     });
-
-    this.map.addLayer(layerGroup);
+  
     return layerGroup;
   }
+
   Cargarmercados(): L.Layer {
     const markerCluster = L.markerClusterGroup();
 
@@ -487,7 +495,11 @@ export class MapPrivateComponent implements OnInit {
             });
 
             const marker = L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${mercado.nombre}</strong><br>${mercado.provincia}`);
+              .bindPopup(`<div class="popup-content">
+                <p>${mercado.nombre}</p>
+                <p>Provincia: ${mercado.provincia}</p>
+                <p>Municipio: ${mercado.municipio}</p>
+            </div>`);
 
             markerCluster.addLayer(marker);
           }
@@ -565,7 +577,7 @@ export class MapPrivateComponent implements OnInit {
   CargarProveedoresAsistenciaTecnica(): L.Layer {
     const layerGroup = L.layerGroup();
 
-    this.proveedorasistenciatecnicaservice.listarTodos().subscribe(proveedores => {
+    this.proveedorasistenciatecnicaservice.listarTodos().subscribe((proveedores: ProveedorAsistenciaTecnica[]) => {
       proveedores.forEach(proveedor => {
         if (proveedor.geom) {
           try {

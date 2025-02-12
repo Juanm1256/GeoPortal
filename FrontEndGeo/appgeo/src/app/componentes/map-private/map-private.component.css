@@ -106,3 +106,7 @@
 .layer-btn.active {
   background: #28a745 !important;
 }
+#map-private {
+  position: absolute;
+  overflow: hidden;
+}
