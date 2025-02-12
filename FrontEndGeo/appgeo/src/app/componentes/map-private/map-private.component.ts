@@ -149,41 +149,59 @@ export class MapPrivateComponent implements OnInit {
   }
 
   /*** MARCADORES ***/
-  addCustomMarker() {
-    const center = this.map.getCenter();
-    const { lat, lng } = center;
+addCustomMarker() {
+  const center = this.map.getCenter();
+  const { lat, lng } = center;
 
-    const customIcon = L.icon({
-      iconUrl: 'assets/leaflet/marker-icon-2x.png',
-      shadowUrl: 'assets/leaflet/marker-shadow.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
-    });
+  const customIcon = L.icon({
+    iconUrl: 'assets/leaflet/marker-icon-2x.png',
+    shadowUrl: 'assets/leaflet/marker-shadow.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
 
-    const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
+  const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
 
-    marker.bindPopup(`
+  // **Función para actualizar el popup con la nueva posición**
+  const updatePopup = () => {
+    const newLatLng = marker.getLatLng();
+    marker.setPopupContent(`
       <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
         <p>Marcador en:</p>
-        <p><strong>Lat:</strong> ${lat.toFixed(5)}, <strong>Lng:</strong> ${lng.toFixed(5)}</p>
+        <p><strong>Lat:</strong> ${newLatLng.lat.toFixed(5)}, <strong>Lng:</strong> ${newLatLng.lng.toFixed(5)}</p>
         <button class="delete-marker-btn" style="background: red; color: white; padding: 8px 12px; cursor: pointer;">
           Eliminar Marcador
         </button>
       </div>
     `);
+  };
 
-    marker.addTo(this.markerLayer);
-    this.markerLayer.addTo(this.map);
-    this.markers.push(marker);
+  marker.bindPopup(`
+    <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <p>Marcador en:</p>
+      <p><strong>Lat:</strong> ${lat.toFixed(5)}, <strong>Lng:</strong> ${lng.toFixed(5)}</p>
+      <button class="delete-marker-btn" style="background: red; color: white; padding: 8px 12px; cursor: pointer;">
+        Eliminar Marcador
+      </button>
+    </div>
+  `);
 
-    marker.on("popupopen", () => {
-      const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.removeMarker(marker));
-      }
-    });
-  }
+  // **Actualizar el popup cuando el marcador se mueva**
+  marker.on('dragend', updatePopup);
+
+  marker.addTo(this.markerLayer);
+  this.markerLayer.addTo(this.map);
+  this.markers.push(marker);
+
+  marker.on("popupopen", () => {
+    const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => this.removeMarker(marker));
+    }
+  });
+}
+
 
   removeMarker(marker: L.Marker) {
     this.map.removeLayer(marker);
