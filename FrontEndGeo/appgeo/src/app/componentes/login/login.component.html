@@ -15,12 +15,12 @@
                     <img src="/assets/img/logo_iniaf.webp" alt="Imagen 1" class="login-image">
                 </div>
                 <h2>INICIAR SESIÓN</h2>
-                <form>
+                <form (ngSubmit)="onSubmit()">
                     <div class="inputBox">
-                        <input type="text" placeholder="Usuario:">
+                        <input type="text" placeholder="Usuario:" [(ngModel)]="username" name="username" required>
                     </div>
                     <div class="inputBox">
-                        <input type="password" placeholder="Contraseña:">
+                        <input type="password" placeholder="Contraseña:" [(ngModel)]="password" name="password" required>
                     </div>
                     <div class="inputBox">
                         <input type="submit" value="Ingresar">
