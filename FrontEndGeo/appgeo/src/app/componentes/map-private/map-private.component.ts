@@ -190,30 +190,41 @@ export class MapPrivateComponent implements OnInit {
     this.markers = this.markers.filter(m => m !== marker);
   }
 
-  captureMap() {
+  async captureMap() {
     const mapElement = document.getElementById('map-private');
     if (!mapElement) {
         console.error("No se encontró el mapa");
         return;
     }
 
-    domtoimage.toPng(mapElement, {
-        quality: 1,
-        bgcolor: '#fff',
-        style: {
-            transform: 'scale(1)',
-            'transform-origin': 'top left'
-        }
-    })
-    .then((dataUrl: string) => {
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `mapa_${new Date().getTime()}.png`;
-        link.click();
-    })
-    .catch((error: any) => {
+    try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const html2canvas = (await import('html2canvas')).default;
+
+        const canvas = await html2canvas(mapElement, {
+            useCORS: true,  // Habilitar CORS
+            allowTaint: true, // Permitir contenido de otros dominios
+            logging: true, // Activar logs para debuggear
+            imageTimeout: 0, // Sin timeout para la carga de imágenes
+            scale: 2 // Mayor calidad
+        });
+
+        canvas.toBlob((blob) => {
+            if (blob) {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mapa_${new Date().getTime()}.png`;
+                link.click();
+                
+                window.URL.revokeObjectURL(url);
+            }
+        }, 'image/png');
+
+    } catch (error) {
         console.error('Error al capturar el mapa:', error);
-    });
+    }
 }
 
   
@@ -625,7 +636,8 @@ export class MapPrivateComponent implements OnInit {
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
-      opacity: 0.8
+      opacity: 0.8,
+      crossOrigin: '' // Modificar esta línea
     });
 
     this.map.addLayer(redCaminos);
