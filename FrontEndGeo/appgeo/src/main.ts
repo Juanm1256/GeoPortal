@@ -9,7 +9,7 @@ import { jwtInterceptor } from './app/servicios/jwt.interceptor.service';
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
-    ...appConfig.providers, // Mantiene los proveedores existentes
-    provideHttpClient(withInterceptors([jwtInterceptor])) // Agrega el interceptor JWT
+    ...appConfig.providers,
+    provideHttpClient(withInterceptors([jwtInterceptor]))
   ]
 }).catch((err) => console.error(err));

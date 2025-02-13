@@ -23,7 +23,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private authService: AuthService) {}
 
   ngOnInit() {
-    // Suscribirse al observable para que la UI se actualice automáticamente
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
       (isDark) => {
         this.isDarkMode = isDark;
@@ -32,7 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   toggleTheme(event: Event) {
-    event.preventDefault(); // ⬅ Evita navegación inesperada
+    event.preventDefault();
     this.themeService.toggleTheme();
   }
 

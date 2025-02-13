@@ -6,7 +6,7 @@ import { RolesComponent } from './componentes/roles/roles.component';
 import { MapPrivateComponent } from './componentes/map-private/map-private.component';
 import { MapPublicComponent } from './componentes/map-public/map-public.component';
 import { LoginComponent } from './componentes/login/login.component';
-import { AuthGuard } from './servicios/auth.guard.service'; // 🔐 Importamos el guard
+import { AuthGuard } from './servicios/auth.guard.service';
 
 export const routes: Routes = [
   {
@@ -17,7 +17,7 @@ export const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
-      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] }, // 🔐 Protegemos con el guard
+      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
       { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
       { path: 'roles', component: RolesComponent, canActivate: [AuthGuard] },
       { path: 'map-private', component: MapPrivateComponent, canActivate: [AuthGuard] },

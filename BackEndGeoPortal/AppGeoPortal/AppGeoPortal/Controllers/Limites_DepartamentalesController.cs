@@ -1,4 +1,5 @@
 ﻿using AppGeoPortal.Contrato;
+using AppGeoPortal.Middleware.Atributes;
 using AppGeoPortal.Modelos.Maps;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,8 +17,9 @@ namespace AppGeoPortal.Controllers
             this.contexto = contexto;
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ListarTodos")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Lim_Dep>>> ListarTodos()
         {
             try

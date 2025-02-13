@@ -1,4 +1,5 @@
 ﻿using AppGeoPortal.Contrato;
+using AppGeoPortal.Middleware.Atributes;
 using AppGeoPortal.Modelos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,8 +18,9 @@ namespace AppGeoPortal.Controllers
             _usuario = usuario;
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ListarTodos")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Usuarios>>> ListarTodos()
         {
             try
@@ -32,8 +34,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ListarActivos")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Usuarios>>> ListarActivos()
         {
             try
@@ -47,8 +50,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeAgregar")]
+        [Authorize]
         [HttpPost("Insertar")]
+        [PermisoRequerido("Agregar")]
         public async Task<ActionResult> Insertar([FromBody] Usuarios usuarios)
         {
             try
@@ -68,8 +72,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeModificar")]
+        [Authorize]
         [HttpPut("Modificar/{id:int}")]
+        [PermisoRequerido("Modificar")]
         public async Task<ActionResult> Modificar([FromBody] Usuarios usuarios, int id)
         {
             try
@@ -89,8 +94,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeEliminar")]
+        [Authorize]
         [HttpDelete("Eliminar")]
+        [PermisoRequerido("Eliminar")]
         public async Task<ActionResult> Eliminar(int id)
         {
             try
@@ -110,8 +116,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ObtenerId")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<Usuarios>> ObtenerId(int id)
         {
             try

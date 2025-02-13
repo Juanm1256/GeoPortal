@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 })
 
 export class DashboardComponent implements OnInit {
-  /*** Variables principales ***/
   totalUsuarios = 0;
   totalRoles = 0;
   totalCapas = 0;
@@ -32,7 +31,7 @@ export class DashboardComponent implements OnInit {
   roles: any[] = [];
   ultimoUsuario: any;
   ultimaCapaActiva: any;
-  private chartInstance: Chart | null = null; // Para evitar error de "canvas en uso"
+  private chartInstance: Chart | null = null;
 
   constructor(
     private usuarioService: UsuariosService,
@@ -48,13 +47,12 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    Chart.register(...registerables); // ✅ Registra los componentes de Chart.js
+    Chart.register(...registerables);
     this.obtenerTotales();
     this.obtenerCantidadPorCapa();
     this.obtenerUsuariosRoles();
   }
 
-  /*** 🔹 Obtener cantidad de usuarios, roles y capas ***/
   obtenerTotales() {
     forkJoin([
       this.usuarioService.ListarTodos(),
@@ -75,7 +73,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  /*** 🔹 Obtener cantidad de datos por capa ***/
 obtenerCantidadPorCapa() {
   forkJoin([
     this.capDepService.listarTodos(),
@@ -99,11 +96,10 @@ obtenerCantidadPorCapa() {
       { nombre: 'Proveedores de Asistencia Técnica', cantidad: asistencia.length }
     ];
     
-    this.updateChart(); // 🔹 Actualizar gráfico con todas las capas
+    this.updateChart();
   });
 }
 
-  /*** 🔹 Obtener lista de usuarios y roles ***/
   obtenerUsuariosRoles() {
     forkJoin([
       this.usuarioService.ListarTodos(),
@@ -115,12 +111,12 @@ obtenerCantidadPorCapa() {
       this.ultimoUsuario = usuarios[usuarios.length - 1];
     });
   }
-  /*** 📊 Actualizar gráfico ***/
+
   updateChart() {
     const ctx = document.getElementById('chart') as HTMLCanvasElement;
 
     if (this.chartInstance) {
-      this.chartInstance.destroy(); // ✅ Evita error de "Canvas en uso"
+      this.chartInstance.destroy();
     }
 
     this.chartInstance = new Chart(ctx, {
