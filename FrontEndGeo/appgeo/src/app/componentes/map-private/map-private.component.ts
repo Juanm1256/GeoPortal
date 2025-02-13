@@ -18,7 +18,6 @@ import { ProveedorAlimentos } from '../../interfaces/proveedor-alimentos';
 import { ProveedorAsistenciaTecnica } from '../../interfaces/proveedor-asistencia-tecnica';
 import { CommonModule } from '@angular/common';
 import 'leaflet.markercluster';
-import html2canvas from 'html2canvas';
 import { map, filter, mergeMap, bufferCount, delay, take } from 'rxjs/operators';
 import { from } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -638,12 +637,13 @@ addCustomMarker() {
   }
 
   CargarRedCaminos(): L.Layer {
-    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
       layers: 'capas_geo:red_caminos',
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
-      opacity: 0.8
+      opacity: 0.8,
+      crossOrigin: true,
     });
 
     this.map.addLayer(redCaminos);
@@ -651,12 +651,13 @@ addCustomMarker() {
   }
 
   CargarRedHidrica(): L.Layer {
-    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
       layers: 'capas_geo:red_hidrica',
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
-      opacity: 0.8
+      opacity: 0.8,
+      crossOrigin: true,
     });
 
     this.map.addLayer(redHidrica);

@@ -1,5 +1,6 @@
 ﻿using AppGeoPortal.Contrato;
 using AppGeoPortal.Modelos.Maps;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ namespace AppGeoPortal.Controllers
             this.contexto = contexto;
         }
 
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ListarTodos")]
         public async Task<ActionResult<List<Mercados>>> ListarTodos()
         {

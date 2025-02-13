@@ -1,5 +1,6 @@
 ﻿using AppGeoPortal.Contrato;
 using AppGeoPortal.Modelos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,7 @@ namespace AppGeoPortal.Controllers
             _usuario = usuario;
         }
 
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ListarTodos")]
         public async Task<ActionResult<List<Usuarios>>> ListarTodos()
         {
@@ -30,6 +32,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ListarActivos")]
         public async Task<ActionResult<List<Usuarios>>> ListarActivos()
         {
@@ -44,6 +47,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Policy = "PuedeAgregar")]
         [HttpPost("Insertar")]
         public async Task<ActionResult> Insertar([FromBody] Usuarios usuarios)
         {
@@ -64,6 +68,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Policy = "PuedeModificar")]
         [HttpPut("Modificar/{id:int}")]
         public async Task<ActionResult> Modificar([FromBody] Usuarios usuarios, int id)
         {
@@ -84,6 +89,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Policy = "PuedeEliminar")]
         [HttpDelete("Eliminar")]
         public async Task<ActionResult> Eliminar(int id)
         {
@@ -104,7 +110,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ObtenerId")]
         public async Task<ActionResult<Usuarios>> ObtenerId(int id)
         {

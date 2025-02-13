@@ -1,5 +1,6 @@
 ﻿using AppGeoPortal.Contrato;
 using AppGeoPortal.Modelos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,8 @@ namespace AppGeoPortal.Controllers
         {
             _roles = roles;
         }
+
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ListarTodos")]
         public async Task<ActionResult<List<Roles>>> ListarTodos()
         {
@@ -30,6 +33,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Policy = "PuedeVer")]
         [HttpGet("ListarPermisos")]
         public async Task<ActionResult<List<Permisos>>> ListarPermisos()
         {
