@@ -18,7 +18,6 @@ import { ProveedorAlimentos } from '../../interfaces/proveedor-alimentos';
 import { ProveedorAsistenciaTecnica } from '../../interfaces/proveedor-asistencia-tecnica';
 import { CommonModule } from '@angular/common';
 import 'leaflet.markercluster';
-import html2canvas from 'html2canvas';
 import { map, filter, mergeMap, bufferCount, delay, take } from 'rxjs/operators';
 import { from } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -149,82 +148,89 @@ export class MapPrivateComponent implements OnInit {
   }
 
   /*** MARCADORES ***/
-  addCustomMarker() {
-    const center = this.map.getCenter();
-    const { lat, lng } = center;
+addCustomMarker() {
+  const center = this.map.getCenter();
+  const { lat, lng } = center;
 
-    const customIcon = L.icon({
-      iconUrl: 'assets/leaflet/marker-icon-2x.png',
-      shadowUrl: 'assets/leaflet/marker-shadow.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
-    });
+  const customIcon = L.icon({
+    iconUrl: 'assets/leaflet/marker-icon-2x.png',
+    shadowUrl: 'assets/leaflet/marker-shadow.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
 
-    const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
+  const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
 
-    marker.bindPopup(`
+  // **Función para actualizar el popup con la nueva posición**
+  const updatePopup = () => {
+    const newLatLng = marker.getLatLng();
+    marker.setPopupContent(`
       <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
         <p>Marcador en:</p>
-        <p><strong>Lat:</strong> ${lat.toFixed(5)}, <strong>Lng:</strong> ${lng.toFixed(5)}</p>
+        <p><strong>Lat:</strong> ${newLatLng.lat.toFixed(5)}, <strong>Lng:</strong> ${newLatLng.lng.toFixed(5)}</p>
         <button class="delete-marker-btn" style="background: red; color: white; padding: 8px 12px; cursor: pointer;">
           Eliminar Marcador
         </button>
       </div>
     `);
+  };
 
-    marker.addTo(this.markerLayer);
-    this.markerLayer.addTo(this.map);
-    this.markers.push(marker);
+  marker.bindPopup(`
+    <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <p>Marcador en:</p>
+      <p><strong>Lat:</strong> ${lat.toFixed(5)}, <strong>Lng:</strong> ${lng.toFixed(5)}</p>
+      <button class="delete-marker-btn" style="background: red; color: white; padding: 8px 12px; cursor: pointer;">
+        Eliminar Marcador
+      </button>
+    </div>
+  `);
 
-    marker.on("popupopen", () => {
-      const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.removeMarker(marker));
-      }
-    });
-  }
+  // **Actualizar el popup cuando el marcador se mueva**
+  marker.on('dragend', updatePopup);
+
+  marker.addTo(this.markerLayer);
+  this.markerLayer.addTo(this.map);
+  this.markers.push(marker);
+
+  marker.on("popupopen", () => {
+    const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => this.removeMarker(marker));
+    }
+  });
+}
+
 
   removeMarker(marker: L.Marker) {
     this.map.removeLayer(marker);
     this.markers = this.markers.filter(m => m !== marker);
   }
 
-  async captureMap() {
+  captureMap() {
     const mapElement = document.getElementById('map-private');
     if (!mapElement) {
         console.error("No se encontró el mapa");
         return;
     }
 
-    try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const html2canvas = (await import('html2canvas')).default;
-
-        const canvas = await html2canvas(mapElement, {
-            useCORS: true,  // Habilitar CORS
-            allowTaint: true, // Permitir contenido de otros dominios
-            logging: true, // Activar logs para debuggear
-            imageTimeout: 0, // Sin timeout para la carga de imágenes
-            scale: 2 // Mayor calidad
-        });
-
-        canvas.toBlob((blob) => {
-            if (blob) {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `mapa_${new Date().getTime()}.png`;
-                link.click();
-                
-                window.URL.revokeObjectURL(url);
-            }
-        }, 'image/png');
-
-    } catch (error) {
+    domtoimage.toPng(mapElement, {
+        quality: 1,
+        bgcolor: '#fff',
+        style: {
+            transform: 'scale(1)',
+            'transform-origin': 'top left'
+        }
+    })
+    .then((dataUrl: string) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `mapa_${new Date().getTime()}.png`;
+        link.click();
+    })
+    .catch((error: any) => {
         console.error('Error al capturar el mapa:', error);
-    }
+    });
 }
 
   
@@ -631,13 +637,13 @@ export class MapPrivateComponent implements OnInit {
   }
 
   CargarRedCaminos(): L.Layer {
-    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
       layers: 'capas_geo:red_caminos',
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
       opacity: 0.8,
-      crossOrigin: '' // Modificar esta línea
+      crossOrigin: true,
     });
 
     this.map.addLayer(redCaminos);
@@ -645,12 +651,13 @@ export class MapPrivateComponent implements OnInit {
   }
 
   CargarRedHidrica(): L.Layer {
-    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
       layers: 'capas_geo:red_hidrica',
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
-      opacity: 0.8
+      opacity: 0.8,
+      crossOrigin: true,
     });
 
     this.map.addLayer(redHidrica);

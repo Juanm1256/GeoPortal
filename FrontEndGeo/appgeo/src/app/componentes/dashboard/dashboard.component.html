@@ -1,0 +1,48 @@
+<div class="dashboard-container">
+  
+  <div class="dashboard-cards">
+    <div class="card">
+      <h3>Usuarios</h3>
+      <p>Total: {{ totalUsuarios }}</p>
+    </div>
+    <div class="card">
+      <h3>Roles</h3>
+      <p>Total: {{ totalRoles }}</p>
+    </div>
+    <div class="card">
+      <h3>Capas</h3>
+      <p>Total: {{ totalCapas }}</p>
+    </div>
+  </div>
+
+  <!-- 📌 Tabla de capas activas -->
+  <div class="data-layer">
+    <h3>Datos por Capa</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre de Capa</th>
+          <th>Cantidad de Datos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let capa of cantidadPorCapa">
+          <td>{{ capa.nombre }}</td>
+          <td>{{ capa.cantidad }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📌 Gráfico de distribución de capas -->
+  <div class="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <!-- 📌 Últimos cambios -->
+  <div class="latest-updates">
+    <h3>Últimos cambios</h3>
+    <p>Último usuario registrado: {{ ultimoUsuario?.nombre }}</p>
+  </div>
+
+</div>

@@ -19,5 +19,13 @@ namespace AppGeoPortal.Modelos
         public virtual Personas IdPersonanav { get; set; }
         [ForeignKey("idrol")]
         public virtual Roles? IdRolnav { get; set; }
+
+        public List<string> ObtenerPermisosActivos()
+        {
+            return IdRolnav?.RolPermisos?
+                .Where(rp => rp.estado == "Activo")
+                .Select(rp => rp.IdPermisonav.nombre)
+                .ToList() ?? new List<string>();
+        }
     }
 }
