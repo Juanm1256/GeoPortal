@@ -37,19 +37,19 @@ namespace AppGeoPortal.Repositorio.Implementacion
 
             if (userAccount is null || !PasswordHashHandler.VerifyPassword(password, userAccount.password_hash))
             {
-                throw new UnauthorizedAccessException("Usuario o contraseña incorrectos.");
+                return null;
             }
 
             if (userAccount.estado != "Activo")
             {
                 _logger.LogWarning($"Intento de acceso de usuario inactivo: {username}");
-                throw new UnauthorizedAccessException("El usuario está inactivo.");
+                return null;
             }
 
             if (userAccount.IdRolnav.estado != "Activo")
             {
                 _logger.LogWarning($"Intento de acceso con rol inactivo. Usuario: {username}, Rol: {userAccount.IdRolnav.nombre}");
-                throw new UnauthorizedAccessException("El rol del usuario está inactivo.");
+                return null;
             }
 
             var permisos = userAccount.ObtenerPermisosActivos() ?? new List<string>();

@@ -13,7 +13,7 @@
             <form [formGroup]="form" (ngSubmit)="Guardar()">
               <div class="form-group mb-3">
                 <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" id="nombre" placeholder="Ingresa el nombre del rol"
+                <input type="text" class="form-control" id="nombre" placeholder="Ingresa el nombre del rol" autocomplete="off"
                        formControlName="nombre" required />
                 <!-- Mensajes de Error -->
                 <div *ngIf="form.controls['nombre'].invalid && (form.controls['nombre'].dirty || form.controls['nombre'].touched)">

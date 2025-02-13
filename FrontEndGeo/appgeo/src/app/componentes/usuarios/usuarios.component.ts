@@ -46,11 +46,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       username: ['', [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ]+)*$')
+        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+)*$')
       ]],
       password: ['', [
         Validators.required,
-        Validators.minLength(6)
+        Validators.minLength(6),
+        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+)*$')
       ]],
       idrol: ['', Validators.required],
       nombres: ['', [

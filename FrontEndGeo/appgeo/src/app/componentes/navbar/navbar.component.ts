@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ThemeService } from '../../servicios/theme.service';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../servicios/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,10 +18,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   @Output() sidebarToggle = new EventEmitter<void>();
 
-  constructor(public themeService: ThemeService) {}
+  constructor(
+    public themeService: ThemeService,
+    private authService: AuthService) {}
 
   ngOnInit() {
-    // Suscribirse al observable para que la UI se actualice automáticamente
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
       (isDark) => {
         this.isDarkMode = isDark;
@@ -29,7 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   toggleTheme(event: Event) {
-    event.preventDefault(); // ⬅ Evita navegación inesperada
+    event.preventDefault();
     this.themeService.toggleTheme();
   }
 
@@ -39,5 +41,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.themeSubscription.unsubscribe();
+  }
+  logout(): void {
+    this.authService.logout();
   }
 }

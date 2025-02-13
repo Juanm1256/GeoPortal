@@ -38,5 +38,16 @@ export class Mensaje {
             { type: 'pattern', message: 'El ci solo puede contener letras y números.' }
         ],
 
+        //Login
+        'usuario': [
+            { type: 'required', message: 'El username es requerido.' },
+            { type: 'maxlength', message: 'El username no puede tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'El username solo puede contener letras y números.' }
+        ],
+        'contraseña': [
+            { type: 'required', message: 'La contraseña es requerida.' },
+            { type: 'minlength', message: 'La contraseña debe tener al menos 6 caracteres.' }
+        ]
+
     }
 }

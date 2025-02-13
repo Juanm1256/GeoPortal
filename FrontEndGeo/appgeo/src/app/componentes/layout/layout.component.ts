@@ -21,7 +21,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
   constructor(public themeService: ThemeService) {}
 
   ngOnInit() {
-    // Suscribirse al observable del servicio para actualizar el tema dinámicamente
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
       (isDark) => {
         this.isDarkMode = isDark;
