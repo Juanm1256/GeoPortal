@@ -1,4 +1,5 @@
 ﻿using AppGeoPortal.Contrato;
+using AppGeoPortal.Middleware.Atributes;
 using AppGeoPortal.Modelos;
 using AppGeoPortal.Modelos.DTO;
 using Microsoft.AspNetCore.Authorization;
@@ -18,8 +19,9 @@ namespace AppGeoPortal.Controllers
             _roles = roles;
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ListarTodos")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Rol_Permiso>>> ListarTodos()
         {
             try
@@ -33,8 +35,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeVer")]
+        [Authorize]
         [HttpGet("ListarActivos")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Rol_Permiso>>> ListarActivos()
         {
             try
@@ -48,8 +51,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeAgregar")]
+        [Authorize]
         [HttpPost("Insertar")]
+        [PermisoRequerido("Agregar")]
         public async Task<ActionResult> Insertar([FromBody] Rol_PermisoDTO roles)
         {
             try
@@ -69,8 +73,9 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize(Policy = "PuedeModificar")]
+        [Authorize]
         [HttpPut("Modificar/{nombrerol}")]
+        [PermisoRequerido("Modificar")]
         public async Task<ActionResult> Modificar([FromBody] Rol_PermisoDTO roles, string nombrerol)
         {
             try

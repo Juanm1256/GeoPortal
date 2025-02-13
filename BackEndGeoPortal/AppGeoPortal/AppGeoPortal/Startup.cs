@@ -1,12 +1,14 @@
 ﻿using AppGeoPortal.Contexto;
 using AppGeoPortal.Contrato;
 using AppGeoPortal.Implementacion;
-using AppGeoPortal.Middleware.Contrato;
 using AppGeoPortal.Middleware.Implementacion;
+using AppGeoPortal.Repositorio.Contratos;
+using AppGeoPortal.Repositorio.Implementacion;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,30 +42,30 @@ namespace AppGeoPortal
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIBibliografia", Version = "v1" });
-                var jwtSecurityScheme = new OpenApiSecurityScheme
-                {
-                    BearerFormat = "JWT",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = JwtBearerDefaults.AuthenticationScheme,
-                    Description = "Enter your JWT Access Token",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIBibliografia", Version = "v1" });
+            //    var jwtSecurityScheme = new OpenApiSecurityScheme
+            //    {
+            //        BearerFormat = "JWT",
+            //        Name = "Authorization",
+            //        In = ParameterLocation.Header,
+            //        Type = SecuritySchemeType.Http,
+            //        Scheme = JwtBearerDefaults.AuthenticationScheme,
+            //        Description = "Enter your JWT Access Token",
+            //        Reference = new OpenApiReference
+            //        {
+            //            Id = JwtBearerDefaults.AuthenticationScheme,
+            //            Type = ReferenceType.SecurityScheme
+            //        }
+            //    };
 
-                c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    { jwtSecurityScheme, Array.Empty<string>() }
-                });
-            });
+            //    c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
+            //    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //    {
+            //        { jwtSecurityScheme, new string[] { "Bearer" } }
+            //    });
+            //});
             services.AddDbContext<AppDbContext>(options =>
                 options.UseLazyLoadingProxies().UseNpgsql(
                     Configuration.GetConnectionString("cadenaconexion"),
@@ -82,7 +84,7 @@ namespace AppGeoPortal
             services.AddScoped<IProveedorAContrato, Proveedor_AlevinesLogic>();
             services.AddScoped<IProveedorAliContrato, Proveedor_AlimentosLogic>();
             services.AddScoped<IProveedorAsisTecContrato, Proveedor_AsistTecLogic>();
-            services.AddScoped<IJwtContrato, JwtService>();
+            services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()
@@ -109,35 +111,35 @@ namespace AppGeoPortal
                 };
             });
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("PuedeAgregar", policy => policy.RequireClaim("Permiso", "Agregar"));
-                options.AddPolicy("PuedeEliminar", policy => policy.RequireClaim("Permiso", "Eliminar"));
-                options.AddPolicy("PuedeVer", policy => policy.RequireClaim("Permiso", "Ver"));
-                options.AddPolicy("PuedeModificar", policy => policy.RequireClaim("Permiso", "Modificar"));
-            });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment() || env.IsProduction())
+            app.UseMiddleware<JwtMiddleware>();
+
+            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIBibliografia"));
+                //app.UseSwagger();
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppGeoPortal API"));
             }
+
             app.UseCors("AllowWebApp");
 
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseAuthorization(); 
+
+            app.UseMiddleware<PermisosMiddleware>(); 
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+
     }
 }
