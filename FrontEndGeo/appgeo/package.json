@@ -28,6 +28,7 @@
     "chart.js": "^4.4.7",
     "dom-to-image": "^2.6.0",
     "html2canvas": "^1.4.1",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "proj4": "^2.15.0",

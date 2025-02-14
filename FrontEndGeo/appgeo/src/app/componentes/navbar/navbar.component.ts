@@ -15,12 +15,14 @@ import { AuthService } from '../../servicios/auth.service';
 export class NavbarComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
+  userRole: string | null = null; // ✅ Variable para el rol del usuario
 
   @Output() sidebarToggle = new EventEmitter<void>();
 
   constructor(
     public themeService: ThemeService,
-    private authService: AuthService) {}
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
@@ -28,6 +30,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDark;
       }
     );
+
+    this.userRole = this.authService.getUserRole(); // ✅ Obtener el rol del usuario
   }
 
   toggleTheme(event: Event) {
@@ -39,10 +43,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.sidebarToggle.emit();
   }
 
-  ngOnDestroy() {
-    this.themeSubscription.unsubscribe();
-  }
   logout(): void {
     this.authService.logout();
+  }
+
+  ngOnDestroy() {
+    this.themeSubscription.unsubscribe();
   }
 }
