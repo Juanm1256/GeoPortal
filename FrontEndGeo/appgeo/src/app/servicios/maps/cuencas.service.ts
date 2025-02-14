@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { Cuencas } from '../../interfaces/cuencas';
 
 @Injectable({
@@ -11,7 +11,11 @@ export class CuencasService {
   constructor(private http: HttpClient) {}
 
   listarTodos(): Observable<Cuencas[]> {
-    return this.http.get<Cuencas[]>(this.API+'/'+"ListarTodos");
+    return this.http.get<Cuencas[]>(this.API+'/'+"ListarTodos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
 
 }

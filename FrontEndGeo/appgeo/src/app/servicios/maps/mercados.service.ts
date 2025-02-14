@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Mercados } from '../../interfaces/mercados';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,10 @@ export class MercadosService {
   constructor(private http: HttpClient) {}
 
   listarTodos(): Observable<Mercados[]> {
-    return this.http.get<Mercados[]>(this.API+'/'+"ListarTodos");
+    return this.http.get<Mercados[]>(this.API+'/'+"ListarTodos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
 }

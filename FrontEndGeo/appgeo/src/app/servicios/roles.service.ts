@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Roles } from '../interfaces/roles';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { Permisos } from '../interfaces/permisos';
 
 @Injectable({
@@ -14,21 +14,47 @@ export class RolesService {
 
   
   ListarTodos(): Observable<Roles[]>{
-    return this.http.get<Roles[]>(this.API+'/Roles/'+"ListarTodos");
+    return this.http.get<Roles[]>(this.API+'/Roles/'+"ListarTodos").pipe(
+          catchError(error => {
+            return of();
+          })
+        );
   }
   ListarPermiso(): Observable<Permisos[]>{
-    return this.http.get<Permisos[]>(this.API+'/Roles/'+"ListarPermisos");
+    return this.http.get<Permisos[]>(this.API+'/Roles/'+"ListarPermisos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
   ListarRolPermisoActivos(): Observable<Roles[]>{
-    return this.http.get<Roles[]>(this.API+'/Rol_Permiso/'+"ListarActivos");
+    return this.http.get<Roles[]>(this.API+'/Rol_Permiso/'+"ListarActivos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
   PostRol(rol:Roles): Observable<Roles>{
-    return this.http.post<Roles>(this.API+'/Roles/'+"Insertar",rol);
+    return this.http.post<Roles>(this.API+'/Roles/'+"Insertar",rol).pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
   PutRol(id: number, rol: Roles): Observable<Roles>{
-    return this.http.put<Roles>(this.API+'/Roles/'+"Modificar"+'/'+id, rol);
+    return this.http.put<Roles>(this.API+'/Roles/'+"Modificar"+'/'+id, rol).pipe(
+      catchError(error => {
+        //console.warn('⚠ Error al obtener las capitales departamentales:', error);
+        return of();
+      })
+    );
   }
   DeleteRol(id: number):Observable<Roles>{
-    return this.http.delete<Roles>(this.API+'/Roles/'+id);
+    return this.http.delete<Roles>(this.API+'/Roles/'+id).pipe(
+      catchError(error => {
+        //console.warn('⚠ Error al obtener las capitales departamentales:', error);
+        return of();
+      })
+    );
   }
 }
