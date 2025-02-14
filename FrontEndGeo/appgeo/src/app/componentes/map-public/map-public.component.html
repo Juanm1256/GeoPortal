@@ -1,1 +1,76 @@
-<div id="map-public"></div>
+<!-- Contenedor del mapa -->
+<div id="map-private" style="width: 100%; height: 700px;">
+
+    <!-- Panel lateral de herramientas -->
+    <div class="toolbar" [class.showLayers]="isLayersOpen">
+      <!-- Botón para alternar capas -->
+      <button class="tool-btn" (click)="toggleLayers()" title="Capas">
+        <i class="bi bi-stack"></i>
+      </button>
+  
+      <!-- Botones normales (desaparecen cuando se activa capas) -->
+      <div class="tools" *ngIf="!isLayersOpen">
+        <button class="tool-btn" (click)="mapZoomIn()" title="Zoom +">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+        <button class="tool-btn" (click)="mapZoomOut()" title="Zoom -">
+          <i class="bi bi-dash-lg"></i>
+        </button>
+        <button class="tool-btn" (click)="getUserLocation()" title="Ubicación">
+          <i class="bi bi-crosshair"></i>
+        </button>
+        <button class="tool-btn" (click)="toggleBaseMap()" title="Mapa Base">
+          <i class="bi bi-globe"></i>
+        </button>
+        <button class="tool-btn" (click)="addCustomMarker()" title="Marcador">
+          <i class="bi bi-geo-alt"></i>
+        </button>
+        <button class="tool-btn" (click)="captureMap()" title="Capturar">
+          <i class="bi bi-camera"></i>
+        </button>
+        <button class="tool-btn" (click)="resetMapView()" title="Reset">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+  
+      <!-- Panel de capas (visible solo cuando se presiona "Capas") -->
+      <div class="layer-panel" *ngIf="isLayersOpen" (mouseover)="restoreLayerButtonStyles()">
+        <button class="layer-btn" (click)="toggleLayer('cuencas', $event)" data-layer="cuencas">
+          <i class="bi bi-layers"></i> <span>Cuencas</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('mercados', $event)" data-layer="mercados">
+          <i class="bi bi-shop"></i> <span>Mercados</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('capitalesDepartamentales', $event)"
+          data-layer="capitalesDepartamentales">
+          <i class="bi bi-geo-alt"></i> <span>Capitales Departamentales</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('limitesDepartamentales', $event)"
+          data-layer="limitesDepartamentales">
+          <i class="bi bi-map"></i> <span>Límites Departamentales</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('limitesMunicipales', $event)" data-layer="limitesMunicipales">
+          <i class="bi bi-map-fill"></i> <span>Límites Municipales</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('proveedorAlevines', $event)" data-layer="proveedorAlevines">
+          <i class="bi bi-box"></i> <span>Alevines</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('proveedorAlimentos', $event)" data-layer="proveedorAlimentos">
+          <i class="bi bi-basket"></i> <span>Alimentos</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('proveedorAsistenciaTecnica', $event)"
+          data-layer="proveedorAsistenciaTecnica">
+          <i class="bi bi-tools"></i> <span>Asistencia Técnica</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('redCaminos', $event)" data-layer="redCaminos">
+          <i class="bi bi-signpost-2"></i> <span>Red de Caminos</span>
+        </button>
+        <button class="layer-btn" (click)="toggleLayer('redHidrica', $event)" data-layer="redHidrica">
+          <i class="bi bi-water"></i> <span>Red Hídrica</span>
+        </button>
+      </div>
+      <button class="tool-btn logout-btn" *ngIf="!isLayersOpen" (click)="logout()" title="Cerrar Sesión">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+    </div>
+  </div>
