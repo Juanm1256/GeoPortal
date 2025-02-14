@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { UsuariosService } from '../../servicios/usuarios.service';
 import { RolesService } from '../../servicios/roles.service';
@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./dashboard.component.css']
 })
 
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
   totalUsuarios = 0;
   totalRoles = 0;
   totalCapas = 0;
@@ -51,6 +51,10 @@ export class DashboardComponent implements OnInit {
     this.obtenerTotales();
     this.obtenerCantidadPorCapa();
     this.obtenerUsuariosRoles();
+  }
+
+  ngAfterViewInit(): void {
+    this.updateChart();
   }
 
   obtenerTotales() {
@@ -113,13 +117,17 @@ obtenerCantidadPorCapa() {
   }
 
   updateChart() {
-    const ctx = document.getElementById('chart') as HTMLCanvasElement;
+    const canvas = document.getElementById('chart') as HTMLCanvasElement;
+    if (!canvas) {
+      //console.error('❌ No se encontró el canvas');
+      return;
+    }
 
     if (this.chartInstance) {
       this.chartInstance.destroy();
     }
 
-    this.chartInstance = new Chart(ctx, {
+    this.chartInstance = new Chart(canvas.getContext('2d')!, {
       type: 'pie',
       data: {
         labels: this.cantidadPorCapa.map(capa => capa.nombre),
