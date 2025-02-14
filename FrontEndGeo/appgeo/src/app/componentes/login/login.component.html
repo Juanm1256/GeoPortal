@@ -29,8 +29,11 @@
                         </small>
                     </div>
                     <div class="inputBox">
-                        <input type="submit" value="Ingresar" [disabled]="form.invalid">
-                    </div>
+                        <button type="submit" [disabled]="form.invalid || isLoading" [class.loading]="isLoading">
+                          {{ isLoading ? 'Accediendo' : 'Ingresar' }}
+                        </button>
+                      </div>
+                      
                 </form>
             </div>
             <div class="images-container bottom">
