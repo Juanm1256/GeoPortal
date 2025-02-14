@@ -6,10 +6,10 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ThemeService {
   private isDarkModeSubject = new BehaviorSubject<boolean>(false);
-  isDarkMode$ = this.isDarkModeSubject.asObservable(); // Observable para los componentes
+  isDarkMode$ = this.isDarkModeSubject.asObservable();
 
   constructor() {
-    const savedTheme = sessionStorage.getItem('theme'); // Usamos sessionStorage en vez de localStorage
+    const savedTheme = sessionStorage.getItem('theme');
     const isDark = savedTheme === 'dark';
     this.isDarkModeSubject.next(isDark);
   }
@@ -17,6 +17,6 @@ export class ThemeService {
   toggleTheme(): void {
     const newTheme = !this.isDarkModeSubject.value;
     this.isDarkModeSubject.next(newTheme);
-    sessionStorage.setItem('theme', newTheme ? 'dark' : 'light'); // Usamos sessionStorage
+    sessionStorage.setItem('theme', newTheme ? 'dark' : 'light');
   }
 }

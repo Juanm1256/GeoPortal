@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ProveedorAlimentos } from '../../interfaces/proveedor-alimentos';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,10 @@ export class ProveedoralimentosService {
   constructor(private http: HttpClient) {}
 
   listarTodos(): Observable<ProveedorAlimentos[]> {
-    return this.http.get<ProveedorAlimentos[]>(this.API+'/'+"ListarTodos");
+    return this.http.get<ProveedorAlimentos[]>(this.API+'/'+"ListarTodos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
 }

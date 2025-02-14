@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import {jwtDecode} from 'jwt-decode'; // ✅ Asegúrate de instalarlo: `npm install jwt-decode`
 import { Login } from '../interfaces/login';
+import { tap } from 'rxjs/operators';
 
 interface LoginResponse {
   Expira: Date;
@@ -23,12 +24,17 @@ export class AuthService {
 
   // ✅ Método para iniciar sesión
   login(credentials: Login): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/Login`, credentials);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/Login`, credentials).pipe(
+      tap(response => {
+        //console.log('🔍 Respuesta del backend:', response);
+        this.saveToken(response.Token);
+      })
+    );
   }
 
   // ✅ Método para cerrar sesión
   logout(): void {
-    console.warn('🔴 Cerrando sesión...');
+    //console.warn('🔴 Cerrando sesión...');
     localStorage.removeItem('Token');
     localStorage.removeItem('userRole'); 
     localStorage.removeItem('permissions');
@@ -55,16 +61,17 @@ export class AuthService {
         }
       }
 
-      console.log('✅ Token guardado correctamente');
+      //console.log('✅ Token guardado correctamente');
     } catch (error) {
-      console.error('❌ Error al decodificar el token:', error);
+      //console.error('❌ Error al decodificar el token:', error);
     }
   }
 
   // ✅ Obtener el token del localStorage
   getToken(): string | null {
-    return localStorage.getItem('Token');
-  }
+  const token = localStorage.getItem('Token');
+  return token && token !== 'undefined' ? token : null;
+}
 
   // ✅ Obtener el rol del usuario
   getUserRole(): string | null {
@@ -84,10 +91,10 @@ export class AuthService {
 
     try {
       const payload: any = jwtDecode(token);
-      console.log('🔍 Expiración del token:', new Date(payload.exp * 1000));
+      //console.log('🔍 Expiración del token:', new Date(payload.exp * 1000));
       return payload.exp * 1000; // Devuelve la fecha de expiración en milisegundos
     } catch (error) {
-      console.error('❌ Error al decodificar el token:', error);
+      //console.error('❌ Error al decodificar el token:', error);
       return null;
     }
   }

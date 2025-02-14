@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LimitesMunicipales } from '../../interfaces/limites-municipales';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,10 @@ export class LimitesMunicipalesService {
   constructor(private http: HttpClient) {}
 
   listarTodos(): Observable<LimitesMunicipales[]> {
-    return this.http.get<LimitesMunicipales[]>(this.API+'/'+"ListarTodos");
+    return this.http.get<LimitesMunicipales[]>(this.API+'/'+"ListarTodos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
 }

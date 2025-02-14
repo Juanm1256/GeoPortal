@@ -214,12 +214,17 @@ addCustomMarker() {
         return;
     }
 
+    const width = mapElement.scrollWidth;
+    const height = mapElement.scrollHeight;
+    const scaleFactor = Math.max(window.devicePixelRatio || 1, 1);
     domtoimage.toPng(mapElement, {
         quality: 1,
         bgcolor: '#fff',
         style: {
-            transform: 'scale(1)',
-            'transform-origin': 'top left'
+          transform: `scale(${scaleFactor})`,
+          'transform-origin': 'top left',
+          width: `${width * scaleFactor}px`,
+          height: `${height * scaleFactor}px`
         }
     })
     .then((dataUrl: string) => {
@@ -412,18 +417,14 @@ addCustomMarker() {
                           `);
 
                 layer.on({
-                  mouseover: (e) => {
+                  mouseup: (e) => {
                     const layer = e.target;
                     layer.setStyle({
                       weight: 3,
-                      fillOpacity: 0.7,
+                      fillOpacity: 0.2,
                       color: colorMouseOver,
                       fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
                     });
-                  },
-                  mouseout: (e) => {
-                    const layer = e.target;
-                    layer.setStyle(estiloPoligono);
                   }
                 });
               }
@@ -474,7 +475,7 @@ addCustomMarker() {
                 const targetLayer = e.target;
                 targetLayer.setStyle({
                   weight: 3,
-                  fillOpacity: 0.7,
+                  fillOpacity: 0.2,
                   color: colorMouseOver,
                   fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
                 });

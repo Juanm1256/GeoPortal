@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { CapitalesDepartamentales } from '../../interfaces/capitales-departamentales';
 
 @Injectable({
@@ -11,6 +11,10 @@ export class CapitalesDepartamentalesService {
   constructor(private http: HttpClient) {}
 
   listarTodos(): Observable<CapitalesDepartamentales[]> {
-    return this.http.get<CapitalesDepartamentales[]>(this.API+'/'+"ListarTodos");
+    return this.http.get<CapitalesDepartamentales[]>(this.API+'/'+"ListarTodos").pipe(
+      catchError(error => {
+        return of();
+      })
+    );
   }
 }
