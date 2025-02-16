@@ -25,6 +25,7 @@ import { ColoresMapaUtil } from '../../Colores/Colores';
 import { AuthService } from '../../servicios/auth.service';
 // @ts-ignore
 import domtoimage from 'dom-to-image';
+import { Router } from '@angular/router';
 
 @Component({
 
@@ -34,7 +35,7 @@ import domtoimage from 'dom-to-image';
   styleUrl: './map-public.component.css'
 })
 export class MapPublicComponent implements OnInit {
-  
+  userRole: string | null = null; // ✅ Almacena el rol del usuario
   private map!: L.Map;
   private markerLayer = L.layerGroup();
   private markers: L.Marker[] = [];
@@ -57,7 +58,8 @@ export class MapPublicComponent implements OnInit {
     private proveedoralevinesservice: ProveedoralevinesService,
     private proveedoralimentoservice: ProveedoralimentosService,
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
   allowScroll(event: WheelEvent): void {
     const target = event.currentTarget as HTMLElement;
@@ -67,13 +69,15 @@ export class MapPublicComponent implements OnInit {
       event.stopPropagation(); // Evita que Leaflet capture el evento de zoom
     }
   }
-  
-  // ✅ Método para cerrar sesión
+  goBack(): void {
+    window.history.back(); // Regresa a la página anterior en el historial
+  }
   logout(): void {
-    this.authService.logout();
+    this.authService.logout(); 
   }
 
   ngOnInit(): void {
+    this.userRole = this.authService.getUserRole();
     (window as any).removeMarker = this.removeMarker.bind(this);
     this.initMap();
   }
