@@ -59,6 +59,15 @@ export class MapPublicComponent implements OnInit {
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService,
     private authService: AuthService
   ) {}
+  allowScroll(event: WheelEvent): void {
+    const target = event.currentTarget as HTMLElement;
+  
+    // Si el panel tiene scroll disponible, permitimos el desplazamiento normal
+    if (target.scrollHeight > target.clientHeight) {
+      event.stopPropagation(); // Evita que Leaflet capture el evento de zoom
+    }
+  }
+  
   // ✅ Método para cerrar sesión
   logout(): void {
     this.authService.logout();

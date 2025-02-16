@@ -106,3 +106,28 @@
 .layer-btn.active {
   background: #28a745 !important;
 }
+/* Panel de capas con scroll */
+.scrollable-layer-panel {
+  max-height: 450px; /* Ajusta la altura máxima según necesidad */
+  overflow-y: auto;  /* Habilita el scroll vertical */
+  scrollbar-width: thin; /* Estilo de scroll en Firefox */
+  scrollbar-color: #888 #f1f1f1; /* Color del scroll en Firefox */
+}
+
+/* Personalización del scrollbar en WebKit (Chrome, Edge, Safari) */
+.scrollable-layer-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-layer-panel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrollable-layer-panel::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.scrollable-layer-panel::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
