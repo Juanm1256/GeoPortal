@@ -58,7 +58,7 @@
   
   /* Cambio de color al pasar el mouse */
   .tool-btn:hover {
-    background: #142944;
+    background: #2C5384;
   }
   
   /* Panel de capas oculto por defecto */
@@ -80,7 +80,7 @@
   
   /* Botones de capas */
   .layer-btn {
-    background: #1a4876;
+    background: #2C5384;
     border: none;
     padding: 8px 10px;
     cursor: pointer;
@@ -109,6 +109,15 @@
   #map-private {
     position: absolute;
     overflow: hidden;
+  }
+  .back-btn {
+    background-color: #2C5384;
+    color: white;
+   
+  }
+  
+  .back-btn:hover {
+    background-color: #0c273c; /* Un poco más oscuro al pasar el mouse */
   }
   /* 🔴 Botón de Cerrar Sesión */
 .logout-btn {

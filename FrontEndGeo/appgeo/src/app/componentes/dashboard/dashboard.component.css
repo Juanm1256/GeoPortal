@@ -15,7 +15,7 @@
 }
 
 .card {
-  background: #1a4876;
+  background: #2C5384;
   color: white;
   padding: 20px;
   border-radius: 10px;
@@ -31,7 +31,7 @@
 }
 
 .data-layer th {
-  background-color: #1a4876;
+  background-color: #2C5384;
   color: white;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .dashboard-container.dark-theme .data-layer th {
-  background-color: #1a4876; /* Azul oscuro similar al modo claro */
+  background-color: #2C5384; /* Azul oscuro similar al modo claro */
   color: white;
 }
 
@@ -74,7 +74,7 @@
 
 /* 🌙 Estilos para los cards */
 .dashboard-container.dark-theme .card {
-  background: #1a4876; /* Azul oscuro uniforme */
+  background: #2C5384; /* Azul oscuro uniforme */
   color: white;
   border: 1px solid #555;
 }
@@ -97,7 +97,7 @@
 /* Animación del spinner */
 .spinner {
   border: 5px solid rgba(255, 255, 255, 0.3);
-  border-top: 5px solid #1a4876;
+  border-top: 5px solid #2C5384;
   border-radius: 50%;
   width: 50px;
   height: 50px;
