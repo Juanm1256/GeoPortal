@@ -119,12 +119,12 @@ export class MapPrivateComponent implements OnInit {
         case 'modgene': this.capas[layerName] = this.Cargarmodgene(layerName); break;
       }
   
-      this.map.addLayer(this.capas[layerName]); // Agregamos la capa al mapa
+      this.map.addLayer(this.capas[layerName]);
       this.activeLayers[layerName] = true;
       button.classList.add('active');
     } else {
-      this.map.removeLayer(this.capas[layerName]); // Eliminamos la capa del mapa
-      delete this.capas[layerName]; // Eliminamos la referencia en el objeto
+      this.map.removeLayer(this.capas[layerName]);
+      delete this.capas[layerName];
       this.activeLayers[layerName] = false;
       button.classList.remove('active');
     }

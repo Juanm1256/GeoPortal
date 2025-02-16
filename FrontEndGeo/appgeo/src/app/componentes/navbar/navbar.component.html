@@ -8,17 +8,14 @@
     </div>
 
     <!-- Botón de Sidebar (Solo visible para Administradores) -->
-    <button 
-      class="btn btn-outline-secondary me-2 sidebar-btn" 
-      (click)="toggleSidebar()" 
+    <button class="btn btn-outline-secondary me-2 sidebar-btn" (click)="toggleSidebar()"
       *ngIf="userRole === 'Administrador'">
       <i class="bi bi-list"></i>
     </button>
 
     <!-- Botón Toggler para Responsive -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
-            aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -30,17 +27,57 @@
         <button type="button" class="btn btn-outline-secondary me-2" (click)="toggleTheme($event)">
           <i class="bi" [ngClass]="isDarkMode ? 'bi-sun' : 'bi-moon'"></i>
         </button>
-        
-        <!-- Botón de perfil (Solo visible para Administradores) -->
-        <button type="button" class="btn btn-outline-secondary me-2" *ngIf="userRole === 'Administrador'">
+
+        <!-- Botón de Usuario -->
+        <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#userInfoModal">
           <i class="bi bi-person"></i>
         </button>
-
-        <!-- Botón de Logout (Siempre visible) -->
         <button type="button" class="btn btn-outline-danger" (click)="logout()">
           <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-        </button>      
+        </button>
       </div>
     </div>
   </div>
+ <!-- Modal de Información del Usuario -->
+<div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userInfoModalLabel">Información del Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="usuario; else loadingTemplate">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle me-3" style="font-size: 3rem; color: #6c757d;"></i>
+            <div>
+              <p><strong>Nombre de Usuario :</strong> {{ usuario.name || 'No disponible' }}<p>
+              <p><strong>Rol:</strong> {{ usuario.Rol || 'No asignado' }}</p>
+              <p><strong>Estado Rol:</strong> 
+                <span class="badge bg-success" *ngIf="usuario.EstadoRol === 'Activo'">Activo</span>
+                <span class="badge bg-danger" *ngIf="usuario.EstadoRol === 'Inactivo'">Inactivo</span>
+              </p>
+              <p><strong>Permisos:</strong></p>
+              <ul>
+                <li *ngFor="let permiso of usuario.Permiso">{{ permiso }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cargando -->
+        <ng-template #loadingTemplate>
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 </nav>
