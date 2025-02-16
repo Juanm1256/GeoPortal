@@ -56,7 +56,14 @@ export class MapPrivateComponent implements OnInit {
     private proveedoralimentoservice: ProveedoralimentosService,
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService
   ) {}
-
+  allowScroll(event: WheelEvent): void {
+    const target = event.currentTarget as HTMLElement;
+  
+    // Si el panel tiene scroll disponible, permitimos el desplazamiento normal
+    if (target.scrollHeight > target.clientHeight) {
+      event.stopPropagation(); // Evita que Leaflet capture el evento de zoom
+    }
+  }
   ngOnInit(): void {
     (window as any).removeMarker = this.removeMarker.bind(this);
     this.initMap();
