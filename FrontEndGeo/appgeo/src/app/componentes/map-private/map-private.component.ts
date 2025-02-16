@@ -36,7 +36,7 @@ export class MapPrivateComponent implements OnInit {
   private map!: L.Map;
   private markerLayer = L.layerGroup();
   private markers: L.Marker[] = [];
-  private capas: { [key: string]: L.Layer } = {};
+  private capas: { [key: string]: L.Layer | L.LayerGroup } = {};
   activeLayers: { [key: string]: boolean } = {};
 
   private baseMaps: { [key: string]: L.TileLayer } = {};
@@ -61,7 +61,7 @@ export class MapPrivateComponent implements OnInit {
   
     // Si el panel tiene scroll disponible, permitimos el desplazamiento normal
     if (target.scrollHeight > target.clientHeight) {
-      event.stopPropagation(); // Evita que Leaflet capture el evento de zoom
+      event.stopPropagation();
     }
   }
   ngOnInit(): void {
@@ -103,7 +103,7 @@ export class MapPrivateComponent implements OnInit {
 
   toggleLayer(layerName: string, event: any) {
     const button = event.target.closest('.layer-btn');
-
+  
     if (!this.capas[layerName]) {
       switch (layerName) {
         case 'cuencas': this.capas[layerName] = this.CargarCuencas(); break;
@@ -114,18 +114,22 @@ export class MapPrivateComponent implements OnInit {
         case 'proveedorAlevines': this.capas[layerName] = this.CargarProveedorAlevines(); break;
         case 'proveedorAlimentos': this.capas[layerName] = this.CargarProveedorAlimentos(); break;
         case 'proveedorAsistenciaTecnica': this.capas[layerName] = this.CargarProveedoresAsistenciaTecnica(); break;
-        case 'redCaminos': this.capas[layerName] = this.CargarRedCaminos();break;
-        case 'redHidrica': this.capas[layerName] = this.CargarRedHidrica();break;
+        case 'redCaminos': this.capas[layerName] = this.CargarRedCaminos(layerName); break;
+        case 'redHidrica': this.capas[layerName] = this.CargarRedHidrica(layerName); break;
+        case 'modgene': this.capas[layerName] = this.Cargarmodgene(layerName); break;
       }
+  
+      this.map.addLayer(this.capas[layerName]); // Agregamos la capa al mapa
       this.activeLayers[layerName] = true;
       button.classList.add('active');
     } else {
-      this.map.removeLayer(this.capas[layerName]);
-      delete this.capas[layerName];
+      this.map.removeLayer(this.capas[layerName]); // Eliminamos la capa del mapa
+      delete this.capas[layerName]; // Eliminamos la referencia en el objeto
       this.activeLayers[layerName] = false;
       button.classList.remove('active');
     }
   }
+  
 
   /*** FUNCIONES DE MAPA ***/
   getUserLocation() {
@@ -644,32 +648,146 @@ addCustomMarker() {
     return layerGroup;
   }
 
-  CargarRedCaminos(): L.Layer {
-    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
-      layers: 'capas_geo:red_caminos',
-      format: 'image/png',
-      transparent: true,
-      version: '1.1.1',
-      opacity: 0.8,
-      crossOrigin: true,
-    });
+  CargarRedCaminos(layerName: string): L.LayerGroup {
+    const maxFeatures = 200; 
+    let startIndex = 0;
+    let isLoading = false;
 
-    this.map.addLayer(redCaminos);
-    return redCaminos;
+    if (!this.capas[layerName]) {
+      this.capas[layerName] = L.layerGroup();
+    }
+
+    const cargarLote = (startIndex: number) => {
+      if (isLoading) return;
+
+      isLoading = true;
+      const url = `http://localhost:8085/geoserver/capas_geo/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=capas_geo:red_caminos&maxFeatures=${maxFeatures}&startIndex=${startIndex}&outputFormat=application/json`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          isLoading = false;
+
+          if (data.features && data.features.length > 0) {
+            const geoJsonLayer = L.geoJSON(data, {
+              style: { color: "gray", weight: 2 }
+            });
+
+            if (this.capas[layerName] instanceof L.LayerGroup) {
+              (this.capas[layerName] as L.LayerGroup).addLayer(geoJsonLayer);
+            }
+
+            if (data.features.length === maxFeatures) {
+              startIndex += maxFeatures;
+              cargarLote(startIndex);
+            }
+          }
+        })
+        .catch(error => {
+          isLoading = false;
+          console.error("Error cargando GeoJSON:", error);
+        });
+    };
+
+    cargarLote(startIndex);
+
+    return this.capas[layerName] as L.LayerGroup;
+  }
+  
+  
+CargarRedHidrica(layerName: string): L.LayerGroup {
+  const maxFeatures = 200; 
+  let startIndex = 0;
+  let isLoading = false;
+
+  if (!this.capas[layerName]) {
+    this.capas[layerName] = L.layerGroup();
   }
 
-  CargarRedHidrica(): L.Layer {
-    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
-      layers: 'capas_geo:red_hidrica',
-      format: 'image/png',
-      transparent: true,
-      version: '1.1.1',
-      opacity: 0.8,
-      crossOrigin: true,
-    });
+  const cargarLote = (startIndex: number) => {
+    if (isLoading) return;
 
-    this.map.addLayer(redHidrica);
-    return redHidrica;
+    isLoading = true;
+    const url = `http://localhost:8085/geoserver/capas_geo/ows?service=WFS&version=1.0.0&request=GetFeature&maxFeatures=${maxFeatures}&startIndex=${startIndex}&typeName=capas_geo:red_hidrica&outputFormat=application/json`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        isLoading = false;
+
+        if (data.features && data.features.length > 0) {
+          const geoJsonLayer = L.geoJSON(data, {
+            style: { color: "blue", weight: 2 }
+          });
+
+          if (this.capas[layerName] instanceof L.LayerGroup) {
+            (this.capas[layerName] as L.LayerGroup).addLayer(geoJsonLayer);
+          }
+
+          if (data.features.length === maxFeatures) {
+            startIndex += maxFeatures;
+            cargarLote(startIndex);
+          }
+        }
+      })
+      .catch(error => {
+        isLoading = false;
+        console.error("Error cargando GeoJSON:", error);
+      });
+  };
+
+  cargarLote(startIndex);
+
+  return this.capas[layerName] as L.LayerGroup;
+}
+
+  
+Cargarmodgene(layerName: string): L.LayerGroup {
+  const maxFeatures = 100; 
+  let startIndex = 0;
+  let isLoading = false;
+
+  if (!this.capas[layerName]) {
+    this.capas[layerName] = L.layerGroup();
   }
+
+  const cargarLote = (startIndex: number) => {
+    if (isLoading) return;
+
+    isLoading = true;
+    const url = `http://localhost:8085/geoserver/capas_rastergeo/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=capas_rastergeo%3Amod_gen_ajustado&maxFeatures=${maxFeatures}&startIndex=${startIndex}&outputFormat=application%2Fjson`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        isLoading = false;
+
+        if (data.features && data.features.length > 0) {
+          const geoJsonLayer = L.geoJSON(data, {
+            style: { color: "blue", weight: 2 }
+          });
+
+          if (this.capas[layerName] instanceof L.LayerGroup) {
+            (this.capas[layerName] as L.LayerGroup).addLayer(geoJsonLayer);
+          }
+
+          if (data.features.length === maxFeatures) {
+            startIndex += maxFeatures;
+            cargarLote(startIndex);
+          }
+        }
+      })
+      .catch(error => {
+        isLoading = false;
+        console.error("Error cargando GeoJSON:", error);
+      });
+  };
+
+  cargarLote(startIndex);
+
+  return this.capas[layerName] as L.LayerGroup;
+}
+  
+  
 
 }

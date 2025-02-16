@@ -19,7 +19,6 @@
   background: #2C5384;
   border: none;
   padding: 8px;
-  cursor: pointer;
   font-size: 14px;
   font-weight: bold;
   color: white;
@@ -83,7 +82,6 @@
   background: #1a4876;
   border: none;
   padding: 8px 10px;
-  cursor: pointer;
   font-size: 14px;
   color: white;
   display: flex;
