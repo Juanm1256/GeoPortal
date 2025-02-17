@@ -10,19 +10,19 @@ import { AuthGuard } from './servicios/auth.guard.service';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'map-public', component: MapPublicComponent }, // ✅ Rutas accesibles para visitantes
+  { path: 'map-public', component: MapPublicComponent },
 
   {
     path: '',
     component: LayoutComponent,
     children: [
-      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] }, // ✅ Protegido
-      { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] }, // ✅ Protegido
-      { path: 'roles', component: RolesComponent, canActivate: [AuthGuard] }, // ✅ Protegido
-      { path: 'map-private', component: MapPrivateComponent, canActivate: [AuthGuard] }, // ✅ Protegido
+      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+      { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
+      { path: 'roles', component: RolesComponent, canActivate: [AuthGuard] },
+      { path: 'map-private', component: MapPrivateComponent, canActivate: [AuthGuard] }, 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
-  { path: '**', redirectTo: 'login' } // ✅ Redirige cualquier ruta desconocida al login
+  { path: '**', redirectTo: 'login' }
 ];
