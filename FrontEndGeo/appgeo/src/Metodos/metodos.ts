@@ -391,8 +391,8 @@ export class Metodos {
       }
     
     public cargarmodgene(maping: L.Map): L.Layer {
-        const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-          layers: 'capas_rastergeo:mod_gen_ajustado',
+      const modgene = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
+          layers: 'capas_geo:capa_raster',
           format: 'image/png',
           transparent: true,
           version: '1.1.1',
@@ -400,7 +400,8 @@ export class Metodos {
           crossOrigin: true,
         });
     
-        maping.addLayer(redHidrica);
-        return redHidrica;
+        maping.addLayer(modgene);
+        return modgene;
+
       }
 }
