@@ -66,39 +66,30 @@
           <i class="bi bi-water"></i> <span>Red Hídrica</span>
         </button>
         <button class="layer-btn" (click)="toggleLayer('modgene', $event)" data-layer="modgene">
-          <i class="bi bi-layers"></i> <span>Prueba</span>
+          <i class="bi bi-layers"></i> <span>Mod General Ajustado</span>
         </button>
       </div>
     </div>
   </div>
 <!-- Modal de información -->
-<div 
-  *ngIf="modalInfo"
-  class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
->
-  <div class="bg-white p-6 rounded-lg max-w-md w-full">
-    <h2 class="text-xl font-bold mb-4">Información del Elemento</h2>
-    
-    <div *ngIf="modalInfo.length > 0; else noInfo">
-      <table class="w-full">
-        <tbody>
-          <tr *ngFor="let item of modalInfo" class="border-b">
-            <td class="font-semibold py-2">{{item.key}}</td>
-            <td class="py-2">{{item.value}}</td>
-          </tr>
-        </tbody>
-      </table>
+<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="datosModalLabel">Información de la Capa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <ul *ngIf="modalInfo && modalInfo.length > 0; else sinDatos">
+          <li *ngFor="let dato of modalInfo">{{ dato.key }}: {{ dato.value }}</li>
+        </ul>
+        <ng-template #sinDatos>
+          <p>No hay datos disponibles.</p>
+        </ng-template>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
     </div>
-
-    <ng-template #noInfo>
-      <p class="text-gray-500">No se encontró información</p>
-    </ng-template>
-
-    <button 
-      (click)="cerrarModal()"
-      class="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-    >
-      Cerrar
-    </button>
   </div>
 </div>
