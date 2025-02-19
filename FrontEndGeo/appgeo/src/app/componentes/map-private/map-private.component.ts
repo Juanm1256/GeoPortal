@@ -88,18 +88,17 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
 
     L.control.layers(this.baseMaps).addTo(this.map);
 
-    // 🟢 Evento para volver a agregar las capas activas después de cambiar el mapa base
     this.map.on('baselayerchange', () => {
       setTimeout(() => {
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
-            this.map.addLayer(this.capas[layerName]); // 🟢 Reagregar la capa al mapa
+            this.map.addLayer(this.capas[layerName]);
             if (this.capas[layerName] instanceof L.TileLayer.WMS) {
-              (this.capas[layerName] as L.TileLayer.WMS).bringToFront(); // 🟢 Traer al frente las capas WMS
+              (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
             }
           }
         });
-      }, 500); // Pequeña pausa para evitar parpadeos
+      }, 500);
     });
 
 
@@ -154,10 +153,33 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         case 'modgene':
           this.capas[layerName] = this.metodos.cargarmodgene(this.map);
           break;
+        case 'Fragmentos_gruesos_suelo':
+          this.capas[layerName] = this.metodos.cargarfragmentosgruesossuelo(this.map);
+          break;
+        case 'ph_suelo':
+          this.capas[layerName] = this.metodos.cargarph_suelo(this.map);
+          break;
+        case 'texturasuelo0':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo0(this.map);
+          break;
+        case 'texturasuelo10':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo10(this.map);
+          break;
+        case 'texturasuelo30':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo30(this.map);
+          break;
+        case 'texturasuelo60':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo60(this.map);
+          break;
+        case 'texturasuelo100':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo100(this.map);
+          break;
+        case 'texturasuelo200':
+          this.capas[layerName] = this.metodos.cargarTexturasuelo200(this.map);
+          break;
       }
-      this.map.addLayer(this.capas[layerName]); // 🟢 Agregar capa al mapa
+      this.map.addLayer(this.capas[layerName]); 
 
-      // 🔹 Traer la capa al frente si es WMS
       if (this.capas[layerName] instanceof L.TileLayer.WMS) {
         (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
       }
@@ -169,7 +191,6 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       delete this.capas[layerName];
       this.activeLayers[layerName] = false;
       button.classList.remove('active');
-      // 🚨 Si la capa desactivada es modgene, eliminar el marcador seleccionado
     if (layerName === 'modgene' && this.marcadorSeleccionado) {
       this.map.removeLayer(this.marcadorSeleccionado);
       this.marcadorSeleccionado = null;
@@ -305,30 +326,24 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       cancelButtonText: "Cancelar"
     }).then((result) => {
       if (result.isConfirmed) {
-        // 🔹 Restablecer la vista del mapa
         this.map.setView([-16.54529, -64.7400], 6);
   
-        // 🔹 Limpiar todos los marcadores del mapa
         this.markerLayer.clearLayers();
   
-        // 🚨 Eliminar marcador de la capa modgene si existe
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
   
-        // 🔹 Remover todas las capas activas
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
   
-        // 🔹 Resetear variables de capas activas
         this.capas = {};
         this.activeLayers = {};
   
-        // 🔹 Remover todos los mapas base y establecer OSM como predeterminado
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -337,12 +352,10 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
   
-        // 🔹 Reiniciar estilos de botones de capas
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
   
-        // 🔹 Mostrar mensaje de éxito
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",
@@ -364,16 +377,13 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   }
 
   consultarInformacionFeature(event: L.LeafletMouseEvent) {
-    // ✅ Verificar si la capa 'modgene' está activa
     if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
-      console.warn("⚠️ La capa 'modgene' no está activada. No se ejecutará la consulta.");
       return;
     }
 
     const latlng = event.latlng;
     const url = this.construirUrlGetFeatureInfo(latlng, this.map.getBounds());
 
-    console.log('📌 URL de consulta:', url);
 
     fetch(url)
       .then(response => {
@@ -383,8 +393,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
           return response.json();
         } else {
           return response.text().then(text => {
-            console.error('❌ Respuesta de error:', text);
-            throw new Error('Error en la consulta WFS: ' + text);
+            
           });
         }
       })
@@ -392,38 +401,29 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         if (data?.features?.length > 0) {
           const feature = data.features[0];
 
-          // 🟢 Mostrar información en el modal
           this.mostrarModalInformacion(feature.properties);
 
-          // 🟢 Agregar un marcador en la ubicación seleccionada
           this.agregarMarcador(latlng, feature.properties);
-        } else {
-          console.log('⚠️ No se encontró información en esta ubicación');
         }
-      })
-      .catch(error => {
-        console.error('❌ Error al consultar información:', error);
       });
   }
 
 
 
   construirUrlGetFeatureInfo(latlng: L.LatLng, bbox: L.LatLngBounds): string {
-    return `http://localhost:8085/geoserver/capas_geo/ows?` +
+    return `http://localhost:8085/geoserver/capas_rastergeo/ows?` +
       `service=WFS&` +
       `version=1.0.0&` +
       `request=GetFeature&` +
-      `typeName=capas_geo:capa_raster&` +
+      `typeName=capas_rastergeo:mod_gen_ajustado&` +
       `outputFormat=application/json&` +
       `srsName=EPSG:4326&` +
-      `CQL_FILTER=INTERSECTS(the_geom, POINT(${latlng.lng} ${latlng.lat}))`;
+      `CQL_FILTER=INTERSECTS(geom, POINT(${latlng.lng} ${latlng.lat}))`;
   }
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
-    // 🛑 Verificar si la capa 'modgene' está activa antes de agregar el marcador
     if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
-      console.warn("⚠️ La capa 'modgene' no está activada. No se agregará el marcador.");
-      return; // 🚫 No agregar el marcador si la capa no está activa
+      return; 
     }
 
     const customIcon = L.icon({
@@ -455,14 +455,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         const modal = new bootstrap.Modal(modalElement);
         modal.show();
       }
-      else {
-        console.error("⚠️ Error: No se encontró el modal 'datosModal'. Verifica el HTML.");
-      }
     }, 200);
   }
 
   cerrarModal() {
-    this.modalInfo = []; // ✅ En lugar de null, limpiamos con un array vacío
+    this.modalInfo = [];
   }
 
   ngOnDestroy() {
