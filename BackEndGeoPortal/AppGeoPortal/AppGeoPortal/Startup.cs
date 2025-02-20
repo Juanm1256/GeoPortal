@@ -66,6 +66,7 @@ namespace AppGeoPortal
             //        { jwtSecurityScheme, new string[] { "Bearer" } }
             //    });
             //});
+
             services.AddDbContext<AppDbContext>(options =>
                 options.UseLazyLoadingProxies().UseNpgsql(
                     Configuration.GetConnectionString("cadenaconexion"),
@@ -85,6 +86,7 @@ namespace AppGeoPortal
             services.AddScoped<IProveedorAliContrato, Proveedor_AlimentosLogic>();
             services.AddScoped<IProveedorAsisTecContrato, Proveedor_AsistTecLogic>();
             services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+            services.AddScoped<ITexturaContrato, TexturaLogic>();
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()

@@ -18,7 +18,9 @@ import { Metodos } from '../../../Metodos/metodos';
 import * as bootstrap from 'bootstrap';
 import Chart from 'chart.js/auto';
 import { ThemeService } from '../../servicios/theme.service';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { Texturas } from '../../interfaces/texturas';
+import { TexturasService } from '../../servicios/maps/texturas.service';
 
 @Component({
   selector: 'app-map-public',
@@ -61,6 +63,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     private proveedoralimentoservice: ProveedoralimentosService,
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService,
     private authService: AuthService,
+    private texturaservice: TexturasService,
     private router: Router,
     private themeService: ThemeService
   ) {
@@ -92,7 +95,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     this.checkGraphButtonVisibility();
     this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
       this.isDarkMode = isDark;
-      console.log('🔹 Modo oscuro activado:', isDark); // <-- Verifica si aparece esto en la consola
+      //console.log('🔹 Modo oscuro activado:', isDark);
     });
   }
   ngOnDestroy() {
@@ -134,26 +137,25 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         });
       }, 500);
     });
-    // ✅ EVENTO UNIFICADO
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      console.log("🟢 Evento click detectado:", e.latlng);
+      //console.log("🟢 Evento click detectado:", e.latlng);
 
       const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
       if (activeLayer) {
-        console.log("🔹 Capa activa:", activeLayer);
+        //console.log("🔹 Capa activa:", activeLayer);
         this.metodos.getFeatureInfo(activeLayer, e.latlng, this.map);
       } else {
-        console.warn("⚠️ No hay capas activas en este momento.");
+        //console.warn("⚠️ No hay capas activas en este momento.");
       }
     });
   }
   toggleSidebar() {
-    console.log("🔹 toggleSidebar() llamado");
-    console.log("🔹 showSidebarButton:", this.showSidebarButton);
+    //console.log("🔹 toggleSidebar() llamado");
+    //console.log("🔹 showSidebarButton:", this.showSidebarButton);
 
     if (this.showSidebarButton) {
       this.sidebarOpen = !this.sidebarOpen;
-      console.log("🔹 sidebarOpen:", this.sidebarOpen);
+      //console.log("🔹 sidebarOpen:", this.sidebarOpen);
 
       if (this.sidebarOpen) {
         this.openSidebarWithLayerData('Textura del Suelo');  // 🔥 Llama esta función aquí
@@ -164,7 +166,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         }
       }
     } else {
-      console.warn("⚠️ showSidebarButton es falso. El panel no se mostrará.");
+      //console.warn("⚠️ showSidebarButton es falso. El panel no se mostrará.");
     }
   }
   isAnyLayerActive(): boolean {
@@ -172,53 +174,61 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       'Textura_suelo_0', 'Textura_suelo_10',
       'Textura_suelo_30', 'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'
     ];
-    console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
+    //console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
     return activeLayers.some(layer => this.activeLayers[layer]);
   }
 
   openSidebarWithLayerData(layerName: string) {
-    // Simular los datos de ejemplo
-    const TexturaBDejemplo = [
-      { value: 9, porcentaje: 1.5 },
-      { value: 8, porcentaje: 0.0 },
-      { value: 7, porcentaje: 23.7 },
-      { value: 6, porcentaje: 51.5 },
-      { value: 4, porcentaje: 22.8 },
-      { value: 3, porcentaje: 0.0 },
-      { value: 1, porcentaje: 0.1 },
-      { value: 0, porcentaje: 0.4 }
-    ];
-    // Mapa de colores según el value
-    const colorMap: { [key: number]: string } = {
-      0: '#ca7173',
-      1: '#430bea',
-      3: '#ffe605',
-      4: '#16efdd',
-      6: '#c7b4ff',
-      7: '#617ece',
-      8: '#073408',
-      9: '#dc1010'
-    };
-    // Actualizar la información en el panel lateral
-    this.layerInfo = {
-      nombre: layerName,
-      descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
-    };
-
-    // Asignar los datos al gráfico
-    this.layerData = TexturaBDejemplo.map((item, index) => ({
-      label: `Valor ${item.value}`,
-      value: item.porcentaje,
-      color: colorMap[item.value] || '#cccccc' // Color por defecto si no hay coincidencia
-    }));
-    // Llamar a la función para mostrar el gráfico
-    setTimeout(() => this.showPieChart(), 300);
-  }
+      const colorMap: { [key: number]: string } = {
+        0: '#ca7173',
+        1: '#430bea',
+        3: '#ffe605',
+        4: '#16efdd',
+        6: '#c7b4ff',
+        7: '#617ece',
+        8: '#073408',
+        9: '#dc1010'
+      };
+    
+      const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
+        'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
+        'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
+        'Textura_suelo_30': () => this.texturaservice.ListarTexturasuelotreinta(),
+        'Textura_suelo_60': () => this.texturaservice.ListarTexturasuelosesenta(),
+        'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
+        'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
+      };
+    
+      this.layerInfo = {
+        nombre: layerName,
+        descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
+      };
+    
+      // Obtener y procesar los datos
+      if (layerMap[layerName]) {
+        layerMap[layerName]().subscribe({
+          next: (data) => {
+            if (data && data.length > 0) {
+              this.layerData = data.map(item => ({
+                label: `Valor ${item.Value}`,
+                value: item.Porcentaje,
+                color: colorMap[item.Value] || '#cccccc'
+              }));
+              setTimeout(() => this.showPieChart(), 300);
+            } else {
+              ////console.warn('No se recibieron datos para la capa:', layerName);
+            }
+          }
+        });
+      } else {
+        ////console.warn('Capa no reconocida:', layerName);
+      }
+    }
 
 
   private showPieChart() {
-    console.log("🔹 showPieChart() llamado");
-    console.log("🔹 Datos para el gráfico:", this.layerData);
+    //console.log("🔹 showPieChart() llamado");
+    //console.log("🔹 Datos para el gráfico:", this.layerData);
 
     if (this.pieChart) {
       this.pieChart.destroy();
@@ -251,12 +261,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           }
         });
 
-        console.log("✅ Gráfico creado con éxito.");
+        //console.log("✅ Gráfico creado con éxito.");
       } else {
-        console.warn("⚠️ No hay datos para mostrar el gráfico.");
+        //console.warn("⚠️ No hay datos para mostrar el gráfico.");
       }
     } else {
-      console.warn("⚠️ No se encontró el canvas para el gráfico de torta.");
+      //console.warn("⚠️ No se encontró el canvas para el gráfico de torta.");
     }
   }
 
@@ -462,7 +472,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   captureMap() {
     const mapElement = document.getElementById('map-private');
     if (!mapElement) {
-      console.error("No se encontró el mapa");
+      //console.error("No se encontró el mapa");
       return;
     }
 
@@ -486,7 +496,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         link.click();
       })
       .catch((error: any) => {
-        console.error('Error al capturar el mapa:', error);
+        //console.error('Error al capturar el mapa:', error);
       });
   }
 

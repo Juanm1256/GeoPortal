@@ -505,7 +505,7 @@ export class Metodos {
       styles: '',
       srs: 'EPSG:4326',
       bbox: map.getBounds().toBBoxString(),
-      width: map.getSize().x.toString(),  // Asegúrate de que el ancho y alto estén en string
+      width: map.getSize().x.toString(),
       height: map.getSize().y.toString(),
       x: Math.floor(map.latLngToContainerPoint(latlng).x).toString(),
       y: Math.floor(map.latLngToContainerPoint(latlng).y).toString(),
@@ -514,8 +514,6 @@ export class Metodos {
     };
 
     const url = wmsBaseUrl + new URLSearchParams(params as any).toString();
-    console.log("🔹 URL generada para GetFeatureInfo:", url);
-    // Solicitud HTTP usando Fetch
     fetch(url)
     
       .then(response => {
@@ -524,13 +522,12 @@ export class Metodos {
         return response.json();
       })
       .then(data => {
-        console.log("📥 Respuesta recibida del servidor:", data);
+        //console.log("📥 Respuesta recibida del servidor:", data);
 
         if (data.features && data.features.length > 0) {
           const feature = data.features[0];
           console.log("✅ Información de la capa:", feature.properties);
 
-          // Filtrar solo valores numéricos válidos
           const chartData = Object.entries(feature.properties)
             .filter(([key, value]) => typeof value === 'number' && value > 0)  // Solo valores numéricos mayores que 0
             .map(([key, value], index) => ({
