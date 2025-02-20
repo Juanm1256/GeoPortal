@@ -1,13 +1,13 @@
 <!-- Contenedor del mapa -->
-<div id="map-private" style="width: 100%; height: 100%;" >
+<div id="map-private" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}" >
   <!-- Panel lateral de herramientas -->
-  <div class="toolbar" [class.showLayers]="isLayersOpen">
+  <div class="toolbar" [class.showLayers]="isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
     <!-- Botón para alternar capas -->
     <button class="tool-btn" (click)="toggleLayers()" title="Capas">
       <i class="bi bi-stack"></i>
     </button>
     <!-- Botones normales (desaparecen cuando se activa capas) -->
-    <div class="tools" *ngIf="!isLayersOpen">
+    <div class="tools" *ngIf="!isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
       <button class="tool-btn" (click)="mapZoomIn()" title="Zoom +">
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -29,6 +29,9 @@
       <button class="tool-btn" (click)="resetMapView()" title="Reset">
         <i class="bi bi-arrow-counterclockwise"></i>
       </button>
+      <button class="tool-btn" (click)="toggleTheme($event)">
+        <i class="bi" [ngClass]="isDarkMode ? 'bi-sun' : 'bi-moon'"></i>
+      </button>
     </div>
     <!-- Botón de regresar (Solo para Administradores) -->
     <button class="tool-btn back-btn" *ngIf="userRole === 'Administrador' && !isLayersOpen" (click)="goBack()"
@@ -42,7 +45,7 @@
     </button>
     <!-- Panel de capas (visible solo cuando se presiona "Capas") -->
     <div class="layer-panel scrollable-layer-panel" *ngIf="isLayersOpen" (mouseover)="restoreLayerButtonStyles()"
-      (wheel)="allowScroll($event)">
+      (wheel)="allowScroll($event)" [ngClass]="{'dark-theme': isDarkMode}">
       <button class="layer-btn" (click)="toggleLayer('cuencas', $event)" data-layer="cuencas">
         <i class="bi bi-layers"></i> <span>Cuencas</span>
       </button>
@@ -109,7 +112,7 @@
 
 </div>
 <!-- Modal de información -->
-<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true">
+<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -131,10 +134,12 @@
   </div>
 </div>
 <!-- Panel lateral derecho para gráficos de torta -->
-<div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen">
+<div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="sidebar-header">
     <h5>Gráfico de Textura del Suelo</h5>
-    <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">✖</button>
+    <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">
+      <i class="bi bi-x"></i>
+    </button>
   </div>
 
   <div class="sidebar-content">
@@ -158,6 +163,6 @@
   </div>
 </div>
 <!-- Botón para mostrar u ocultar el panel lateral (visible solo si las capas están activas) -->
-<button *ngIf="showSidebarButton" id="toggle-sidebar-btn" class="toggle-sidebar-btn" (click)="toggleSidebar()">
+<button *ngIf="showSidebarButton" id="toggle-sidebar-btn" class="toggle-sidebar-btn" (click)="toggleSidebar()" [ngClass]="{'dark-theme': isDarkMode}">
   📊 Gráficos
 </button>
