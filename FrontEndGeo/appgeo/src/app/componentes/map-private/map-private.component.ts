@@ -14,17 +14,26 @@ import Swal from 'sweetalert2';
 import domtoimage from 'dom-to-image';
 import { Metodos } from '../../../Metodos/metodos';
 import * as bootstrap from 'bootstrap';
+import Chart from 'chart.js/auto';
+import { ThemeService } from '../../servicios/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
-
   selector: 'app-map-private',
   imports: [CommonModule],
   templateUrl: './map-private.component.html',
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit, OnDestroy {
+  isDarkMode: boolean = false;
+  themeSubscription!: Subscription;
+  showSidebarButton: boolean = false;  
+  isGraphButtonVisible: boolean = false;
   modalInfo: { key: string; value: string }[] = [];
-
+  sidebarOpen: boolean = false;
+  layerInfo: { nombre: string; descripcion: string } | null = null;
+  layerData: { label: string; value: number; color: string }[] = [];
+  pieChart: any;
   private map!: L.Map;
   private metodos!: Metodos;
   private markerLayer = L.layerGroup();
@@ -32,14 +41,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   private capas: { [key: string]: L.Layer | L.LayerGroup } = {};
   activeLayers: { [key: string]: boolean } = {};
   private marcadorSeleccionado: L.Marker | null = null;
-
   private baseMaps: { [key: string]: L.TileLayer } = {};
   private baseMapNames: Map<L.TileLayer, string> = new Map();
   private activeBaseLayer!: L.TileLayer;
-
   isAccordionOpen = false;
   isLayersOpen = false;
-
   constructor(
     private cap_depservice: CapitalesDepartamentalesService,
     private cuencasService: CuencasService,
@@ -48,14 +54,13 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     private mercadoservices: MercadosService,
     private proveedoralevinesservice: ProveedoralevinesService,
     private proveedoralimentoservice: ProveedoralimentosService,
-    private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService
+    private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService,
+    private themeService: ThemeService
   ) {
-
     this.metodos = new Metodos();
   }
   allowScroll(event: WheelEvent): void {
     const target = event.currentTarget as HTMLElement;
-
     if (target.scrollHeight > target.clientHeight) {
       event.stopPropagation();
     }
@@ -63,6 +68,19 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     (window as any).removeMarker = this.removeMarker.bind(this);
     this.initMap();
+    this.checkGraphButtonVisibility();
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
+      this.isDarkMode = isDark;
+      console.log('🔹 Modo oscuro activado:', isDark); // <-- Verifica si aparece esto en la consola
+    });
+  }
+  ngOnDestroy() {
+    if (this.map) {
+      this.map.remove();
+    }
+    if (this.themeSubscription) {
+      this.themeSubscription.unsubscribe();
+    }
   }
 
   private initMap(): void {
@@ -82,12 +100,9 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.baseMapNames.set(satellite, "Satélite");
     this.baseMapNames.set(topo, "Topográfico");
     this.baseMapNames.set(carto, "Cartográfico");
-
     osm.addTo(this.map);
     this.activeBaseLayer = osm;
-
     L.control.layers(this.baseMaps).addTo(this.map);
-
     this.map.on('baselayerchange', () => {
       setTimeout(() => {
         Object.keys(this.capas).forEach(layerName => {
@@ -100,9 +115,130 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         });
       }, 500);
     });
+    // ✅ EVENTO UNIFICADO
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      console.log("🟢 Evento click detectado:", e.latlng);
+
+      const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
+      if (activeLayer) {
+        console.log("🔹 Capa activa:", activeLayer);
+        this.metodos.getFeatureInfo(activeLayer, e.latlng, this.map);
+      } else {
+        console.warn("⚠️ No hay capas activas en este momento.");
+      }
+    });
+  }
+  toggleSidebar() {
+    console.log("🔹 toggleSidebar() llamado");
+    console.log("🔹 showSidebarButton:", this.showSidebarButton);
+
+    if (this.showSidebarButton) {
+      this.sidebarOpen = !this.sidebarOpen;
+      console.log("🔹 sidebarOpen:", this.sidebarOpen);
+
+      if (this.sidebarOpen) {
+        this.openSidebarWithLayerData('Textura del Suelo');  // 🔥 Llama esta función aquí
+        setTimeout(() => this.showPieChart(), 300);
+      } else {
+        if (this.pieChart) {
+          this.pieChart.destroy();
+        }
+      }
+    } else {
+      console.warn("⚠️ showSidebarButton es falso. El panel no se mostrará.");
+    }
+  }
+  isAnyLayerActive(): boolean {
+    const activeLayers = [
+      'Textura_suelo_0', 'Textura_suelo_10',
+      'Textura_suelo_30', 'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'
+    ];
+    console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
+    return activeLayers.some(layer => this.activeLayers[layer]);
+  }
+
+  openSidebarWithLayerData(layerName: string) {
+    // Simular los datos de ejemplo
+    const TexturaBDejemplo = [
+      { value: 9, porcentaje: 1.5 },
+      { value: 8, porcentaje: 0.0 },
+      { value: 7, porcentaje: 23.7 },
+      { value: 6, porcentaje: 51.5 },
+      { value: 4, porcentaje: 22.8 },
+      { value: 3, porcentaje: 0.0 },
+      { value: 1, porcentaje: 0.1 },
+      { value: 0, porcentaje: 0.4 }
+    ];
+    // Mapa de colores según el value
+    const colorMap: { [key: number]: string } = {
+      0: '#ca7173',
+      1: '#430bea',
+      3: '#ffe605',
+      4: '#16efdd',
+      6: '#c7b4ff',
+      7: '#617ece',
+      8: '#073408',
+      9: '#dc1010'
+    };
+    // Actualizar la información en el panel lateral
+    this.layerInfo = {
+      nombre: layerName,
+      descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
+    };
+
+    // Asignar los datos al gráfico
+    this.layerData = TexturaBDejemplo.map((item, index) => ({
+      label: `Valor ${item.value}`,
+      value: item.porcentaje,
+      color: colorMap[item.value] || '#cccccc' // Color por defecto si no hay coincidencia
+    }));
+    // Llamar a la función para mostrar el gráfico
+    setTimeout(() => this.showPieChart(), 300);
+  }
 
 
-    this.map.on('click', this.consultarInformacionFeature.bind(this));
+  private showPieChart() {
+    console.log("🔹 showPieChart() llamado");
+    console.log("🔹 Datos para el gráfico:", this.layerData);
+
+    if (this.pieChart) {
+      this.pieChart.destroy();
+    }
+
+    const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
+
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+
+      if (ctx && this.layerData.length > 0) {
+        this.pieChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: this.layerData.map(d => d.label),
+            datasets: [{
+              data: this.layerData.map(d => d.value),
+              backgroundColor: this.layerData.map(d => d.color),
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+
+        console.log("✅ Gráfico creado con éxito.");
+      } else {
+        console.warn("⚠️ No hay datos para mostrar el gráfico.");
+      }
+    } else {
+      console.warn("⚠️ No se encontró el canvas para el gráfico de torta.");
+    }
   }
 
 
@@ -114,9 +250,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.isLayersOpen = !this.isLayersOpen;
   }
 
-
   toggleLayer(layerName: string, event: any) {
     const button = event.target.closest('.layer-btn');
+
+    // Cerrar el panel lateral al cambiar de capa
+    this.sidebarOpen = false;
+    if (this.pieChart) this.pieChart.destroy(); // Destruir el gráfico si existe
 
     if (!this.capas[layerName]) {
       switch (layerName) {
@@ -156,29 +295,36 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         case 'Fragmentos_gruesos_suelo':
           this.capas[layerName] = this.metodos.cargarfragmentosgruesossuelo(this.map);
           break;
-        case 'ph_suelo':
+        case 'pH_suelo':
           this.capas[layerName] = this.metodos.cargarph_suelo(this.map);
           break;
-        case 'texturasuelo0':
+        case 'Textura_suelo_0':
           this.capas[layerName] = this.metodos.cargarTexturasuelo0(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
-        case 'texturasuelo10':
+        case 'Textura_suelo_10':
           this.capas[layerName] = this.metodos.cargarTexturasuelo10(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
-        case 'texturasuelo30':
+        case 'Textura_suelo_30':
           this.capas[layerName] = this.metodos.cargarTexturasuelo30(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
-        case 'texturasuelo60':
+        case 'Textura_suelo_60':
           this.capas[layerName] = this.metodos.cargarTexturasuelo60(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
-        case 'texturasuelo100':
+        case 'Textura_suelo_100':
           this.capas[layerName] = this.metodos.cargarTexturasuelo100(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
-        case 'texturasuelo200':
+        case 'Textura_suelo_200':
           this.capas[layerName] = this.metodos.cargarTexturasuelo200(this.map);
+          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
           break;
       }
-      this.map.addLayer(this.capas[layerName]); 
+
+      this.map.addLayer(this.capas[layerName]);
 
       if (this.capas[layerName] instanceof L.TileLayer.WMS) {
         (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
@@ -191,11 +337,22 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       delete this.capas[layerName];
       this.activeLayers[layerName] = false;
       button.classList.remove('active');
-    if (layerName === 'modgene' && this.marcadorSeleccionado) {
-      this.map.removeLayer(this.marcadorSeleccionado);
-      this.marcadorSeleccionado = null;
+
+      if (layerName === 'modgene' && this.marcadorSeleccionado) {
+        this.map.removeLayer(this.marcadorSeleccionado);
+        this.marcadorSeleccionado = null;
+      }
     }
-    }
+
+    this.checkGraphButtonVisibility();
+  }
+
+
+  checkGraphButtonVisibility() {
+    const activeLayers = [
+      'Textura_suelo_0', 'Textura_suelo_10', 'Textura_suelo_30',
+      'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'];
+    this.showSidebarButton = activeLayers.some(layer => this.activeLayers[layer]);
   }
   getUserLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -230,7 +387,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
 
     const customIcon = L.icon({
       iconUrl: 'assets/leaflet/marker-icon-red.png',
-      
+
       iconSize: [32, 40],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
@@ -327,23 +484,23 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
-  
+
         this.markerLayer.clearLayers();
-  
+
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
-  
+
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
-  
+
         this.capas = {};
         this.activeLayers = {};
-  
+
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -351,11 +508,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         });
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
-  
+
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
-  
+
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",
@@ -363,7 +520,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         );
       }
     });
-  } 
+  }
 
   restoreLayerButtonStyles() {
     setTimeout(() => {
@@ -393,7 +550,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
           return response.json();
         } else {
           return response.text().then(text => {
-            
+
           });
         }
       })
@@ -415,7 +572,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       `service=WFS&` +
       `version=1.0.0&` +
       `request=GetFeature&` +
-      `typeName=capas_rastergeo:mod_gen_ajustado&` +
+      `typeName=capas_rastergeo:Mod_general_ajustado&` +
       `outputFormat=application/json&` +
       `srsName=EPSG:4326&` +
       `CQL_FILTER=INTERSECTS(geom, POINT(${latlng.lng} ${latlng.lat}))`;
@@ -423,7 +580,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
-      return; 
+      return;
     }
 
     const customIcon = L.icon({
@@ -462,9 +619,6 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.modalInfo = [];
   }
 
-  ngOnDestroy() {
-    if (this.map) {
-      this.map.remove();
-    }
-  }
+  
+
 }
