@@ -21,5 +21,6 @@ namespace AppGeoPortal.Contexto
         public virtual DbSet<Proveedor_A> ProveedorAlevies { get; set; }
         public virtual DbSet<ProveedorAli> ProveedorAlimentos { get; set; }
         public virtual DbSet<ProveedorAsisTec> ProveedorAsistenciaTecnica { get; set; }
+        public virtual DbSet<Textura> Texturas { get; set; }
     }
 }
