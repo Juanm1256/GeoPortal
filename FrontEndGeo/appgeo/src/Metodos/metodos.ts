@@ -16,28 +16,28 @@ import { ColoresMapaUtil } from '../app/Colores/Colores';
 
 export class Metodos {
 
-  public CargarCapitalesDepartamentales(map: L.Map, capitalesDepartamentalesService: any ): L.LayerGroup {
+  public CargarCapitalesDepartamentales(map: L.Map, capitalesDepartamentalesService: any): L.LayerGroup {
     const layerGroup = L.layerGroup();
 
     capitalesDepartamentalesService.listarTodos().subscribe({
-        next: (cap_dep: CapitalesDepartamentales[]) => {
-            cap_dep.forEach((cap_deps: CapitalesDepartamentales) => {
-                if (cap_deps.geom) {
-                    try {
-                        const geojson = JSON.parse(cap_deps.geom);
+      next: (cap_dep: CapitalesDepartamentales[]) => {
+        cap_dep.forEach((cap_deps: CapitalesDepartamentales) => {
+          if (cap_deps.geom) {
+            try {
+              const geojson = JSON.parse(cap_deps.geom);
 
-                        if (geojson.type === 'Point') {
-                            const [lon, lat] = geojson.coordinates;
+              if (geojson.type === 'Point') {
+                const [lon, lat] = geojson.coordinates;
 
-                            const icono = L.icon({
-                                iconUrl: '../assets/leaflet/marker-icon-2x.png',
-                                iconSize: [32, 32],
-                                iconAnchor: [16, 32],
-                                popupAnchor: [0, -32]
-                            });
+                const icono = L.icon({
+                  iconUrl: '../assets/leaflet/marker-icon-2x.png',
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                  popupAnchor: [0, -32]
+                });
 
-                            const marker = L.marker([lat, lon], { icon: icono })
-                                .bindPopup(`
+                const marker = L.marker([lat, lon], { icon: icono })
+                  .bindPopup(`
                                     <div class="popup-content">
                                         <strong>${cap_deps.cap_dep}</strong>
                                         <br>
@@ -45,16 +45,16 @@ export class Metodos {
                                     </div>
                                 `);
 
-                            layerGroup.addLayer(marker);
-                        }
-                    } catch (error) {
-                        console.error('Error parsing geom:', error);
-                    }
-                }
-            });
+                layerGroup.addLayer(marker);
+              }
+            } catch (error) {
+              console.error('Error parsing geom:', error);
+            }
+          }
+        });
 
-            map.addLayer(layerGroup);
-        }
+        map.addLayer(layerGroup);
+      }
     });
 
     return layerGroup;
@@ -62,7 +62,7 @@ export class Metodos {
 
   public CargarCuencas(maping: L.Map, cuencasService: any): L.LayerGroup {
     const layerGroup = L.layerGroup();
-    
+
     cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
       cuencas.forEach(cuenca => {
         if (cuenca.geom) {
@@ -106,7 +106,7 @@ export class Metodos {
     maping.addLayer(layerGroup);
     return layerGroup;
   }
-  
+
   public Cargarmercados(maping: L.Map, mercadoservices: any): L.Layer {
     const markerCluster = L.markerClusterGroup();
 
@@ -196,52 +196,52 @@ export class Metodos {
 
   public CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): L.Layer {
     const layerGroup = L.layerGroup();
-  
+
     limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
-        lim_muns.forEach(lim_mun => {
-          if (lim_mun.geom) {
-            const geojson = JSON.parse(lim_mun.geom);
-  
-            if (geojson.type === 'MultiPolygon') {
-              const estiloPoligono = {
-                color: '#191b1c',
-                weight: 2,
-                opacity: 1,
-                fillColor: '#64B5F6',
-                fillOpacity: 0
-              };
-  
-              const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
-  
-              const polygon = L.geoJSON(geojson, {
-                style: estiloPoligono,
-                onEachFeature: (feature, layer) => {
-                  layer.bindPopup(`
+      lim_muns.forEach(lim_mun => {
+        if (lim_mun.geom) {
+          const geojson = JSON.parse(lim_mun.geom);
+
+          if (geojson.type === 'MultiPolygon') {
+            const estiloPoligono = {
+              color: '#191b1c',
+              weight: 2,
+              opacity: 1,
+              fillColor: '#64B5F6',
+              fillOpacity: 0
+            };
+
+            const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+
+            const polygon = L.geoJSON(geojson, {
+              style: estiloPoligono,
+              onEachFeature: (feature, layer) => {
+                layer.bindPopup(`
                                 <div class="popup-content">
                                     <h4>${lim_mun.dep}</h4>
                                     <p>Provincia: ${lim_mun.prov}</p>
                                     <p>Municipio: ${lim_mun.mun}</p>
                                 </div>
                             `);
-  
-                  layer.on({
-                    mouseup: (e) => {
-                      const layer = e.target;
-                      layer.setStyle({
-                        weight: 3,
-                        fillOpacity: 0.2,
-                        color: colorMouseOver,
-                        fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
-                      });
-                    }
-                  });
-                }
-              });
-  
-              layerGroup.addLayer(polygon);
-            }
+
+                layer.on({
+                  mouseup: (e) => {
+                    const layer = e.target;
+                    layer.setStyle({
+                      weight: 3,
+                      fillOpacity: 0.2,
+                      color: colorMouseOver,
+                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                    });
+                  }
+                });
+              }
+            });
+
+            layerGroup.addLayer(polygon);
           }
-        });
+        }
+      });
     });
     maping.addLayer(layerGroup);
     return layerGroup;
@@ -302,8 +302,8 @@ export class Metodos {
     });
     return layerGroup;
   }
-  
-  public  CargarProveedoresAsistenciaTecnica(maping: L.Map, proveedorasistenciatecnicaservice: any): L.Layer {
+
+  public CargarProveedoresAsistenciaTecnica(maping: L.Map, proveedorasistenciatecnicaservice: any): L.Layer {
     const layerGroup = L.layerGroup();
 
     proveedorasistenciatecnicaservice.listarTodos().subscribe((proveedores: ProveedorAsistenciaTecnica[]) => {
@@ -347,152 +347,209 @@ export class Metodos {
   }
 
   public CargarRedCaminos(maping: L.Map): L.Layer {
-      const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
-        layers: 'capas_geo:red_caminos',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(redCaminos);
-      return redCaminos;
-    }
-    
-    
+    const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
+      layers: 'capas_geo:red_caminos',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(redCaminos);
+    return redCaminos;
+  }
+
+
   public CargarRedHidrica(maping: L.Map): L.Layer {
-      const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
-        layers: 'capas_geo:red_hidrica',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(redHidrica);
-      return redHidrica;
-    }
-  
+    const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
+      layers: 'capas_geo:red_hidrica',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(redHidrica);
+    return redHidrica;
+  }
+
   public cargarmodgene(maping: L.Map): L.Layer {
     const modgene = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Mod_general_ajustado',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(modgene);
-      return modgene;
-    }
-  
+      layers: 'capas_rastergeo:Mod_general_ajustado',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(modgene);
+    return modgene;
+  }
+
   public cargarfragmentosgruesossuelo(maping: L.Map): L.Layer {
     const Fragmentos_gruesos_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Fragmentos_gruesos_suelo',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(Fragmentos_gruesos_suelo);
-      return Fragmentos_gruesos_suelo;
-    }
+      layers: 'capas_rastergeo:Fragmentos_gruesos_suelo',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Fragmentos_gruesos_suelo);
+    return Fragmentos_gruesos_suelo;
+  }
   public cargarph_suelo(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:pH_suelo',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
-    
+      layers: 'capas_rastergeo:pH_suelo',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
+
   public cargarTexturasuelo0(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_0',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
-  
+      layers: 'capas_rastergeo:Textura_suelo_0',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
+
   public cargarTexturasuelo10(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_10',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
+      layers: 'capas_rastergeo:Textura_suelo_10',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
   public cargarTexturasuelo30(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_30',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
+      layers: 'capas_rastergeo:Textura_suelo_30',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
   public cargarTexturasuelo60(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_60',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
+      layers: 'capas_rastergeo:Textura_suelo_60',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
   public cargarTexturasuelo100(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_100',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
+      layers: 'capas_rastergeo:Textura_suelo_100',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
   public cargarTexturasuelo200(maping: L.Map): L.Layer {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-        layers: 'capas_rastergeo:Textura_suelo_200',
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        opacity: 0.8,
-        crossOrigin: true,
-      });
-  
-      maping.addLayer(pH_suelo);
-      return pH_suelo;
-    }
+      layers: 'capas_rastergeo:Textura_suelo_200',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(pH_suelo);
+    return pH_suelo;
+  }
+  public getFeatureInfo(layerName: string, latlng: L.LatLng, map: L.Map): void {
+    const wmsBaseUrl = "http://localhost:8085/geoserver/capas_rastergeo/wms?";
+    const params = {
+      service: 'WMS',
+      version: '1.1.1',
+      request: 'GetFeatureInfo',
+      layers: `capas_rastergeo:${layerName}`,
+      styles: '',
+      srs: 'EPSG:4326',
+      bbox: map.getBounds().toBBoxString(),
+      width: map.getSize().x.toString(),  // Asegúrate de que el ancho y alto estén en string
+      height: map.getSize().y.toString(),
+      x: Math.floor(map.latLngToContainerPoint(latlng).x).toString(),
+      y: Math.floor(map.latLngToContainerPoint(latlng).y).toString(),
+      query_layers: `capas_rastergeo:${layerName}`,
+      info_format: 'application/json'
+    };
+
+    const url = wmsBaseUrl + new URLSearchParams(params as any).toString();
+    console.log("🔹 URL generada para GetFeatureInfo:", url);
+    // Solicitud HTTP usando Fetch
+    fetch(url)
+    
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        
+        return response.json();
+      })
+      .then(data => {
+        console.log("📥 Respuesta recibida del servidor:", data);
+
+        if (data.features && data.features.length > 0) {
+          const feature = data.features[0];
+          console.log("✅ Información de la capa:", feature.properties);
+
+          // Filtrar solo valores numéricos válidos
+          const chartData = Object.entries(feature.properties)
+            .filter(([key, value]) => typeof value === 'number' && value > 0)  // Solo valores numéricos mayores que 0
+            .map(([key, value], index) => ({
+              label: key,
+              value: value as number,
+              color: "#36A2EB"
+            }));
+
+          console.log("📊 Datos para el gráfico:", chartData);
+
+          if (chartData.length > 0) {
+            (window as any).openSidebarWithLayerData(feature.properties.nombre || 'Capa Desconocida', chartData);
+          } else {
+            console.warn("⚠️ No hay datos numéricos disponibles para el gráfico.");
+          }
+        } else {
+          console.warn("⚠️ No hay datos disponibles para esta ubicación.");
+        }
+      })
+      .catch(error => console.error("❌ Error al obtener la información de la capa:", error));
+  }
 }
