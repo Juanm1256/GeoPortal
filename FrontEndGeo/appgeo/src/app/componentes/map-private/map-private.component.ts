@@ -74,7 +74,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.checkGraphButtonVisibility();
     this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
       this.isDarkMode = isDark;
-      console.log('🔹 Modo oscuro activado:', isDark);
+      //console.log('🔹 Modo oscuro activado:', isDark);
     });
   }
   ngOnDestroy() {
@@ -119,11 +119,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       }, 500);
     });
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      console.log("🟢 Evento click detectado:", e.latlng);
+      //console.log("🟢 Evento click detectado:", e.latlng);
 
       const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
       if (activeLayer) {
-        console.log("🔹 Capa activa:", activeLayer);
+        //console.log("🔹 Capa activa:", activeLayer);
         this.metodos.getFeatureInfo(activeLayer, e.latlng, this.map);
       } else {
         //console.warn("⚠️ No hay capas activas en este momento.");
@@ -131,13 +131,13 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     });
   }
   toggleSidebar() {
-    console.log("🔹 toggleSidebar() llamado");
-    console.log("🔹 showSidebarButton:", this.showSidebarButton);
+    //console.log("🔹 toggleSidebar() llamado");
+    //console.log("🔹 showSidebarButton:", this.showSidebarButton);
     
 
     if (this.showSidebarButton) {
       this.sidebarOpen = !this.sidebarOpen;
-      console.log("🔹 sidebarOpen:", this.sidebarOpen);
+      //console.log("🔹 sidebarOpen:", this.sidebarOpen);
 
       if (this.sidebarOpen) {
         this.openSidebarWithLayerData('Textura del Suelo'); 
@@ -156,7 +156,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       'Textura_suelo_0', 'Textura_suelo_10',
       'Textura_suelo_30', 'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'
     ];
-    console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
+    //console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
     return activeLayers.some(layer => this.activeLayers[layer]);
   }
 
@@ -181,7 +181,6 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
     };
   
-    // Actualizar la información en el panel lateral
     this.layerInfo = {
       nombre: layerName,
       descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
@@ -199,19 +198,19 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
             }));
             setTimeout(() => this.showPieChart(), 300);
           } else {
-            console.warn('No se recibieron datos para la capa:', layerName);
+            //console.warn('No se recibieron datos para la capa:', layerName);
           }
         }
       });
     } else {
-      console.warn('Capa no reconocida:', layerName);
+      //console.warn('Capa no reconocida:', layerName);
     }
   }
 
 
   private showPieChart() {
-    console.log("🔹 showPieChart() llamado");
-    console.log("🔹 Datos para el gráfico:", this.layerData);
+    //console.log("🔹 showPieChart() llamado");
+    //console.log("🔹 Datos para el gráfico:", this.layerData);
 
     if (this.pieChart) {
       this.pieChart.destroy();
@@ -265,9 +264,8 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   toggleLayer(layerName: string, event: any) {
     const button = event.target.closest('.layer-btn');
 
-    // Cerrar el panel lateral al cambiar de capa
     this.sidebarOpen = false;
-    if (this.pieChart) this.pieChart.destroy(); // Destruir el gráfico si existe
+    if (this.pieChart) this.pieChart.destroy();
 
     if (!this.capas[layerName]) {
       switch (layerName) {
@@ -312,27 +310,27 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
           break;
         case 'Textura_suelo_0':
           this.capas[layerName] = this.metodos.cargarTexturasuelo0(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName);
           break;
         case 'Textura_suelo_10':
           this.capas[layerName] = this.metodos.cargarTexturasuelo10(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName);
           break;
         case 'Textura_suelo_30':
           this.capas[layerName] = this.metodos.cargarTexturasuelo30(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName);
           break;
         case 'Textura_suelo_60':
           this.capas[layerName] = this.metodos.cargarTexturasuelo60(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName);
           break;
         case 'Textura_suelo_100':
           this.capas[layerName] = this.metodos.cargarTexturasuelo100(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName); 
           break;
         case 'Textura_suelo_200':
           this.capas[layerName] = this.metodos.cargarTexturasuelo200(this.map);
-          this.openSidebarWithLayerData(layerName); // Mostrar gráfico de torta
+          this.openSidebarWithLayerData(layerName);
           break;
       }
 
@@ -630,7 +628,4 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   cerrarModal() {
     this.modalInfo = [];
   }
-
-  
-
 }
