@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, of } from 'rxjs';
+import { catchError, Observable, of, throwError } from 'rxjs';
 import { Texturas } from '../../interfaces/texturas';
 
 @Injectable({
@@ -11,46 +11,38 @@ export class TexturasService {
   private API = 'https://localhost:7297/api';
   constructor(private http: HttpClient) { }
 
-  ListarTexturasuelocero(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelocero").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+  private handleError(error: any): Observable<never> {
+    console.error('Error en la petición:', error);
+    return throwError(() => new Error('Error en la petición al servidor'));
   }
-  ListarTexturasuelodiez(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelodiez").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+
+  private getTexturas(endpoint: string): Observable<Texturas[]> {
+    return this.http.get<Texturas[]>(`${this.API}/Texturas/${endpoint}`).pipe(
+      catchError(this.handleError)
+    );
   }
-  ListarTexturasuelotreinta(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelotreinta").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+
+  ListarTexturasuelocero(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelocero');
   }
-  ListarTexturasuelosesenta(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelosesenta").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+
+  ListarTexturasuelodiez(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelodiez');
   }
-  ListarTexturasuelocien(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelocien").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+
+  ListarTexturasuelotreinta(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelotreinta');
   }
-  ListarTexturasuelodoscientos(): Observable<Texturas[]>{
-    return this.http.get<Texturas[]>(this.API+'/Texturas/'+"ListarTexturasuelodoscientos").pipe(
-          catchError(error => {
-            return of();
-          })
-        );
+
+  ListarTexturasuelosesenta(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelosesenta');
+  }
+
+  ListarTexturasuelocien(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelocien');
+  }
+
+  ListarTexturasuelodoscientos(): Observable<Texturas[]> {
+    return this.getTexturas('ListarTexturasuelodoscientos');
   }
 }

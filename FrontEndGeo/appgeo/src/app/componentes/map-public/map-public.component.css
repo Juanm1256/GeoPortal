@@ -1,141 +1,130 @@
-/* Contenedor de herramientas */
-.toolbar {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  }
-  
-  /* Botones de herramientas */
-  .tool-btn {
-    background: #2C5384;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
-    transition: background 0.3s;
-    position: relative;
-  }
-  
-  /* Ocultar el texto de los botones normales */
-  .tool-btn span {
-    display: none;
-  }
-  
-  /* Mostrar el texto cuando el mouse pasa sobre el botón */
-  .tool-btn:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 50px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 5px 8px;
-    border-radius: 5px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  
-  /* Íconos */
-  .tool-btn i {
-    font-size: 18px;
-  }
-  
-  /* Cambio de color al pasar el mouse */
-  .tool-btn:hover {
-    background: #2C5384;
-  }
-  
-  /* Panel de capas oculto por defecto */
-  .layer-panel {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    
-  }
-  
-  /* Mostrar el panel de capas cuando "Capas" está activo */
-  .showLayers .tools {
-    display: none;
-  }
-  
-  .showLayers .layer-panel {
-    display: flex;
-  }
-  
-  /* Botones de capas */
-  .layer-btn {
-    background: #2C5384;
-    border: none;
-    padding: 8px 10px;
-    cursor: pointer;
-    font-size: 14px;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 5px;
-  }
-  
-  /* Mantener visible el texto en la lista de capas */
-  .layer-btn span {
-    display: inline;
-  }
-  
-  /* Efecto hover */
-  .layer-btn:hover {
-    background: #0f2e4f;
-  }
-  
-  /* Mantener los botones en verde cuando la capa está activa */
-  .layer-btn.active {
-    background: #28a745 !important;
-  }
-  #map-private {
-    position: absolute;
-    overflow: hidden;
-  }
-  .back-btn {
-    background-color: #2C5384;
-    color: white;
-   
-  }
-  
-  .back-btn:hover {
-    background-color: #0c273c; /* Un poco más oscuro al pasar el mouse */
-  }
-  /* 🔴 Botón de Cerrar Sesión */
-.logout-btn {
-    background: #d9534f; /* Rojo */
-  }
-  
-  .logout-btn:hover {
-    background: #c9302c; /* Rojo más oscuro */
-  }
-/* Panel de capas con scroll */
-.scrollable-layer-panel {
-  max-height: 600px; /* Ajusta la altura máxima según necesidad */
-  overflow-y: auto;  /* Habilita el scroll vertical */
-  scrollbar-width: thin; /* Estilo de scroll en Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Color del scroll en Firefox */
+#map-private {
+  position: absolute;
+  overflow: hidden;
 }
 
-/* Personalización del scrollbar en WebKit (Chrome, Edge, Safari) */
+/* 🔴 Botón de Cerrar Sesión */
+.logout-btn {
+  background: #d9534f;
+  /* Rojo */
+}
+/* ============================= */
+/*          MODO CLARO           */
+/* ============================= */
+
+/* Contenedor de herramientas */
+.toolbar {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Botones de herramientas */
+.tool-btn {
+  background: #2C5384;
+  border: none;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  transition: background 0.3s;
+  position: relative;
+}
+
+.tool-btn span {
+  display: none;
+}
+
+/* Mostrar el texto cuando el mouse pasa sobre el botón */
+.tool-btn:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 50px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tool-btn i {
+  font-size: 18px;
+}
+
+/* Cambio de color al pasar el mouse */
+.tool-btn:hover {
+  background: #142944;
+}
+
+/* Panel de capas oculto por defecto */
+.layer-panel {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Mostrar el panel de capas cuando "Capas" está activo */
+.showLayers .tools {
+  display: none;
+}
+
+.showLayers .layer-panel {
+  display: flex;
+}
+
+/* Botones de capas */
+.layer-btn {
+  background: #2C5384;
+  border: none;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 5px;
+}
+
+/* Mantener visible el texto en la lista de capas */
+.layer-btn span {
+  display: inline;
+}
+
+/* Efecto hover */
+.layer-btn:hover {
+  background: #0f2e4f;
+}
+
+/* Mantener los botones en verde cuando la capa está activa */
+.layer-btn.active {
+  background: #28a745 !important;
+}
+
+/* Panel de capas con scroll */
+.scrollable-layer-panel {
+  max-height: 450px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+/* Scroll en WebKit */
 .scrollable-layer-panel::-webkit-scrollbar {
   width: 8px;
 }
@@ -151,4 +140,233 @@
 
 .scrollable-layer-panel::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Panel lateral derecho */
+.sidebar-right {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 500px;
+  height: 100vh;
+  background: #ffffff;
+  border-left: 3px solid #2C5384;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+  transition: right 0.4s ease;
+  z-index: 1001;
+  overflow-y: auto;
+}
+
+/* Mostrar el panel cuando está abierto */
+.sidebar-right.open {
+  right: 0;
+}
+
+/* Botón de cierre del panel lateral */
+.sidebar-header {
+  background: #2C5384;
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  border-bottom: 1px solid white;
+  position: relative;
+}
+
+.sidebar-header .btn-close {
+  all: unset;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+/* Hover */
+.sidebar-header .btn-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenido del panel */
+.sidebar-content {
+  padding: 20px;
+}
+
+/* Botón para mostrar el panel lateral */
+.toggle-sidebar-btn {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  background: #2C5384;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 18px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s;
+}
+
+.toggle-sidebar-btn:hover {
+  background: #142944;
+}
+
+/* Gráfico de torta */
+canvas#pieChart {
+  width: 100%;
+  max-width: 450px;
+  margin: 20px auto;
+  display: block;
+}
+
+/* Leyenda del gráfico */
+.chart-legend {
+  margin-top: 20px;
+  border-top: 2px solid #2C5384;
+  padding-top: 15px;
+}
+
+.chart-container {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 1px 0;
+}
+
+canvas#pieChart {
+  width: 80% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Leyenda de datos */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ============================= */
+/*        MODO NOCTURNO         */
+/* ============================= */
+
+.dark-theme {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+/* Herramientas en modo nocturno */
+.dark-theme .toolbar {
+  background: rgba(50, 50, 50, 0.9);
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+.dark-theme .tool-btn {
+  background: #2C5384;
+  color: #ffffff;
+}
+
+.dark-theme .tool-btn:hover {
+  background: #0f3e78;
+}
+
+/* Botones de capas en modo nocturno */
+.dark-theme .layer-btn {
+  background: #2C5384;
+  color: white;
+}
+
+.dark-theme .layer-btn:hover {
+  background: #0f3e78;
+}
+
+.dark-theme .layer-btn.active {
+  background: #2C5384 !important;
+}
+
+/* Panel lateral derecho en modo nocturno */
+.dark-theme .sidebar-right {
+  background: #1e1e1e;
+  color: #ffffff;
+  border-left: 3px solid #2C5384;
+}
+
+.dark-theme .sidebar-header {
+  background: #2C5384;
+  color: #ffffff;
+  border-bottom: 1px solid #2C5384;
+}
+
+.dark-theme .sidebar-header .btn-close {
+  color: #ffffff !important;
+}
+
+.dark-theme .sidebar-header .btn-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark-theme .toggle-sidebar-btn {
+  background: #2C5384;
+  color: white;
+}
+
+.dark-theme .toggle-sidebar-btn:hover {
+  background: #0f3e78;
+}
+
+/* Gráfico de torta en modo nocturno */
+.dark-theme canvas#pieChart {
+  border: 2px solid #2C5384;
+}
+
+/* Leyenda del gráfico en modo nocturno */
+.dark-theme .chart-legend {
+  border-top: 2px solid #2C5384;
+}
+
+/* Scroll en modo nocturno */
+.dark-theme .scrollable-layer-panel::-webkit-scrollbar-thumb {
+  background: #2C5384;
+}
+
+.dark-theme .scrollable-layer-panel::-webkit-scrollbar-thumb:hover {
+  background: #0f3e78;
+}
+
+/* Leyenda de datos */
+.dark-theme .legend-color {
+  border: 1px solid #ffffff;
 }

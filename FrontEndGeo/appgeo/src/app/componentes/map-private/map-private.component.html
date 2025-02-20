@@ -1,13 +1,14 @@
 <!-- Contenedor del mapa -->
-<div id="map-private" style="width: 100%; height: 100%;">
+<div id="map-private" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}">
   <!-- Panel lateral de herramientas -->
-  <div class="toolbar" [class.showLayers]="isLayersOpen">
+  <div class="toolbar" [class.showLayers]="isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
     <!-- Botón para alternar capas -->
     <button class="tool-btn" (click)="toggleLayers()" title="Capas">
       <i class="bi bi-stack"></i>
     </button>
+
     <!-- Botones normales (desaparecen cuando se activa capas) -->
-    <div class="tools" *ngIf="!isLayersOpen">
+    <div class="tools" *ngIf="!isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
       <button class="tool-btn" (click)="mapZoomIn()" title="Zoom +">
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -30,73 +31,78 @@
         <i class="bi bi-arrow-counterclockwise"></i>
       </button>
     </div>
-      <!-- Panel de capas (visible solo cuando se presiona "Capas") -->
-      <div class="layer-panel scrollable-layer-panel" *ngIf="isLayersOpen" (mouseover)="restoreLayerButtonStyles()" (wheel)="allowScroll($event)">
-        <button class="layer-btn" (click)="toggleLayer('cuencas', $event)" data-layer="cuencas">
-          <i class="bi bi-layers"></i> <span>Cuencas</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('mercados', $event)" data-layer="mercados">
-          <i class="bi bi-shop"></i> <span>Mercados</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('capitalesDepartamentales', $event)"
-          data-layer="capitalesDepartamentales">
-          <i class="bi bi-geo-alt"></i> <span>Capitales Departamentales</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('limitesDepartamentales', $event)"
-          data-layer="limitesDepartamentales">
-          <i class="bi bi-map"></i> <span>Límites Departamentales</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('limitesMunicipales', $event)" data-layer="limitesMunicipales">
-          <i class="bi bi-map-fill"></i> <span>Límites Municipales</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('proveedorAlevines', $event)" data-layer="proveedorAlevines">
-          <i class="bi bi-box"></i> <span>Alevines</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('proveedorAlimentos', $event)" data-layer="proveedorAlimentos">
-          <i class="bi bi-basket"></i> <span>Alimentos</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('proveedorAsistenciaTecnica', $event)"
-          data-layer="proveedorAsistenciaTecnica">
-          <i class="bi bi-tools"></i> <span>Asistencia Técnica</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('redCaminos', $event)" data-layer="redCaminos">
-          <i class="bi bi-signpost-2"></i> <span>Red de Caminos</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('redHidrica', $event)" data-layer="redHidrica">
-          <i class="bi bi-water"></i> <span>Red Hídrica</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('modgene', $event)" data-layer="modgene">
-          <i class="bi bi-layers"></i> <span>Mod General Ajustado</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('Fragmentos_gruesos_suelo', $event)" data-layer="Fragmentos_gruesos_suelo">
-          <i class="bi bi-layers"></i> <span>Fragmentos Gruesos Suelo</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('ph_suelo', $event)" data-layer="ph_suelo">
-          <i class="bi bi-layers"></i> <span>PH Suelo</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo0', $event)" data-layer="texturasuelo0">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 0</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo10', $event)" data-layer="texturasuelo10">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 10</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo30', $event)" data-layer="texturasuelo30">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 30</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo60', $event)" data-layer="texturasuelo60">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 60</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo100', $event)" data-layer="texturasuelo100">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 100</span>
-        </button>
-        <button class="layer-btn" (click)="toggleLayer('texturasuelo200', $event)" data-layer="texturasuelo200">
-          <i class="bi bi-layers"></i> <span>Textura Suelo 200</span>
-        </button>
-      </div>
+
+    <!-- Panel de capas (visible solo cuando se presiona "Capas") -->
+    <div class="layer-panel scrollable-layer-panel" *ngIf="isLayersOpen" (mouseover)="restoreLayerButtonStyles()"
+      (wheel)="allowScroll($event)" [ngClass]="{'dark-theme': isDarkMode}">
+      <button class="layer-btn" (click)="toggleLayer('cuencas', $event)" data-layer="cuencas">
+        <i class="bi bi-layers"></i> <span>Cuencas</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('mercados', $event)" data-layer="mercados">
+        <i class="bi bi-shop"></i> <span>Mercados</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('capitalesDepartamentales', $event)"
+        data-layer="capitalesDepartamentales">
+        <i class="bi bi-geo-alt"></i> <span>Capitales Departamentales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('limitesDepartamentales', $event)"
+        data-layer="limitesDepartamentales">
+        <i class="bi bi-map"></i> <span>Límites Departamentales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('limitesMunicipales', $event)" data-layer="limitesMunicipales">
+        <i class="bi bi-map-fill"></i> <span>Límites Municipales</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAlevines', $event)" data-layer="proveedorAlevines">
+        <i class="bi bi-box"></i> <span>Alevines</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAlimentos', $event)" data-layer="proveedorAlimentos">
+        <i class="bi bi-basket"></i> <span>Alimentos</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('proveedorAsistenciaTecnica', $event)"
+        data-layer="proveedorAsistenciaTecnica">
+        <i class="bi bi-tools"></i> <span>Asistencia Técnica</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('redCaminos', $event)" data-layer="redCaminos">
+        <i class="bi bi-signpost-2"></i> <span>Red de Caminos</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('redHidrica', $event)" data-layer="redHidrica">
+        <i class="bi bi-water"></i> <span>Red Hídrica</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('modgene', $event)" data-layer="modgene">
+        <i class="bi bi-layers"></i> <span>Mod General Ajustado</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Fragmentos_gruesos_suelo', $event)"
+        data-layer="Fragmentos_gruesos_suelo">
+        <i class="bi bi-layers"></i> <span>Fragmentos Gruesos Suelo</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('pH_suelo', $event)" data-layer="ph_suelo">
+        <i class="bi bi-layers"></i> <span>PH Suelo</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_0', $event)" data-layer="texturasuelo0">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 0</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_10', $event)" data-layer="texturasuelo10">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 10</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_30', $event)" data-layer="texturasuelo30">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 30</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_60', $event)" data-layer="texturasuelo60">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 60</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_100', $event)" data-layer="texturasuelo100">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 100</span>
+      </button>
+      <button class="layer-btn" (click)="toggleLayer('Textura_suelo_200', $event)" data-layer="texturasuelo200">
+        <i class="bi bi-layers"></i> <span>Textura Suelo 200</span>
+      </button>
     </div>
   </div>
+</div>
+
 <!-- Modal de información -->
-<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true">
+<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true"
+  [ngClass]="{'dark-theme': isDarkMode}">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -117,3 +123,39 @@
     </div>
   </div>
 </div>
+
+<!-- Panel lateral derecho para gráficos de torta -->
+<div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}">
+  <div class="sidebar-header">
+    <h5>Gráfico de Textura del Suelo</h5>
+    <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">
+      <i class="bi bi-x"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-content">
+    <!-- Datos generales -->
+    <div *ngIf="layerInfo">
+      <p><strong>Nombre de la Capa:</strong> {{ layerInfo.nombre }}</p>
+      <p><strong>Descripción:</strong> {{ layerInfo.descripcion }}</p>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- Leyenda de datos -->
+    <div class="chart-legend" *ngIf="layerData.length > 0">
+      <div *ngFor="let item of layerData" class="legend-item">
+        <span class="legend-color" [style.background]="item.color"></span>
+        <span>{{ item.label }}: {{ item.value }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botón para mostrar u ocultar el panel lateral (visible solo si las capas están activas) -->
+<button *ngIf="showSidebarButton" id="toggle-sidebar-btn" class="toggle-sidebar-btn" (click)="toggleSidebar()"
+  [ngClass]="{'dark-theme': isDarkMode}">
+  📊 Gráficos
+</button>

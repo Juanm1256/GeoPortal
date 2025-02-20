@@ -1,4 +1,4 @@
 export interface Texturas {
-    Value: DoubleRange,
-    Porcentaje: DoubleRange
+    Value: number,
+    Porcentaje: number
 }
