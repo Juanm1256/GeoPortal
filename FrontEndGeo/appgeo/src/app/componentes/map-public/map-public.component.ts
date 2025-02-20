@@ -80,6 +80,10 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
   }
+  toggleTheme(event: Event) {
+    event.preventDefault();
+    this.themeService.toggleTheme();
+  }
   ngOnInit(): void {
     this.userRole = this.authService.getUserRole();
 
