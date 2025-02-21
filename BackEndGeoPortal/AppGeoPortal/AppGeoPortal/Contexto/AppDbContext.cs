@@ -1,4 +1,5 @@
 ﻿using AppGeoPortal.Modelos;
+using AppGeoPortal.Modelos.DTO;
 using AppGeoPortal.Modelos.Maps;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,5 +23,6 @@ namespace AppGeoPortal.Contexto
         public virtual DbSet<ProveedorAli> ProveedorAlimentos { get; set; }
         public virtual DbSet<ProveedorAsisTec> ProveedorAsistenciaTecnica { get; set; }
         public virtual DbSet<Textura> Texturas { get; set; }
+        public virtual DbSet<DepartamentoInfoDTO> DepartamentoInfoDTOs { get; set; }
     }
 }

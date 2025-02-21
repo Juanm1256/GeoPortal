@@ -16,9 +16,11 @@ import { Metodos } from '../../../Metodos/metodos';
 import * as bootstrap from 'bootstrap';
 import Chart from 'chart.js/auto';
 import { ThemeService } from '../../servicios/theme.service';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { TexturasService } from '../../servicios/maps/texturas.service';
 import { Texturas } from '../../interfaces/texturas';
+import { DepartamentoinfoService } from '../../servicios/maps/departamentoinfo.service';
+import { DepartamentoInforDTO } from '../../interfaces/departamento-infor-dto';
 
 @Component({
   selector: 'app-map-private',
@@ -32,6 +34,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   showSidebarButton: boolean = false;  
   isGraphButtonVisible: boolean = false;
   modalInfo: { key: string; value: string }[] = [];
+  showModal = false;
   sidebarOpen: boolean = false;
   layerInfo: { nombre: string; descripcion: string } | null = null;
   layerData: { label: string; value: number; color: string }[] = [];
@@ -58,6 +61,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     private proveedoralimentoservice: ProveedoralimentosService,
     private proveedorasistenciatecnicaservice: ProveedorasistenciatecnicaService,
     private texturaservice: TexturasService,
+    private departamentoService: DepartamentoinfoService,
     private themeService: ThemeService
   ) {
     this.metodos = new Metodos();
@@ -68,14 +72,17 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
   }
-  ngOnInit(): void {
-    (window as any).removeMarker = this.removeMarker.bind(this);
-    this.initMap();
-    this.checkGraphButtonVisibility();
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
-      this.isDarkMode = isDark;
-      //console.log('🔹 Modo oscuro activado:', isDark);
-    });
+  async ngOnInit(): Promise<void> {
+    try {
+      (window as any).removeMarker = this.removeMarker.bind(this);
+      await this.initMap();
+      this.checkGraphButtonVisibility();
+      this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
+        this.isDarkMode = isDark;
+      });
+    } catch (error) {
+      //console.error('Error en la inicialización:', error);
+    }
   }
   ngOnDestroy() {
     if (this.map) {
@@ -86,50 +93,81 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }
   }
 
-  private initMap(): void {
-    this.map = L.map('map-private', {
-      center: [-16.54529, -64.7400],
-      zoom: 6,
-      zoomControl: false
-    });
+  private async initMap(): Promise<void> {
+    try {
+      this.map = L.map('map-private', {
+        center: [-16.54529, -64.7400],
+        zoom: 6,
+        zoomControl: false
+      });
+  
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
+      const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+      const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
+      const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 });
+  
+      this.baseMaps = { "Mapa OSM": osm, "Satélite": satellite, "Topográfico": topo, "Cartográfico": carto };
+      this.baseMapNames.set(osm, "Mapa OSM");
+      this.baseMapNames.set(satellite, "Satélite");
+      this.baseMapNames.set(topo, "Topográfico");
+      this.baseMapNames.set(carto, "Cartográfico");
+  
+      await new Promise<void>((resolve) => {
+        osm.on('load', () => resolve());
+        osm.addTo(this.map);
+      });
+  
+      this.activeBaseLayer = osm;
+      L.control.layers(this.baseMaps).addTo(this.map);
+      this.setupMapEventListeners();
+    } catch (error) {
+      //console.error('Error al inicializar el mapa:', error);
+      throw error;
+    }
+  }
 
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
-    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
-    const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 });
-
-    this.baseMaps = { "Mapa OSM": osm, "Satélite": satellite, "Topográfico": topo, "Cartográfico": carto };
-    this.baseMapNames.set(osm, "Mapa OSM");
-    this.baseMapNames.set(satellite, "Satélite");
-    this.baseMapNames.set(topo, "Topográfico");
-    this.baseMapNames.set(carto, "Cartográfico");
-    osm.addTo(this.map);
-    this.activeBaseLayer = osm;
-    L.control.layers(this.baseMaps).addTo(this.map);
-    this.map.on('baselayerchange', () => {
-      setTimeout(() => {
-        Object.keys(this.capas).forEach(layerName => {
-          if (this.capas[layerName]) {
-            this.map.addLayer(this.capas[layerName]);
-            if (this.capas[layerName] instanceof L.TileLayer.WMS) {
-              (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
+  private setupMapEventListeners(): void {
+    this.map.on('baselayerchange', async () => {
+      try {
+        await new Promise<void>((resolve) => {
+          setTimeout(async () => {
+            for (const layerName of Object.keys(this.capas)) {
+              if (this.capas[layerName]) {
+                this.map.addLayer(this.capas[layerName]);
+                if (this.capas[layerName] instanceof L.TileLayer.WMS) {
+                  (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
+                }
+              }
             }
-          }
+            resolve();
+          }, 500);
         });
-      }, 500);
+      } catch (error) {
+        //console.error('Error al cambiar la capa base:', error);
+      }
     });
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      //console.log("🟢 Evento click detectado:", e.latlng);
-
+  
+    this.map.on('click', async (e: L.LeafletMouseEvent) => {
       const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
       if (activeLayer) {
-        //console.log("🔹 Capa activa:", activeLayer);
-        this.metodos.getFeatureInfo(activeLayer, e.latlng, this.map);
-      } else {
-        //console.warn("⚠️ No hay capas activas en este momento.");
+        try {
+          this.map.on('click', async (e: L.LeafletMouseEvent) => {
+            const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
+            if (activeLayer) {
+              try {
+                await this.consultarInformacionFeature(e);
+              } catch (error) {
+                //console.error('Error al obtener información de la característica:', error);
+              }
+            }
+          });
+        } catch (error) {
+          //console.error('Error al obtener información de la característica:', error);
+        }
       }
     });
   }
+
   toggleSidebar() {
     //console.log("🔹 toggleSidebar() llamado");
     //console.log("🔹 showSidebarButton:", this.showSidebarButton);
@@ -160,67 +198,62 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     return activeLayers.some(layer => this.activeLayers[layer]);
   }
 
-  openSidebarWithLayerData(layerName: string) {
-    const colorMap: { [key: number]: string } = {
-      0: '#ca7173',
-      1: '#430bea',
-      3: '#ffe605',
-      4: '#16efdd',
-      6: '#c7b4ff',
-      7: '#617ece',
-      8: '#073408',
-      9: '#dc1010'
-    };
+  async openSidebarWithLayerData(layerName: string): Promise<void> {
+    try {
+      const colorMap: { [key: number]: string } = {
+        0: '#ca7173',
+        1: '#430bea',
+        3: '#ffe605',
+        4: '#16efdd',
+        6: '#c7b4ff',
+        7: '#617ece',
+        8: '#073408',
+        9: '#dc1010'
+      };
   
-    const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
-      'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
-      'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
-      'Textura_suelo_30': () => this.texturaservice.ListarTexturasuelotreinta(),
-      'Textura_suelo_60': () => this.texturaservice.ListarTexturasuelosesenta(),
-      'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
-      'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
-    };
+      const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
+        'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
+        'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
+        'Textura_suelo_30': () => this.texturaservice.ListarTexturasuelotreinta(),
+        'Textura_suelo_60': () => this.texturaservice.ListarTexturasuelosesenta(),
+        'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
+        'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
+      };
   
-    this.layerInfo = {
-      nombre: layerName,
-      descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
-    };
+      this.layerInfo = {
+        nombre: layerName,
+        descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
+      };
   
-    // Obtener y procesar los datos
-    if (layerMap[layerName]) {
-      layerMap[layerName]().subscribe({
-        next: (data) => {
-          if (data && data.length > 0) {
-            this.layerData = data.map(item => ({
-              label: `Valor ${item.Value}`,
-              value: item.Porcentaje,
-              color: colorMap[item.Value] || '#cccccc'
-            }));
-            setTimeout(() => this.showPieChart(), 300);
-          } else {
-            //console.warn('No se recibieron datos para la capa:', layerName);
-          }
+      if (layerMap[layerName]) {
+        const data = await firstValueFrom(layerMap[layerName]());
+        if (data && data.length > 0) {
+          this.layerData = data.map(item => ({
+            label: `Valor ${item.Value}`,
+            value: item.Porcentaje,
+            color: colorMap[item.Value] || '#cccccc'
+          }));
+          await this.showPieChart();
         }
-      });
-    } else {
-      //console.warn('Capa no reconocida:', layerName);
+      }
+    } catch (error) {
+      //console.error('Error al abrir el panel lateral:', error);
     }
   }
 
 
-  private showPieChart() {
-    //console.log("🔹 showPieChart() llamado");
-    //console.log("🔹 Datos para el gráfico:", this.layerData);
-
-    if (this.pieChart) {
-      this.pieChart.destroy();
-    }
-
-    const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
-
-    if (canvas) {
+  private async showPieChart(): Promise<void> {
+    try {
+      if (this.pieChart) {
+        this.pieChart.destroy();
+      }
+  
+      const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
+      if (!canvas) {
+        throw new Error('No se encontró el canvas para el gráfico');
+      }
+  
       const ctx = canvas.getContext('2d');
-
       if (ctx && this.layerData.length > 0) {
         this.pieChart = new Chart(ctx, {
           type: 'pie',
@@ -242,13 +275,9 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
             }
           }
         });
-
-        //console.log("✅ Gráfico creado con éxito.");
-      } else {
-        //console.warn("⚠️ No hay datos para mostrar el gráfico.");
       }
-    } else {
-      //console.warn("⚠️ No se encontró el canvas para el gráfico de torta.");
+    } catch (error) {
+      //console.error('Error al mostrar el gráfico:', error);
     }
   }
 
@@ -261,100 +290,122 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.isLayersOpen = !this.isLayersOpen;
   }
 
-  toggleLayer(layerName: string, event: any) {
+  async toggleLayer(layerName: string, event: any): Promise<void> {
     const button = event.target.closest('.layer-btn');
-
     this.sidebarOpen = false;
     if (this.pieChart) this.pieChart.destroy();
+  
+    try {
+      if (!this.capas[layerName]) {
+        const layer = await this.loadLayer(layerName);
+        if (layer) {
+          this.capas[layerName] = layer;
+          this.map.addLayer(this.capas[layerName]);
+  
+          if (this.capas[layerName] instanceof L.TileLayer.WMS) {
+            (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
+          }
+  
+          this.activeLayers[layerName] = true;
+          button.classList.add('active');
+  
+          if (layerName.startsWith('Textura_suelo_')) {
+            await this.openSidebarWithLayerData(layerName);
+          }
+        }
+      } else {
+        this.map.removeLayer(this.capas[layerName]);
+        delete this.capas[layerName];
+        this.activeLayers[layerName] = false;
+        button.classList.remove('active');
+  
+        if (layerName === 'modgene' && this.marcadorSeleccionado) {
+          this.map.removeLayer(this.marcadorSeleccionado);
+          this.marcadorSeleccionado = null;
+        }
+      }
+  
+      this.checkGraphButtonVisibility();
+    } catch (error) {
+      //console.error(`Error al alternar la capa ${layerName}:`, error);
+    }
+  }
 
-    if (!this.capas[layerName]) {
+  private async loadLayer(layerName: string): Promise<L.Layer | L.LayerGroup> {
+    try {
+      let layer: L.Layer | L.LayerGroup;
+      
       switch (layerName) {
         case 'cuencas':
-          this.capas[layerName] = this.metodos.CargarCuencas(this.map, this.cuencasService);
+          layer = await this.metodos.CargarCuencas(this.map, this.cuencasService);
           break;
         case 'mercados':
-          this.capas[layerName] = this.metodos.Cargarmercados(this.map, this.mercadoservices);
+          layer = await this.metodos.Cargarmercados(this.map, this.mercadoservices);
           break;
         case 'capitalesDepartamentales':
-          this.capas[layerName] = this.metodos.CargarCapitalesDepartamentales(this.map, this.cap_depservice);
+          layer = await this.metodos.CargarCapitalesDepartamentales(this.map, this.cap_depservice);
           break;
         case 'limitesDepartamentales':
-          this.capas[layerName] = this.metodos.CargarLimitesDepartamentales(this.map, this.limitesdepservice);
+          layer = await this.metodos.CargarLimitesDepartamentales(this.map, this.limitesdepservice);
           break;
         case 'limitesMunicipales':
-          this.capas[layerName] = this.metodos.CargarLimitesMunicipales(this.map, this.limitesmuservice);
+          layer = await this.metodos.CargarLimitesMunicipales(this.map, this.limitesmuservice);
           break;
         case 'proveedorAlevines':
-          this.capas[layerName] = this.metodos.CargarProveedorAlevines(this.map, this.proveedoralevinesservice);
+          layer = await this.metodos.CargarProveedorAlevines(this.map, this.proveedoralevinesservice);
           break;
         case 'proveedorAlimentos':
-          this.capas[layerName] = this.metodos.CargarProveedorAlimentos(this.map, this.proveedoralimentoservice);
+          layer = await this.metodos.CargarProveedorAlimentos(this.map, this.proveedoralimentoservice);
           break;
         case 'proveedorAsistenciaTecnica':
-          this.capas[layerName] = this.metodos.CargarProveedoresAsistenciaTecnica(this.map, this.proveedorasistenciatecnicaservice);
+          layer = await this.metodos.CargarProveedoresAsistenciaTecnica(this.map, this.proveedorasistenciatecnicaservice);
           break;
         case 'redCaminos':
-          this.capas[layerName] = this.metodos.CargarRedCaminos(this.map);
+          layer = await this.metodos.CargarRedCaminos(this.map);
           break;
         case 'redHidrica':
-          this.capas[layerName] = this.metodos.CargarRedHidrica(this.map);
+          layer = await this.metodos.CargarRedHidrica(this.map);
           break;
         case 'modgene':
-          this.capas[layerName] = this.metodos.cargarmodgene(this.map);
+          layer = await this.metodos.cargarmodgene(this.map);
           break;
         case 'Fragmentos_gruesos_suelo':
-          this.capas[layerName] = this.metodos.cargarfragmentosgruesossuelo(this.map);
+          layer = await this.metodos.cargarfragmentosgruesossuelo(this.map);
           break;
         case 'pH_suelo':
-          this.capas[layerName] = this.metodos.cargarph_suelo(this.map);
+          layer = await this.metodos.cargarph_suelo(this.map);
           break;
         case 'Textura_suelo_0':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo0(this.map);
-          this.openSidebarWithLayerData(layerName);
+          layer = await this.metodos.cargarTexturasuelo0(this.map);
           break;
         case 'Textura_suelo_10':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo10(this.map);
-          this.openSidebarWithLayerData(layerName);
+          layer = await this.metodos.cargarTexturasuelo10(this.map);
           break;
         case 'Textura_suelo_30':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo30(this.map);
-          this.openSidebarWithLayerData(layerName);
+          layer = await this.metodos.cargarTexturasuelo30(this.map);
           break;
         case 'Textura_suelo_60':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo60(this.map);
-          this.openSidebarWithLayerData(layerName);
+          layer = await this.metodos.cargarTexturasuelo60(this.map);
           break;
         case 'Textura_suelo_100':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo100(this.map);
-          this.openSidebarWithLayerData(layerName); 
+          layer = await this.metodos.cargarTexturasuelo100(this.map);
           break;
         case 'Textura_suelo_200':
-          this.capas[layerName] = this.metodos.cargarTexturasuelo200(this.map);
-          this.openSidebarWithLayerData(layerName);
+          layer = await this.metodos.cargarTexturasuelo200(this.map);
           break;
+        default:
+          throw new Error(`Capa no reconocida: ${layerName}`);
       }
 
-      this.map.addLayer(this.capas[layerName]);
-
-      if (this.capas[layerName] instanceof L.TileLayer.WMS) {
-        (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
+      if (!layer) {
+        throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
 
-      this.activeLayers[layerName] = true;
-      button.classList.add('active');
-    } else {
-      this.map.removeLayer(this.capas[layerName]);
-      delete this.capas[layerName];
-      this.activeLayers[layerName] = false;
-      button.classList.remove('active');
-
-      if (layerName === 'modgene' && this.marcadorSeleccionado) {
-        this.map.removeLayer(this.marcadorSeleccionado);
-        this.marcadorSeleccionado = null;
-      }
+      return layer;
+    } catch (error) {
+      //console.error(`Error al cargar la capa ${layerName}:`, error);
+      throw error;
     }
-
-    this.checkGraphButtonVisibility();
   }
 
 
@@ -364,11 +415,18 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'];
     this.showSidebarButton = activeLayers.some(layer => this.activeLayers[layer]);
   }
-  getUserLocation() {
-    navigator.geolocation.getCurrentPosition((position) => {
+  
+  async getUserLocation(): Promise<void> {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      
       const { latitude, longitude } = position.coords;
       this.map.setView([latitude, longitude], 15);
-    });
+    } catch (error) {
+      //console.error('Error al obtener la ubicación del usuario:', error);
+    }
   }
 
   mapZoomIn() {
@@ -390,7 +448,6 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.map.addLayer(this.activeBaseLayer);
   }
 
-  /*** MARCADORES ***/
   addCustomMarker() {
     const center = this.map.getCenter();
     const { lat, lng } = center;
@@ -450,35 +507,36 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     this.markers = this.markers.filter(m => m !== marker);
   }
 
-  captureMap() {
+  async captureMap(): Promise<void> {
     const mapElement = document.getElementById('map-private');
     if (!mapElement) {
-      console.error("No se encontró el mapa");
+      //console.error("No se encontró el mapa");
       return;
     }
-
-    const width = mapElement.scrollWidth;
-    const height = mapElement.scrollHeight;
-    const scaleFactor = Math.max(window.devicePixelRatio || 1, 1);
-    domtoimage.toPng(mapElement, {
-      quality: 1,
-      bgcolor: '#fff',
-      style: {
-        transform: `scale(${scaleFactor})`,
-        'transform-origin': 'top left',
-        width: `${width * scaleFactor}px`,
-        height: `${height * scaleFactor}px`
-      }
-    })
-      .then((dataUrl: string) => {
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `mapa_${new Date().getTime()}.png`;
-        link.click();
-      })
-      .catch((error: any) => {
-        console.error('Error al capturar el mapa:', error);
+  
+    try {
+      const width = mapElement.scrollWidth;
+      const height = mapElement.scrollHeight;
+      const scaleFactor = Math.max(window.devicePixelRatio || 1, 1);
+      
+      const dataUrl = await domtoimage.toPng(mapElement, {
+        quality: 1,
+        bgcolor: '#fff',
+        style: {
+          transform: `scale(${scaleFactor})`,
+          'transform-origin': 'top left',
+          width: `${width * scaleFactor}px`,
+          height: `${height * scaleFactor}px`
+        }
       });
+  
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `mapa_${new Date().getTime()}.png`;
+      link.click();
+    } catch (error) {
+      //console.error('Error al capturar el mapa:', error);
+    }
   }
 
   resetMapView() {
@@ -543,50 +601,31 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
-  consultarInformacionFeature(event: L.LeafletMouseEvent) {
+  async consultarInformacionFeature(event: L.LeafletMouseEvent) {
     if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
+      console.warn("⚠️ La capa 'modgene' no está activada. No se ejecutará la consulta.");
       return;
     }
-
+  
     const latlng = event.latlng;
-    const url = this.construirUrlGetFeatureInfo(latlng, this.map.getBounds());
-
-
-    fetch(url)
-      .then(response => {
-        const contentType = response.headers.get('content-type');
-
-        if (contentType && contentType.includes('application/json')) {
-          return response.json();
-        } else {
-          return response.text().then(text => {
-
-          });
-        }
-      })
-      .then(data => {
-        if (data?.features?.length > 0) {
-          const feature = data.features[0];
-
-          this.mostrarModalInformacion(feature.properties);
-
-          this.agregarMarcador(latlng, feature.properties);
+    this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
+      .subscribe({
+        next: (data) => {
+          if (data && data.length > 0) {
+            const departamentoInfo = data[0];
+            this.mostrarModalInformacion(departamentoInfo);
+  
+            this.agregarMarcador(latlng, departamentoInfo);
+          } else {
+            //console.log('⚠️ No se encontró información en esta ubicación');
+          }
+        },
+        error: (error) => {
+          //console.error('❌ Error al consultar información:', error);
         }
       });
   }
 
-
-
-  construirUrlGetFeatureInfo(latlng: L.LatLng, bbox: L.LatLngBounds): string {
-    return `http://localhost:8085/geoserver/capas_rastergeo/ows?` +
-      `service=WFS&` +
-      `version=1.0.0&` +
-      `request=GetFeature&` +
-      `typeName=capas_rastergeo:Mod_general_ajustado&` +
-      `outputFormat=application/json&` +
-      `srsName=EPSG:4326&` +
-      `CQL_FILTER=INTERSECTS(geom, POINT(${latlng.lng} ${latlng.lat}))`;
-  }
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
@@ -610,22 +649,22 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       .openPopup();
   }
 
-  mostrarModalInformacion(propiedades: { [key: string]: any }) {
-    this.modalInfo = Object.entries(propiedades).map(([key, value]) => ({
-      key,
-      value: value !== null ? value.toString() : 'N/A'
-    }));
+  mostrarModalInformacion(propiedades: any) {
+    this.modalInfo = [
+      { key: 'Cuenca', value: propiedades.CuencaPunto || 'N/A' },
+      { key: 'Departamento', value: propiedades.Departamento || 'N/A' },
+      { key: 'Municipio', value: propiedades.MunicipioPunto || 'N/A' },
+      { key: 'Número de Mercados', value: propiedades.NumeroMercados?.toString() || 'N/A' },
+      { key: 'Número de Municipios', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
+      { key: 'Número de Provincias', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
+      { key: 'Provincia', value: propiedades.ProvinciaPunto || 'N/A' }
+    ];
 
-    setTimeout(() => {
-      const modalElement = document.getElementById('datosModal');
-      if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-      }
-    }, 200);
+    this.showModal = true;
   }
 
   cerrarModal() {
+    this.showModal = false;
     this.modalInfo = [];
   }
 }

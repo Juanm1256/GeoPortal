@@ -42,30 +42,30 @@ namespace AppGeoPortal
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIBibliografia", Version = "v1" });
-            //    var jwtSecurityScheme = new OpenApiSecurityScheme
-            //    {
-            //        BearerFormat = "JWT",
-            //        Name = "Authorization",
-            //        In = ParameterLocation.Header,
-            //        Type = SecuritySchemeType.Http,
-            //        Scheme = JwtBearerDefaults.AuthenticationScheme,
-            //        Description = "Enter your JWT Access Token",
-            //        Reference = new OpenApiReference
-            //        {
-            //            Id = JwtBearerDefaults.AuthenticationScheme,
-            //            Type = ReferenceType.SecurityScheme
-            //        }
-            //    };
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIBibliografia", Version = "v1" });
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    BearerFormat = "JWT",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    Description = "Enter your JWT Access Token",
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
 
-            //    c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-            //    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //    {
-            //        { jwtSecurityScheme, new string[] { "Bearer" } }
-            //    });
-            //});
+                c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { jwtSecurityScheme, new string[] { "Bearer" } }
+                });
+            });
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseLazyLoadingProxies().UseNpgsql(
@@ -87,6 +87,8 @@ namespace AppGeoPortal
             services.AddScoped<IProveedorAsisTecContrato, Proveedor_AsistTecLogic>();
             services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
             services.AddScoped<ITexturaContrato, TexturaLogic>();
+            services.AddScoped<IObtenerInformacionDepartamentoContrato, ObtenerInformacionDepartamentoLogic>();
+
             services.AddCors(options => options.AddPolicy("AllowWebApp",
                     builder => builder.AllowAnyOrigin()
                    .AllowAnyMethod()
@@ -124,8 +126,8 @@ namespace AppGeoPortal
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppGeoPortal API"));
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppGeoPortal API"));
             }
 
             app.UseCors("AllowWebApp");

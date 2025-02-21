@@ -101,24 +101,35 @@
 </div>
 
 <!-- Modal de información -->
-<div class="modal fade" id="datosModal" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true"
-  [ngClass]="{'dark-theme': isDarkMode}">
-  <div class="modal-dialog">
+<div class="modal fade" 
+     id="datosModal" 
+     [class.show]="showModal" 
+     [style.display]="showModal ? 'block' : 'none'"
+     tabindex="-1" 
+     aria-labelledby="datosModalLabel" 
+     aria-hidden="true"
+     (click)="cerrarModal()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="datosModalLabel">Información de la Capa</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title" id="datosModalLabel">Información de Departamento</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
       </div>
       <div class="modal-body">
-        <ul *ngIf="modalInfo && modalInfo.length > 0; else sinDatos">
-          <li *ngFor="let dato of modalInfo">{{ dato.key }}: {{ dato.value }}</li>
-        </ul>
+        <table class="table" *ngIf="modalInfo && modalInfo.length > 0; else sinDatos">
+          <tbody>
+            <tr *ngFor="let dato of modalInfo">
+              <th>{{ dato.key }}</th>
+              <td>{{ dato.value }}</td>
+            </tr>
+          </tbody>
+        </table>
         <ng-template #sinDatos>
-          <p>No hay datos disponibles.</p>
+          <p>No hay información disponible para esta ubicación.</p>
         </ng-template>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
       </div>
     </div>
   </div>

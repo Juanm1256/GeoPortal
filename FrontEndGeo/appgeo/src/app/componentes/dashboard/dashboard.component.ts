@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { forkJoin, Subscription } from 'rxjs';
+import { firstValueFrom, forkJoin, Subscription } from 'rxjs';
 import { UsuariosService } from '../../servicios/usuarios.service';
 import { RolesService } from '../../servicios/roles.service';
 import { CapitalesDepartamentalesService } from '../../servicios/maps/capitales-departamentales.service';
@@ -21,7 +21,7 @@ import { ThemeService } from '../../servicios/theme.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
@@ -49,89 +49,139 @@ export class DashboardComponent implements OnInit {
     private themeService: ThemeService
   ) {}
 
-  ngOnInit(): void {
-    Chart.register(...registerables);
-    this.cargarDatos();
-    // 🔹 Suscribirse al servicio de modo oscuro
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      (isDark) => {
-        this.isDarkMode = isDark;
-      }
-    );
+  async ngOnInit(): Promise<void> {
+    try {
+      Chart.register(...registerables);
+      
+      this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+        isDark => this.isDarkMode = isDark
+      );
+
+      await this.cargarDatos();
+      // Removemos la actualización del gráfico de aquí
+    } catch (error) {
+      console.error('Error en la inicialización:', error);
+      this.isLoading = false;
+    }
   }
 
-  cargarDatos() {
-    forkJoin([
-      this.usuarioService.ListarTodos(),
-      this.rolesService.ListarTodos(),
-      this.capDepService.listarTodos(),
-      this.cuencasService.listarTodos(),
-      this.limitesDepService.listarTodos(),
-      this.limitesMunService.listarTodos(),
-      this.mercadosService.listarTodos(),
-      this.proveedorAlevinesService.listarTodos(),
-      this.proveedorAlimentosService.listarTodos(),
-      this.proveedorAsistenciaService.listarTodos()
-    ]).subscribe(([usuarios, roles, ...capas]) => {
-      this.totalUsuarios = usuarios.length;
-      this.totalRoles = roles.length;
-      this.totalCapas = capas.length;
-
-      this.cantidadPorCapa = [
-        { nombre: 'Capitales Departamentales', cantidad: capas[0].length },
-        { nombre: 'Cuencas', cantidad: capas[1].length },
-        { nombre: 'Límites Departamentales', cantidad: capas[2].length },
-        { nombre: 'Límites Municipales', cantidad: capas[3].length },
-        { nombre: 'Mercados', cantidad: capas[4].length },
-        { nombre: 'Proveedores de Alevines', cantidad: capas[5].length },
-        { nombre: 'Proveedores de Alimentos', cantidad: capas[6].length },
-        { nombre: 'Proveedores de Asistencia Técnica', cantidad: capas[7].length }
-      ];
-
-      this.usuarios = usuarios;
-      this.roles = roles;
-      this.ultimoUsuario = usuarios[usuarios.length - 1];
-
-      this.isLoading = false; // Ocultar el spinner cuando los datos estén listos
-
-      // 🔹 Esperamos un pequeño tiempo para que el DOM termine de renderizar el canvas antes de actualizar el gráfico
-      setTimeout(() => {
-        this.updateChart();
-      }, 500);
-    });
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      // Esperamos a que los datos estén cargados y el canvas esté disponible
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await this.actualizarGrafico();
+    } catch (error) {
+      console.error('Error al inicializar la vista:', error);
+    }
   }
 
-  updateChart() {
-    if (!this.chartCanvas) {
-      console.warn('⚠️ No se encontró el canvas del gráfico.');
-      return;
+  async cargarDatos(): Promise<void> {
+    try {
+      const [
+        usuarios,
+        roles,
+        capitalesDep,
+        cuencas,
+        limitesDep,
+        limitesMun,
+        mercados,
+        proveedoresAlevines,
+        proveedoresAlimentos,
+        proveedoresAsistencia
+      ] = await firstValueFrom(forkJoin([
+        this.usuarioService.ListarTodos(),
+        this.rolesService.ListarTodos(),
+        this.capDepService.listarTodos(),
+        this.cuencasService.listarTodos(),
+        this.limitesDepService.listarTodos(),
+        this.limitesMunService.listarTodos(),
+        this.mercadosService.listarTodos(),
+        this.proveedorAlevinesService.listarTodos(),
+        this.proveedorAlimentosService.listarTodos(),
+        this.proveedorAsistenciaService.listarTodos()
+      ]));
+
+      this.procesarDatos(
+        usuarios,
+        roles,
+        [
+          capitalesDep,
+          cuencas,
+          limitesDep,
+          limitesMun,
+          mercados,
+          proveedoresAlevines,
+          proveedoresAlimentos,
+          proveedoresAsistencia
+        ]
+      );
+    } catch (error) {
+      console.error('Error al cargar los datos:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private procesarDatos(usuarios: any[], roles: any[], capas: any[]): void {
+    this.totalUsuarios = usuarios.length;
+    this.totalRoles = roles.length;
+    this.totalCapas = capas.length;
+
+    this.cantidadPorCapa = [
+      { nombre: 'Capitales Departamentales', cantidad: capas[0].length },
+      { nombre: 'Cuencas', cantidad: capas[1].length },
+      { nombre: 'Límites Departamentales', cantidad: capas[2].length },
+      { nombre: 'Límites Municipales', cantidad: capas[3].length },
+      { nombre: 'Mercados', cantidad: capas[4].length },
+      { nombre: 'Proveedores de Alevines', cantidad: capas[5].length },
+      { nombre: 'Proveedores de Alimentos', cantidad: capas[6].length },
+      { nombre: 'Proveedores de Asistencia Técnica', cantidad: capas[7].length }
+    ];
+
+    this.usuarios = usuarios;
+    this.roles = roles;
+    this.ultimoUsuario = usuarios[usuarios.length - 1];
+  }
+
+
+  private async actualizarGrafico(): Promise<void> {
+    if (!this.chartCanvas?.nativeElement) {
+      //console.warn('Canvas no disponible todavía, reintentando...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return this.actualizarGrafico();
     }
 
-    const canvas = this.chartCanvas.nativeElement;
-    const ctx = canvas.getContext('2d');
+    try {
+      const canvas = this.chartCanvas.nativeElement;
+      const ctx = canvas.getContext('2d');
 
-    if (!ctx) {
-      console.warn('⚠️ No se pudo obtener el contexto del canvas.');
-      return;
-    }
-
-    if (this.chartInstance) {
-      this.chartInstance.destroy();
-    }
-
-    this.chartInstance = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: this.cantidadPorCapa.map(capa => capa.nombre),
-        datasets: [{
-          data: this.cantidadPorCapa.map(capa => capa.cantidad),
-          backgroundColor: ['#FF5733', '#28A745', '#1399e1', '#FFC300', '#8E44AD', '#3498DB', '#E74C3C', '#2ECC71']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
+      if (!ctx) {
+        throw new Error('No se pudo obtener el contexto del canvas.');
       }
-    });
+
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+
+      this.chartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: this.cantidadPorCapa.map(capa => capa.nombre),
+          datasets: [{
+            data: this.cantidadPorCapa.map(capa => capa.cantidad),
+            backgroundColor: [
+              '#FF5733', '#28A745', '#1399e1', '#FFC300',
+              '#8E44AD', '#3498DB', '#E74C3C', '#2ECC71'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    } catch (error) {
+      //console.error('Error al actualizar el gráfico:', error);
+    }
   }
 }

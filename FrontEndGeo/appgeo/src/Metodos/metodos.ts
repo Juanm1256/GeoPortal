@@ -16,7 +16,7 @@ import { ColoresMapaUtil } from '../app/Colores/Colores';
 
 export class Metodos {
 
-  public CargarCapitalesDepartamentales(map: L.Map, capitalesDepartamentalesService: any): L.LayerGroup {
+  async CargarCapitalesDepartamentales(map: L.Map, capitalesDepartamentalesService: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     capitalesDepartamentalesService.listarTodos().subscribe({
@@ -48,7 +48,7 @@ export class Metodos {
                 layerGroup.addLayer(marker);
               }
             } catch (error) {
-              console.error('Error parsing geom:', error);
+              //console.error('Error parsing geom:', error);
             }
           }
         });
@@ -60,7 +60,7 @@ export class Metodos {
     return layerGroup;
   }
 
-  public CargarCuencas(maping: L.Map, cuencasService: any): L.LayerGroup {
+  async CargarCuencas(maping: L.Map, cuencasService: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
@@ -107,7 +107,7 @@ export class Metodos {
     return layerGroup;
   }
 
-  public Cargarmercados(maping: L.Map, mercadoservices: any): L.Layer {
+  async Cargarmercados(maping: L.Map, mercadoservices: any): Promise<L.Layer> {
     const markerCluster = L.markerClusterGroup();
 
     mercadoservices.listarTodos().subscribe((mercados: Mercados[]) => {
@@ -141,7 +141,7 @@ export class Metodos {
     return markerCluster;
   }
 
-  public CargarLimitesDepartamentales(maping: L.Map, limitesdepservice: any): L.Layer {
+  async CargarLimitesDepartamentales(maping: L.Map, limitesdepservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     limitesdepservice.listarTodos().subscribe((lim_deps: LimitesDepartamentales[]) => {
@@ -194,7 +194,7 @@ export class Metodos {
     return layerGroup;
   }
 
-  public CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): L.Layer {
+  async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
@@ -246,7 +246,7 @@ export class Metodos {
     maping.addLayer(layerGroup);
     return layerGroup;
   }
-  public CargarProveedorAlevines(maping: L.Map, proveedoralevinesservice: any): L.Layer {
+  async CargarProveedorAlevines(maping: L.Map, proveedoralevinesservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     proveedoralevinesservice.listarTodos().subscribe((proveedores: ProveedorAlevines[]) => {
@@ -274,7 +274,7 @@ export class Metodos {
     });
     return layerGroup;
   }
-  public CargarProveedorAlimentos(maping: L.Map, proveedoralimentoservice: any): L.Layer {
+  async CargarProveedorAlimentos(maping: L.Map, proveedoralimentoservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     proveedoralimentoservice.listarTodos().subscribe((datos: ProveedorAlimentos[]) => {
@@ -303,7 +303,7 @@ export class Metodos {
     return layerGroup;
   }
 
-  public CargarProveedoresAsistenciaTecnica(maping: L.Map, proveedorasistenciatecnicaservice: any): L.Layer {
+  async CargarProveedoresAsistenciaTecnica(maping: L.Map, proveedorasistenciatecnicaservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
     proveedorasistenciatecnicaservice.listarTodos().subscribe((proveedores: ProveedorAsistenciaTecnica[]) => {
@@ -337,7 +337,7 @@ export class Metodos {
               layerGroup.addLayer(marker);
             }
           } catch (error) {
-            console.error(`Error procesando proveedor ${proveedor.gid}:`, error);
+            //console.error(`Error procesando proveedor ${proveedor.gid}:`, error);
           }
         }
       });
@@ -346,7 +346,7 @@ export class Metodos {
     return layerGroup;
   }
 
-  public CargarRedCaminos(maping: L.Map): L.Layer {
+  async CargarRedCaminos(maping: L.Map): Promise<L.Layer> {
     const redCaminos = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
       layers: 'capas_geo:red_caminos',
       format: 'image/png',
@@ -361,7 +361,7 @@ export class Metodos {
   }
 
 
-  public CargarRedHidrica(maping: L.Map): L.Layer {
+  async CargarRedHidrica(maping: L.Map): Promise<L.Layer> {
     const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {
       layers: 'capas_geo:red_hidrica',
       format: 'image/png',
@@ -375,7 +375,7 @@ export class Metodos {
     return redHidrica;
   }
 
-  public cargarmodgene(maping: L.Map): L.Layer {
+  async cargarmodgene(maping: L.Map): Promise<L.Layer> {
     const modgene = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Mod_general_ajustado',
       format: 'image/png',
@@ -389,7 +389,7 @@ export class Metodos {
     return modgene;
   }
 
-  public cargarfragmentosgruesossuelo(maping: L.Map): L.Layer {
+  async cargarfragmentosgruesossuelo(maping: L.Map): Promise<L.Layer> {
     const Fragmentos_gruesos_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Fragmentos_gruesos_suelo',
       format: 'image/png',
@@ -402,7 +402,7 @@ export class Metodos {
     maping.addLayer(Fragmentos_gruesos_suelo);
     return Fragmentos_gruesos_suelo;
   }
-  public cargarph_suelo(maping: L.Map): L.Layer {
+  async cargarph_suelo(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:pH_suelo',
       format: 'image/png',
@@ -416,7 +416,7 @@ export class Metodos {
     return pH_suelo;
   }
 
-  public cargarTexturasuelo0(maping: L.Map): L.Layer {
+  async cargarTexturasuelo0(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_0',
       format: 'image/png',
@@ -430,7 +430,7 @@ export class Metodos {
     return pH_suelo;
   }
 
-  public cargarTexturasuelo10(maping: L.Map): L.Layer {
+  async cargarTexturasuelo10(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_10',
       format: 'image/png',
@@ -443,7 +443,7 @@ export class Metodos {
     maping.addLayer(pH_suelo);
     return pH_suelo;
   }
-  public cargarTexturasuelo30(maping: L.Map): L.Layer {
+  async cargarTexturasuelo30(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_30',
       format: 'image/png',
@@ -456,7 +456,7 @@ export class Metodos {
     maping.addLayer(pH_suelo);
     return pH_suelo;
   }
-  public cargarTexturasuelo60(maping: L.Map): L.Layer {
+  async cargarTexturasuelo60(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_60',
       format: 'image/png',
@@ -469,7 +469,7 @@ export class Metodos {
     maping.addLayer(pH_suelo);
     return pH_suelo;
   }
-  public cargarTexturasuelo100(maping: L.Map): L.Layer {
+  async cargarTexturasuelo100(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_100',
       format: 'image/png',
@@ -482,7 +482,7 @@ export class Metodos {
     maping.addLayer(pH_suelo);
     return pH_suelo;
   }
-  public cargarTexturasuelo200(maping: L.Map): L.Layer {
+  async cargarTexturasuelo200(maping: L.Map): Promise<L.Layer> {
     const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_200',
       format: 'image/png',
@@ -494,59 +494,5 @@ export class Metodos {
 
     maping.addLayer(pH_suelo);
     return pH_suelo;
-  }
-  public getFeatureInfo(layerName: string, latlng: L.LatLng, map: L.Map): void {
-    const wmsBaseUrl = "http://localhost:8085/geoserver/capas_rastergeo/wms?";
-    const params = {
-      service: 'WMS',
-      version: '1.1.1',
-      request: 'GetFeatureInfo',
-      layers: `capas_rastergeo:${layerName}`,
-      styles: '',
-      srs: 'EPSG:4326',
-      bbox: map.getBounds().toBBoxString(),
-      width: map.getSize().x.toString(),
-      height: map.getSize().y.toString(),
-      x: Math.floor(map.latLngToContainerPoint(latlng).x).toString(),
-      y: Math.floor(map.latLngToContainerPoint(latlng).y).toString(),
-      query_layers: `capas_rastergeo:${layerName}`,
-      info_format: 'application/json'
-    };
-
-    const url = wmsBaseUrl + new URLSearchParams(params as any).toString();
-    fetch(url)
-    
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        
-        return response.json();
-      })
-      .then(data => {
-        //console.log("📥 Respuesta recibida del servidor:", data);
-
-        if (data.features && data.features.length > 0) {
-          const feature = data.features[0];
-          console.log("✅ Información de la capa:", feature.properties);
-
-          const chartData = Object.entries(feature.properties)
-            .filter(([key, value]) => typeof value === 'number' && value > 0)  // Solo valores numéricos mayores que 0
-            .map(([key, value], index) => ({
-              label: key,
-              value: value as number,
-              color: "#36A2EB"
-            }));
-
-          console.log("📊 Datos para el gráfico:", chartData);
-
-          if (chartData.length > 0) {
-            (window as any).openSidebarWithLayerData(feature.properties.nombre || 'Capa Desconocida', chartData);
-          } else {
-            console.warn("⚠️ No hay datos numéricos disponibles para el gráfico.");
-          }
-        } else {
-          console.warn("⚠️ No hay datos disponibles para esta ubicación.");
-        }
-      })
-      .catch(error => console.error("❌ Error al obtener la información de la capa:", error));
   }
 }
