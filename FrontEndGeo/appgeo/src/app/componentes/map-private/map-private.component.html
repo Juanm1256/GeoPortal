@@ -1,14 +1,16 @@
 <!-- Contenedor del mapa -->
 <div id="map-private" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}">
   <!-- Panel lateral de herramientas -->
-  <div class="toolbar" [class.showLayers]="isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
+  <div class="toolbar" [class.showLayers]="isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}"
+  (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
     <!-- Botón para alternar capas -->
     <button class="tool-btn" (click)="toggleLayers()" title="Capas">
       <i class="bi bi-stack"></i>
     </button>
 
     <!-- Botones normales (desaparecen cuando se activa capas) -->
-    <div class="tools" *ngIf="!isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}">
+    <div class="tools" *ngIf="!isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}"
+    (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
       <button class="tool-btn" (click)="mapZoomIn()" title="Zoom +">
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -100,18 +102,21 @@
   </div>
 </div>
 
-<!-- Modal de información -->
-<div class="modal fade" 
-     id="datosModal" 
-     [class.show]="showModal" 
+<!-- Modal de información (Movible) -->
+<div class="modal fade draggable"
+     id="datosModal"
+     [class.show]="showModal"
      [style.display]="showModal ? 'block' : 'none'"
-     tabindex="-1" 
-     aria-labelledby="datosModalLabel" 
+     tabindex="-1"
+     aria-labelledby="datosModalLabel"
      aria-hidden="true"
-     (click)="cerrarModal()">
+     (click)="cerrarModal()"
+     (mouseover)="disableMapInteractions()" 
+     (mouseleave)="enableMapInteractions()">
+
   <div class="modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" id="modalHeader">
         <h5 class="modal-title" id="datosModalLabel">Información de Departamento</h5>
         <button type="button" class="btn-close" (click)="cerrarModal()"></button>
       </div>
@@ -135,8 +140,10 @@
   </div>
 </div>
 
+
 <!-- Panel lateral derecho para gráficos de torta -->
-<div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}">
+<div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}"
+(mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
   <div class="sidebar-header">
     <h5>Gráfico de Textura del Suelo</h5>
     <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">

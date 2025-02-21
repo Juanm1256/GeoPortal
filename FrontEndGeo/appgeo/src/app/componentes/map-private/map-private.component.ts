@@ -31,7 +31,7 @@ import { DepartamentoInforDTO } from '../../interfaces/departamento-infor-dto';
 export class MapPrivateComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
-  showSidebarButton: boolean = false;  
+  showSidebarButton: boolean = false;
   isGraphButtonVisible: boolean = false;
   modalInfo: { key: string; value: string }[] = [];
   showModal = false;
@@ -77,6 +77,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       (window as any).removeMarker = this.removeMarker.bind(this);
       await this.initMap();
       this.checkGraphButtonVisibility();
+      this.makeModalDraggable();
       this.themeSubscription = this.themeService.isDarkMode$.subscribe((isDark) => {
         this.isDarkMode = isDark;
       });
@@ -92,31 +93,85 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       this.themeSubscription.unsubscribe();
     }
   }
+  // ✅ Deshabilita las interacciones del mapa
+  public disableMapInteractions(): void {
+    if (this.map) {
+      this.map.dragging.disable(); // Deshabilita el arrastre
+      this.map.scrollWheelZoom.disable(); // Deshabilita el zoom con la rueda del mouse
+      this.map.doubleClickZoom.disable(); // Deshabilita el zoom por doble clic
+      this.map.boxZoom.disable(); // Deshabilita el zoom con caja
+      this.map.keyboard.disable(); // Deshabilita el control con teclado
+      this.map.off('click'); // Deshabilita los eventos de clic
+    }
+  }
 
+  // ✅ Habilita las interacciones del mapa
+  public enableMapInteractions(): void {
+    if (this.map) {
+      this.map.dragging.enable();
+      this.map.scrollWheelZoom.enable();
+      this.map.doubleClickZoom.enable();
+      this.map.boxZoom.enable();
+      this.map.keyboard.enable();
+      this.map.on('click', this.consultarInformacionFeature.bind(this)); // Reasigna el evento de clic
+    }
+  }
+  makeModalDraggable(): void {
+    const modal = document.getElementById('datosModal') as HTMLElement;
+    const header = document.getElementById('modalHeader') as HTMLElement;
+
+    if (!modal || !header) return;
+
+    let offsetX = 0, offsetY = 0, posX = 0, posY = 0;
+
+    header.onmousedown = (e: MouseEvent) => {
+      e.preventDefault();
+      offsetX = e.clientX - modal.getBoundingClientRect().left;
+      offsetY = e.clientY - modal.getBoundingClientRect().top;
+
+      document.onmousemove = (event: MouseEvent) => {
+        posX = event.clientX - offsetX;
+        posY = event.clientY - offsetY;
+
+        modal.style.left = `${posX}px`;
+        modal.style.top = `${posY}px`;
+      };
+
+      document.onmouseup = () => {
+        document.onmousemove = null;
+        document.onmouseup = null;
+      };
+    };
+  }
   private async initMap(): Promise<void> {
     try {
       this.map = L.map('map-private', {
         center: [-16.54529, -64.7400],
         zoom: 6,
-        zoomControl: false
+        zoomControl: false,
+        dragging: true,   // Arrastre habilitado solo dentro del mapa
+        boxZoom: true,    // Zoom de caja habilitado
+        doubleClickZoom: true,
+        scrollWheelZoom: true,
+        touchZoom: true
       });
-  
+
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
       const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
       const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
       const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 });
-  
+
       this.baseMaps = { "Mapa OSM": osm, "Satélite": satellite, "Topográfico": topo, "Cartográfico": carto };
       this.baseMapNames.set(osm, "Mapa OSM");
       this.baseMapNames.set(satellite, "Satélite");
       this.baseMapNames.set(topo, "Topográfico");
       this.baseMapNames.set(carto, "Cartográfico");
-  
+
       await new Promise<void>((resolve) => {
         osm.on('load', () => resolve());
         osm.addTo(this.map);
       });
-  
+
       this.activeBaseLayer = osm;
       L.control.layers(this.baseMaps).addTo(this.map);
       this.setupMapEventListeners();
@@ -146,7 +201,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         //console.error('Error al cambiar la capa base:', error);
       }
     });
-  
+
     this.map.on('click', async (e: L.LeafletMouseEvent) => {
       const activeLayer = Object.keys(this.activeLayers).find(layer => this.activeLayers[layer]);
       if (activeLayer) {
@@ -171,14 +226,14 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   toggleSidebar() {
     //console.log("🔹 toggleSidebar() llamado");
     //console.log("🔹 showSidebarButton:", this.showSidebarButton);
-    
+
 
     if (this.showSidebarButton) {
       this.sidebarOpen = !this.sidebarOpen;
       //console.log("🔹 sidebarOpen:", this.sidebarOpen);
 
       if (this.sidebarOpen) {
-        this.openSidebarWithLayerData('Textura del Suelo'); 
+        this.openSidebarWithLayerData('Textura del Suelo');
         setTimeout(() => this.showPieChart(), 300);
       } else {
         if (this.pieChart) {
@@ -210,7 +265,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         8: '#073408',
         9: '#dc1010'
       };
-  
+
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
         'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
         'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
@@ -219,12 +274,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
         'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
       };
-  
+
       this.layerInfo = {
         nombre: layerName,
         descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
       };
-  
+
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
@@ -247,12 +302,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       if (this.pieChart) {
         this.pieChart.destroy();
       }
-  
+
       const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
       if (!canvas) {
         throw new Error('No se encontró el canvas para el gráfico');
       }
-  
+
       const ctx = canvas.getContext('2d');
       if (ctx && this.layerData.length > 0) {
         this.pieChart = new Chart(ctx, {
@@ -294,21 +349,21 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     const button = event.target.closest('.layer-btn');
     this.sidebarOpen = false;
     if (this.pieChart) this.pieChart.destroy();
-  
+
     try {
       if (!this.capas[layerName]) {
         const layer = await this.loadLayer(layerName);
         if (layer) {
           this.capas[layerName] = layer;
           this.map.addLayer(this.capas[layerName]);
-  
+
           if (this.capas[layerName] instanceof L.TileLayer.WMS) {
             (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
           }
-  
+
           this.activeLayers[layerName] = true;
           button.classList.add('active');
-  
+
           if (layerName.startsWith('Textura_suelo_')) {
             await this.openSidebarWithLayerData(layerName);
           }
@@ -318,23 +373,37 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         delete this.capas[layerName];
         this.activeLayers[layerName] = false;
         button.classList.remove('active');
-  
+
+        // 🔹 Si la capa es 'modgene' o si no hay capas activas, eliminar el marcador
         if (layerName === 'modgene' && this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
+
+        // 🔹 Comprobar si no hay capas activas de la lista específica y eliminar el marcador
+        const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+        const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
+
+        if (!capaActiva && this.marcadorSeleccionado) {
+          this.map.removeLayer(this.marcadorSeleccionado);
+          this.marcadorSeleccionado = null;
+        }
       }
-  
+
       this.checkGraphButtonVisibility();
     } catch (error) {
       //console.error(`Error al alternar la capa ${layerName}:`, error);
     }
   }
 
+
   private async loadLayer(layerName: string): Promise<L.Layer | L.LayerGroup> {
     try {
       let layer: L.Layer | L.LayerGroup;
-      
+
+      // 🔄 Cursor spinner antes de iniciar la carga
+      this.map.getContainer().classList.add('loading-cursor');
+
       switch (layerName) {
         case 'cuencas':
           layer = await this.metodos.CargarCuencas(this.map, this.cuencasService);
@@ -401,12 +470,21 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
 
+      // ✅ Detectar eventos de carga de la capa
+      if (layer instanceof L.TileLayer || layer instanceof L.TileLayer.WMS) {
+        layer.on('loading', () => this.map.getContainer().classList.add('loading-cursor'));
+        layer.on('load', () => this.map.getContainer().classList.remove('loading-cursor'));
+        layer.on('tileerror', () => this.map.getContainer().classList.remove('loading-cursor'));
+      }
+
       return layer;
     } catch (error) {
-      //console.error(`Error al cargar la capa ${layerName}:`, error);
+      // ❌ En caso de error, quitar el cursor spinner
+      this.map.getContainer().classList.remove('loading-cursor');
       throw error;
     }
   }
+
 
 
   checkGraphButtonVisibility() {
@@ -415,13 +493,13 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'];
     this.showSidebarButton = activeLayers.some(layer => this.activeLayers[layer]);
   }
-  
+
   async getUserLocation(): Promise<void> {
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
       });
-      
+
       const { latitude, longitude } = position.coords;
       this.map.setView([latitude, longitude], 15);
     } catch (error) {
@@ -513,12 +591,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       //console.error("No se encontró el mapa");
       return;
     }
-  
+
     try {
       const width = mapElement.scrollWidth;
       const height = mapElement.scrollHeight;
       const scaleFactor = Math.max(window.devicePixelRatio || 1, 1);
-      
+
       const dataUrl = await domtoimage.toPng(mapElement, {
         quality: 1,
         bgcolor: '#fff',
@@ -529,7 +607,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
           height: `${height * scaleFactor}px`
         }
       });
-  
+
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = `mapa_${new Date().getTime()}.png`;
@@ -602,20 +680,22 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   }
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
-    if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
-      console.warn("⚠️ La capa 'modgene' no está activada. No se ejecutará la consulta.");
+    const latlng = event.latlng;
+
+    // Obtener la capa activa que debe mostrar el modal
+    const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+    const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
+
+    if (!capaActiva) {
+      console.warn("⚠️ No hay una capa activa con funcionalidad de modal.");
       return;
     }
-  
-    const latlng = event.latlng;
-    console.log(latlng);
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
-            this.mostrarModalInformacion(departamentoInfo);
-  
+            this.mostrarModalInformacion(departamentoInfo, capaActiva);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
             //console.log('⚠️ No se encontró información en esta ubicación');
@@ -628,11 +708,23 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   }
 
 
+
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
-    if (!this.capas['modgene'] || !this.map.hasLayer(this.capas['modgene'])) {
+    const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+
+    // 🔹 Verificar si alguna de las capas válidas está activa
+    const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
+
+    // 🔹 Si no hay capas activas, eliminar el marcador y salir
+    if (!capaActiva) {
+      if (this.marcadorSeleccionado) {
+        this.map.removeLayer(this.marcadorSeleccionado);
+        this.marcadorSeleccionado = null; // Limpiar referencia
+      }
       return;
     }
 
+    // 🔹 Icono personalizado
     const customIcon = L.icon({
       iconUrl: 'assets/leaflet/marker-icon-red.png',
       iconSize: [32, 40],
@@ -640,17 +732,21 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       popupAnchor: [0, -32]
     });
 
+    // 🔹 Eliminar marcador anterior si existe
     if (this.marcadorSeleccionado) {
       this.map.removeLayer(this.marcadorSeleccionado);
     }
 
+    // 🔹 Crear y agregar el marcador rojo con popup
     this.marcadorSeleccionado = L.marker(latlng, { icon: customIcon })
-      .bindPopup(`<b>Información de la Capa</b><br>Ubicación: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+
       .addTo(this.map)
-      .openPopup();
+
   }
 
-  mostrarModalInformacion(propiedades: any) {
+
+
+  mostrarModalInformacion(propiedades: any, capa: string) {
     this.modalInfo = [
       { key: 'Cuenca', value: propiedades.CuencaPunto || 'N/A' },
       { key: 'Departamento', value: propiedades.Departamento || 'N/A' },

@@ -2,12 +2,52 @@
   position: absolute;
   overflow: hidden;
 }
-
-/* 🔴 Botón de Cerrar Sesión */
-.logout-btn {
-  background: #d9534f;
-  /* Rojo */
+/* Spinner cuando la capa está cargando */
+/*#map-private.loading-cursor {
+  cursor: wait !important;
+}*/
+/* Modal draggable */
+.draggable {
+  position: fixed !important;
+  z-index: 1050;
+  top: 100px;
+  left: 10%;
+ 
+  cursor: grab;
 }
+
+.draggable:active {
+  cursor: grabbing;
+}
+
+/* Botón de Regresar (Administrador) */
+.tool-btn.back-btn {
+  background: #dc3545 !important;  /* Rojo Bootstrap */
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.tool-btn.back-btn:hover {
+  background: #bd2130 !important;  /* Rojo oscuro al pasar el mouse */
+}
+
+/* Botón de Logout (Visitante) */
+.tool-btn.logout-btn {
+  background: #dc3545 !important;  /* Rojo Bootstrap */
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.tool-btn.logout-btn:hover {
+  background: #bd2130 !important;  /* Rojo oscuro al pasar el mouse */
+}
+
 /* ============================= */
 /*          MODO CLARO           */
 /* ============================= */

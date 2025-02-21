@@ -1,3 +1,21 @@
+
+/* Spinner cuando la capa está cargando */
+/*#map-private.loading-cursor {
+  cursor: wait !important;
+}*/
+/* Modal draggable */
+.draggable {
+  position: fixed !important;
+  z-index: 1050;
+  top: 100px;
+  left: 10%;
+  cursor: grab;
+}
+
+.draggable:active {
+  cursor: grabbing;
+}
+
 /* ============================= */
 /*          MODO CLARO           */
 /* ============================= */
