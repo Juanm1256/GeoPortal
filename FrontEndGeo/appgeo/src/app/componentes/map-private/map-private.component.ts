@@ -608,6 +608,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }
   
     const latlng = event.latlng;
+    console.log(latlng);
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
