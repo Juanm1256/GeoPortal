@@ -755,13 +755,15 @@ private setupMapEventListeners(): void {
 
   mostrarModalInformacion(propiedades: any, capa: string) {
     this.modalInfo = [
-      { key: 'Cuenca', value: propiedades.CuencaPunto || 'N/A' },
-      { key: 'Departamento', value: propiedades.Departamento || 'N/A' },
-      { key: 'Municipio', value: propiedades.MunicipioPunto || 'N/A' },
-      { key: 'Número de Mercados', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-      { key: 'Número de Municipios', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-      { key: 'Número de Provincias', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-      { key: 'Provincia', value: propiedades.ProvinciaPunto || 'N/A' }
+      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+      { key: 'Total de Mercados:', value: propiedades.NumeroMercados?.toString() || 'N/A' },
+      { key: 'Total de Municipios:', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
+      { key: 'Mercados en Municipio:', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
+      { key: 'Número de Provincias:', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
+      { key: 'Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+      { key: 'Ríos en Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
     ];
 
     this.showModal = true;
