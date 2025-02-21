@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Login } from '../../interfaces/login';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -38,63 +39,60 @@ export class LoginComponent {
     });
   }
 
-  Guardar(): void {
-    if (this.form.invalid) return;
+  async Guardar(): Promise<void> {
+    try {
+      if (this.form.invalid) return;
 
-    this.isLoading = true;
-    document.body.style.cursor = 'wait';
+      this.isLoading = true;
+      document.body.style.cursor = 'wait';
 
-    const login: Login = {
-      Username: this.form.get('usuario')?.value,
-      Password: this.form.get('contraseña')?.value,
-      RefrescarToken: true
-    };
+      const login: Login = {
+        Username: this.form.get('usuario')?.value,
+        Password: this.form.get('contraseña')?.value,
+        RefrescarToken: true
+      };
 
-    this.authService.login(login).subscribe(
-      (response: any) => {
-        const token = response.Token || response.token;
+      const response = await firstValueFrom(this.authService.login(login));
+      const token = response.Token || response.Token;
 
-        if (token) {
-          this.authService.saveToken(token);
-          const userRole = this.authService.getUserRole(); // ✅ Obtener el rol
+      if (token) {
+        this.authService.saveToken(token);
+        const userRole = this.authService.getUserRole();
 
-          Swal.fire({
-            icon: 'success',
-            title: '¡Acceso exitoso!',
-            text: 'Usuario y contraseña correctos.',
-            timer: 2000,
-            showConfirmButton: false
-          });
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Acceso exitoso!',
+          text: 'Usuario y contraseña correctos.',
+          timer: 2000,
+          showConfirmButton: false
+        });
 
-          setTimeout(() => {
-            if (userRole === 'Administrador') {
-              this.router.navigate(['/dashboard']); // ✅ Redirigir al dashboard si es admin
-            } else if (userRole === 'Visitante') {
-              this.router.navigate(['/map-public']); // ✅ Redirigir a map-public si es visitante
-            } else {
-              console.warn('⚠ Rol desconocido, redirigiendo al login.');
-              this.router.navigate(['/login']);
-            }
-          }, 2000);
+        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+
+        if (userRole === 'Administrador') {
+          await this.router.navigate(['/dashboard']);
+        } else if (userRole === 'Visitante') {
+          await this.router.navigate(['/map-public']);
         } else {
-          this.mostrarError('El servidor no devolvió un token JWT');
+          console.warn('⚠ Rol desconocido, redirigiendo al login.');
+          await this.router.navigate(['/login']);
         }
-      },
-      (error) => {
-        this.mostrarError('Credenciales incorrectas o error en el servidor.');
-      },
-      () => {
-        this.isLoading = false;
-        document.body.style.cursor = 'default';
+      } else {
+        await this.mostrarError('El servidor no devolvió un token JWT');
       }
-    );
+    } catch (error) {
+      await this.mostrarError('Credenciales incorrectas o error en el servidor.');
+    } finally {
+      this.isLoading = false;
+      document.body.style.cursor = 'default';
+    }
   }
 
-  private mostrarError(mensaje: string) {
+  private async mostrarError(mensaje: string): Promise<void> {
     this.isLoading = false;
     document.body.style.cursor = 'default';
 
-    Swal.fire({
+    await Swal.fire({
       icon: 'error',
       title: 'Error',
       text: mensaje

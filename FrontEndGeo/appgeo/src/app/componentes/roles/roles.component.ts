@@ -11,7 +11,7 @@ import { RolPermisoDTO } from '../../interfaces/rol-permiso-dto';
 import { RolesPermisoService } from '../../servicios/roles-permiso.service';
 import { ThemeService } from '../../servicios/theme.service';
 import { Permisos } from '../../interfaces/permisos';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-roles',
@@ -54,142 +54,150 @@ export class RolesComponent implements OnInit, OnDestroy {
       permisos: this.fb.array([])
     });
   }
-  cargarRoles() {
-    this.isLoading = true; // ⬅ Mostrar spinner antes de la carga
-
-    this.rolservice.ListarTodos().subscribe(
-      (data) => {
-        this.listaRol = data;
-        this.isLoading = false; // ⬅ Ocultar spinner después de la carga
-        this.pagesizee = this.listaRol.length;
-      },
-      (error) => {
-        console.error('Error al obtener los roles:', error);
-        this.isLoading = false; // ⬅ Ocultar spinner incluso si hay error
-      }
-    );
+  async cargarRoles(): Promise<void> {
+    try {
+      this.isLoading = true;
+      const data = await firstValueFrom(this.rolservice.ListarTodos());
+      this.listaRol = data;
+      this.pagesizee = this.listaRol.length;
+    } catch (error) {
+      console.error('Error al obtener los roles:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
-  ngOnInit(): void {
-    this.cargarRoles();
-    // Suscribirse al observable para cambios de tema
+
+  async ngOnInit(): Promise<void> {
+  try {
+    await this.cargarRoles();
+    
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      (isDark) => {
-        this.isDarkMode = isDark;
-      }
+      (isDark) => this.isDarkMode = isDark
     );
 
-    this.listadoRol();
-    this.ListaPermiso();
+    await Promise.all([
+      this.listadoRol(),
+      this.ListaPermiso()
+    ]);
 
-    // Asegurar que 'permisos' está en el formulario
     if (!this.form.contains('permisos')) {
       this.form.addControl('permisos', this.fb.array([])); 
     }
+  } catch (error) {
+    console.error('Error en la inicialización:', error);
   }
+}
 
   toggleTheme() {
     this.themeService.toggleTheme();
   }
 
-  async listadoRol() {
-    await this.rolservice.ListarTodos().subscribe(
-      (data: Roles[]) => {
-        this.listaRol = data;
-        this.pagesizee = this.listaRol.length;
-      },
-      (error) => {
-        console.error('Error al obtener los roles:', error);
-      }
-    );
+  async listadoRol(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.rolservice.ListarTodos());
+      this.listaRol = data;
+      this.pagesizee = this.listaRol.length;
+    } catch (error) {
+      console.error('Error al obtener los roles:', error);
+    }
   }
 
-  ListaPermiso() {
-    this.rolservice.ListarPermiso().subscribe(
-      (data: Permisos[]) => {
-        this.permisosList = data;
-      },
-      (error) => {
-        console.error('Error al obtener los permisos:', error);
-      }
-    );
+  async ListaPermiso(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.rolservice.ListarPermiso());
+      this.permisosList = data;
+    } catch (error) {
+      console.error('Error al obtener los permisos:', error);
+    }
   }
 
-  Guardar() {
-    const rolDTO: RolPermisoDTO = {
-      nombreRol: this.form.get('nombre')?.value,
-      estado: 'Activo',
-      IdPermisos: this.form.get('permisos')?.value.filter((permiso: any) => permiso !== null)
-    };
+  async Guardar(): Promise<void> {
+    try {
+      const rolDTO: RolPermisoDTO = {
+        nombreRol: this.form.get('nombre')?.value,
+        estado: 'Activo',
+        IdPermisos: this.form.get('permisos')?.value.filter((permiso: any) => permiso !== null)
+      };
   
-    if (this.id == undefined) {
-      this.rolpermisoservice.insertar(rolDTO).subscribe(data => {
+      if (this.id == undefined) {
+        await firstValueFrom(this.rolpermisoservice.insertar(rolDTO));
         Swal.fire({ icon: 'success', title: 'Rol Registrado!' });
-        this.listadoRol();
-        this.form.reset();
-      }, error => {
+      } else {
+        await firstValueFrom(this.rolpermisoservice.modificar(rolDTO, this.id));
+        Swal.fire({ icon: 'success', title: 'Rol Modificado!' });
+      }
+  
+      await this.listadoRol();
+      this.form.reset();
+    } catch (error: any) {
+      if (error.error?.errors) {
         Swal.fire({
           icon: 'error',
           title: 'Error en el Formulario',
           html: error.error.errors[Object.keys(error.error.errors)[0]]
         });
+      } else {
+        console.error('Error al guardar:', error);
+      }
+    }
+  }
+
+  async Guardarinstruct(content: any): Promise<void> {
+    try {
+      await this.modalService.open(content);
+      this.form.markAsUntouched();
+      this.form.markAsPristine();
+      this.id = undefined;
+      this.form.patchValue({ nombre: "" });
+    } catch (error) {
+      console.error('Error al abrir el modal:', error);
+    }
+  }
+
+  async SeleccionarRol(content: any, rol: Roles): Promise<void> {
+    try {
+      await this.modalService.open(content);
+      this.accion = "Editar";
+      this.id = rol.nombre;
+    
+      this.form.patchValue({
+        nombre: rol.nombre,
       });
-    } else {
-      this.rolpermisoservice.modificar(rolDTO, this.id).subscribe(data => {
-        Swal.fire({ icon: 'success', title: 'Rol Modificado!' });
-        this.listadoRol();
+    
+      const permisosArray = this.form.get('permisos') as FormArray;
+      permisosArray.clear();
+    
+      if (rol.permisos && Array.isArray(rol.permisos)) {
+        rol.permisos.forEach((permiso: any) => {
+          permisosArray.push(new FormControl(permiso.idpermiso));
+        });
+      }
+    } catch (error) {
+      console.error('Error al seleccionar rol:', error);
+    }
+  }
+
+  async CambiarEstado(rol: Roles, accion: string): Promise<void> {
+    try {
+      const dto: RolPermisoDTO = {
+        nombreRol: rol.nombre,
+        estado: accion,
+        IdPermisos: rol.permisos ? rol.permisos.map((p: any) => p.idpermiso).filter(id => id !== undefined) : []
+      };
+  
+      if (rol.nombre) {
+        await firstValueFrom(this.rolpermisoservice.modificar(dto, rol.nombre));
+        
+        Swal.fire({
+          icon: accion === 'Inactivo' ? 'error' : 'success',
+          title: `El rol ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
+        });
+        
+        await this.listadoRol();
         this.form.reset();
-      });
-    }
-  }
-
-  Guardarinstruct(content: any) {
-    this.modalService.open(content);
-    this.form.markAsUntouched();
-    this.form.markAsPristine();
-    this.id = undefined;
-    this.form.patchValue({ nombre: "" });
-  }
-
-  SeleccionarRol(content: any, rol: Roles) {
-    this.modalService.open(content);
-    this.accion = "Editar";
-    this.id = rol.nombre;
-  
-    this.form.patchValue({
-      nombre: rol.nombre,
-    });
-  
-    const permisosArray = this.form.get('permisos') as FormArray;
-    permisosArray.clear();
-  
-    if (rol.permisos && Array.isArray(rol.permisos)) {
-      rol.permisos.forEach((permiso: any) => {
-        permisosArray.push(new FormControl(permiso.idpermiso));
-      });
-    }
-  }
-
-  CambiarEstado(rol: Roles, accion: string) {
-    const dto: RolPermisoDTO = {
-      nombreRol: rol.nombre,
-      estado: accion,
-      IdPermisos: rol.permisos ? rol.permisos.map((p: any) => p.idpermiso).filter(id => id !== undefined) : []
-    };
-  
-    if (rol.nombre) {
-      this.rolpermisoservice.modificar(dto, rol.nombre).subscribe(
-        () => {
-          Swal.fire({
-            icon: accion === 'Inactivo' ? 'error' : 'success',
-            title: `El rol ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
-          });
-          this.listadoRol();
-          this.form.reset();
-        },
-        (error) => {
-          console.error('Error al modificar el rol:', error);
-        }
-      );
+      }
+    } catch (error) {
+      console.error('Error al modificar el rol:', error);
     }
   }
 

@@ -9,7 +9,7 @@ import { RolesService } from '../../servicios/roles.service';
 import { CommonModule } from '@angular/common';
 import { FilteronePipe } from '../../Pipes/filterone.pipe';
 import { ThemeService } from '../../servicios/theme.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-usuarios',
@@ -72,123 +72,146 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    // Suscribirse al observable para cambios de tema
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      (isDark) => {
-        this.isDarkMode = isDark;
-      }
-    );
-
-    this.cargarUsuarios();
-    this.cargarRoles();
+  async ngOnInit(): Promise<void> {
+    try {
+      this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+        (isDark) => {
+          this.isDarkMode = isDark;
+        }
+      );
+  
+      await Promise.all([
+        this.cargarUsuarios(),
+        this.cargarRoles()
+      ]);
+    } catch (error) {
+      console.error('Error en la inicialización:', error);
+    }
   }
-  cargarUsuarios() {
-    this.isLoading = true;
 
-    this.usuarioService.ListarTodos().subscribe(
-      (data) => {
-        this.listaUsuarios = data;
-        this.isLoading = false;
-        this.pagesizee = this.listaUsuarios.length;
-      },
-      (error) => {
-        console.error('Error al obtener los usuarios:', error);
-        this.isLoading = false;
-      }
-    );
+  async cargarUsuarios(): Promise<void> {
+    try {
+      this.isLoading = true;
+      const data = await firstValueFrom(this.usuarioService.ListarTodos());
+      this.listaUsuarios = data;
+      this.pagesizee = this.listaUsuarios.length;
+    } catch (error) {
+      console.error('Error al obtener los usuarios:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
+
   toggleTheme() {
     this.themeService.toggleTheme();
   }
 
- 
-
-  cargarRoles() {
-    this.rolService.ListarTodos().subscribe(data => {
+  async cargarRoles(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.rolService.ListarTodos());
       this.roles = data;
-    });
+    } catch (error) {
+      console.error('Error al cargar roles:', error);
+    }
   }
 
   LimpiarSearch() {
     this.search = '';
   }
 
-  Guardar() {
-
-    const today = new Date();
-
-    const usuario: Usuarios = {
-      idusuario: this.id || 0,
-      username: this.form.get('username')?.value,
-      password_hash: this.form.get('password')?.value,
-      fechareg: today, 
-      idrol: this.form.get('idrol')?.value,
-      idpersona: this.idpersona || 0,
-      estado: 'Activo',
-      IdPersonanav: {
-        idpersona: this.idpersona || 0,
-        nombres: this.form.get('nombres')?.value,
-        apellidos: this.form.get('apellidos')?.value,
-        ci: this.form.get('ci')?.value,
+  async Guardar(): Promise<void> {
+    try {
+      const today = new Date();
+  
+      const usuario: Usuarios = {
+        idusuario: this.id || 0,
+        username: this.form.get('username')?.value,
+        password_hash: this.form.get('password')?.value,
         fechareg: today,
+        idrol: this.form.get('idrol')?.value,
+        idpersona: this.idpersona || 0,
         estado: 'Activo',
-      },
-      IdRolnav: undefined, 
-    };
-
-    if (!this.id) {
-      this.usuarioService.PostUsuario(usuario).subscribe(() => {
+        IdPersonanav: {
+          idpersona: this.idpersona || 0,
+          nombres: this.form.get('nombres')?.value,
+          apellidos: this.form.get('apellidos')?.value,
+          ci: this.form.get('ci')?.value,
+          fechareg: today,
+          estado: 'Activo',
+        },
+        IdRolnav: undefined,
+      };
+  
+      if (!this.id) {
+        await firstValueFrom(this.usuarioService.PostUsuario(usuario));
         Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
-        this.cargarUsuarios();
+        await this.cargarUsuarios();
         this.form.reset();
-      }, error => {
-        Swal.fire({ icon: 'error', title: 'Error en el Formulario', html: error.error.errors[Object.keys(error.error.errors)[0]] });
-      });
-    } else {
-      usuario.idusuario = this.id;
-      this.usuarioService.PutUsuario(this.id, usuario).subscribe(() => {
+      } else {
+        await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));
         Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
-        this.cargarUsuarios();
-      }, error => {
+        await this.cargarUsuarios();
+      }
+    } catch (error: any) {
+      if (error.error?.errors) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en el Formulario',
+          html: error.error.errors[Object.keys(error.error.errors)[0]]
+        });
+      } else {
         Swal.fire({ icon: 'error', title: 'Error', text: 'Algo salió mal.' });
-      });
+      }
     }
   }
 
-  Guardarinstruct(content: any) {
-    this.modalService.open(content);
-    this.form.markAsUntouched();
-    this.form.markAsPristine();
-    this.id = undefined;
-    this.idpersona = undefined;
-    this.form.reset();
+  async Guardarinstruct(content: any): Promise<void> {
+    try {
+      await this.modalService.open(content);
+      this.form.markAsUntouched();
+      this.form.markAsPristine();
+      this.id = undefined;
+      this.idpersona = undefined;
+      this.form.reset();
+    } catch (error) {
+      console.error('Error al abrir el modal:', error);
+    }
   }
 
-  SeleccionarUsuario(content: any, usuario: Usuarios) {
-    this.modalService.open(content);
-    this.accion = "Editar";
-    this.id = usuario.idusuario;
-    this.idpersona = usuario.idpersona;
-    this.form.patchValue({
-      username: usuario.username,
-      password: "",
-      idrol: usuario.idrol,
-      nombres: usuario.IdPersonanav?.nombres,
-      apellidos: usuario.IdPersonanav?.apellidos,
-      ci: usuario.IdPersonanav?.ci
-    });
+  async SeleccionarUsuario(content: any, usuario: Usuarios): Promise<void> {
+    try {
+      await this.modalService.open(content);
+      this.accion = "Editar";
+      this.id = usuario.idusuario;
+      this.idpersona = usuario.idpersona;
+      this.form.patchValue({
+        username: usuario.username,
+        password: "",
+        idrol: usuario.idrol,
+        nombres: usuario.IdPersonanav?.nombres,
+        apellidos: usuario.IdPersonanav?.apellidos,
+        ci: usuario.IdPersonanav?.ci
+      });
+    } catch (error) {
+      console.error('Error al seleccionar usuario:', error);
+    }
   }
 
-  CambiarEstado(usuario: Usuarios, accion: string) {
-    usuario.estado = accion;
-    this.usuarioService.PutUsuario(usuario.idusuario, usuario).subscribe(() => {
+  async CambiarEstado(usuario: Usuarios, accion: string): Promise<void> {
+    try {
+      usuario.estado = accion;
+      await firstValueFrom(this.usuarioService.PutUsuario(usuario.idusuario, usuario));
+      
       Swal.fire({
         icon: accion === 'Activo' ? 'success' : 'error',
         title: accion === 'Activo' ? 'Usuario Activado!' : 'Usuario Desactivado!',
       });
-      this.cargarUsuarios();
-    });
+      
+      await this.cargarUsuarios();
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado del usuario.' });
+    }
   }
 
   obtenerNombreRol(idrol: number): string {
