@@ -59,53 +59,61 @@ export class Metodos {
 
     return layerGroup;
   }
-
   async CargarCuencas(maping: L.Map, cuencasService: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
+    let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
 
     cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
-      cuencas.forEach(cuenca => {
-        if (cuenca.geom) {
-          const geojson = JSON.parse(cuenca.geom);
-          if (geojson.type === 'MultiPolygon') {
-            const estiloPoligono = {
-              color: '#191b1c',
-              weight: 2,
-              opacity: 1,
-              fillColor: '#64B5F6',
-              fillOpacity: 0
-            };
-            const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
-            const polygon = L.geoJSON(geojson, {
-              style: estiloPoligono,
-              onEachFeature: (feature, layer) => {
-                layer.bindPopup(`
-                              <div class="popup-content">
-                                  <h4>${cuenca.cuenca}</h4>
-                                  <p>Superficie: ${cuenca.sup_km2} km²</p>
-                              </div>
-                          `);
-                layer.on({
-                  mouseup: (e) => {
-                    const layer = e.target;
-                    layer.setStyle({
-                      weight: 3,
-                      fillOpacity: 0.2,
-                      color: colorMouseOver,
-                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+        cuencas.forEach(cuenca => {
+            if (cuenca.geom) {
+                const geojson = JSON.parse(cuenca.geom);
+                if (geojson.type === 'MultiPolygon') {
+                    const estiloPoligono = {
+                        color: '#191b1c',
+                        weight: 2,
+                        opacity: 1,
+                        fillColor: '#64B5F6',
+                        fillOpacity: 0
+                    };
+                    const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+
+                    const polygon = L.geoJSON(geojson, {
+                        style: estiloPoligono,
+                        onEachFeature: (feature, layer) => {
+                            layer.on({
+                                mouseup: (e) => {
+                                    const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
+
+                                    // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                                    if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                                        poligonoSeleccionado.setStyle(estiloPoligono);
+                                    }
+
+                                    // 🔹 Pintar el nuevo polígono seleccionado
+                                    layer.setStyle({
+                                        weight: 3,
+                                        fillOpacity: 0.2,
+                                        color: colorMouseOver,
+                                        fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                                    });
+
+                                    // 🔹 Guardar la referencia del polígono seleccionado
+                                    poligonoSeleccionado = layer;
+                                }
+                            });
+                        }
                     });
-                  }
-                });
-              }
-            });
-            layerGroup.addLayer(polygon);
-          }
-        }
-      });
+
+                    layerGroup.addLayer(polygon);
+                }
+            }
+        });
     });
+
     maping.addLayer(layerGroup);
     return layerGroup;
-  }
+}
+
 
   async Cargarmercados(maping: L.Map, mercadoservices: any): Promise<L.Layer> {
     const markerCluster = L.markerClusterGroup();
@@ -143,109 +151,117 @@ export class Metodos {
 
   async CargarLimitesDepartamentales(maping: L.Map, limitesdepservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
+    let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
 
     limitesdepservice.listarTodos().subscribe((lim_deps: LimitesDepartamentales[]) => {
-      lim_deps.forEach(lim_dep => {
-        if (lim_dep.geom) {
-          const geojson = JSON.parse(lim_dep.geom);
+        lim_deps.forEach(lim_dep => {
+            if (lim_dep.geom) {
+                const geojson = JSON.parse(lim_dep.geom);
 
-          if (geojson.type === 'MultiPolygon') {
-            const estiloPoligono = {
-              color: '#191b1c',
-              weight: 2,
-              opacity: 1,
-              fillColor: '#64B5F6',
-              fillOpacity: 0
-            };
+                if (geojson.type === 'MultiPolygon') {
+                    const estiloPoligono = {
+                        color: '#191b1c',
+                        weight: 2,
+                        opacity: 1,
+                        fillColor: '#64B5F6',
+                        fillOpacity: 0
+                    };
 
-            const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+                    const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
 
-            const polygon = L.geoJSON(geojson, {
-              style: estiloPoligono,
-              onEachFeature: (feature, layer) => {
-                layer.bindPopup(`
-                              <div class="popup-content">
-                                  <h4>${lim_dep.dep}</h4>
-                                  <p>Superficie: ${lim_dep.cod_dep} km²</p>
-                              </div>
-                          `);
+                    const polygon = L.geoJSON(geojson, {
+                        style: estiloPoligono,
+                        onEachFeature: (feature, layer) => {
+                            layer.on({
+                                mouseup: (e) => {
+                                    const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
 
-                layer.on({
-                  mouseup: (e) => {
-                    const layer = e.target;
-                    layer.setStyle({
-                      weight: 3,
-                      fillOpacity: 0.2,
-                      color: colorMouseOver,
-                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                                    // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                                    if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                                        poligonoSeleccionado.setStyle(estiloPoligono);
+                                    }
+
+                                    // 🔹 Pintar el nuevo polígono seleccionado
+                                    layer.setStyle({
+                                        weight: 3,
+                                        fillOpacity: 0.2,
+                                        color: colorMouseOver,
+                                        fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                                    });
+
+                                    // 🔹 Guardar la referencia del polígono seleccionado
+                                    poligonoSeleccionado = layer;
+                                }
+                            });
+                        }
                     });
-                  }
-                });
-              }
-            });
 
-            layerGroup.addLayer(polygon);
-          }
-        }
-      });
+                    layerGroup.addLayer(polygon);
+                }
+            }
+        });
     });
 
     maping.addLayer(layerGroup);
     return layerGroup;
-  }
+}
+async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.Layer> {
+  const layerGroup = L.layerGroup();
+  let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
 
-  async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.Layer> {
-    const layerGroup = L.layerGroup();
-
-    limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
+  limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
       lim_muns.forEach(lim_mun => {
-        if (lim_mun.geom) {
-          const geojson = JSON.parse(lim_mun.geom);
+          if (lim_mun.geom) {
+              const geojson = JSON.parse(lim_mun.geom);
 
-          if (geojson.type === 'MultiPolygon') {
-            const estiloPoligono = {
-              color: '#191b1c',
-              weight: 2,
-              opacity: 1,
-              fillColor: '#64B5F6',
-              fillOpacity: 0
-            };
+              if (geojson.type === 'MultiPolygon') {
+                  const estiloPoligono = {
+                      color: '#191b1c',
+                      weight: 2,
+                      opacity: 1,
+                      fillColor: '#64B5F6',
+                      fillOpacity: 0
+                  };
 
-            const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+                  const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
 
-            const polygon = L.geoJSON(geojson, {
-              style: estiloPoligono,
-              onEachFeature: (feature, layer) => {
-                layer.bindPopup(`
-                                <div class="popup-content">
-                                    <h4>${lim_mun.dep}</h4>
-                                    <p>Provincia: ${lim_mun.prov}</p>
-                                    <p>Municipio: ${lim_mun.mun}</p>
-                                </div>
-                            `);
+                  const polygon = L.geoJSON(geojson, {
+                      style: estiloPoligono,
+                      onEachFeature: (feature, layer) => {
+                          layer.on({
+                              mouseup: (e) => {
+                                  const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
 
-                layer.on({
-                  mouseup: (e) => {
-                    const layer = e.target;
-                    layer.setStyle({
-                      weight: 3,
-                      fillOpacity: 0.2,
-                      color: colorMouseOver,
-                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
-                    });
-                  }
-                });
+                                  // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                                  if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                                      poligonoSeleccionado.setStyle(estiloPoligono);
+                                  }
+
+                                  // 🔹 Pintar el nuevo polígono seleccionado
+                                  layer.setStyle({
+                                      weight: 3,
+                                      fillOpacity: 0.2,
+                                      color: colorMouseOver,
+                                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                                  });
+
+                                  // 🔹 Guardar la referencia del polígono seleccionado
+                                  poligonoSeleccionado = layer;
+                              }
+                          });
+                      }
+                  });
+
+                  layerGroup.addLayer(polygon);
               }
-            });
-
-            layerGroup.addLayer(polygon);
           }
-        }
       });
-    });
-    maping.addLayer(layerGroup);
-    return layerGroup;
-  }
+  });
+
+  maping.addLayer(layerGroup);
+  return layerGroup;
+}
+
   async CargarProveedorAlevines(maping: L.Map, proveedoralevinesservice: any): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
