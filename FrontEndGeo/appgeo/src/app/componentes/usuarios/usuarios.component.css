@@ -1,0 +1,182 @@
+/* Aplica mayúsculas a todos los inputs excepto username y password */
+.form-control:not([formControlName="username"]):not([formControlName="password"]) {
+  text-transform: uppercase;
+}
+
+/* ===========================
+   🔒 Input de Contraseña
+   =========================== */
+   .password-input-with-icon {
+    width: 100%;
+    padding: 10px 40px 10px 15px; /* Espaciado derecho para el ícono */
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.password-input-with-icon:focus {
+    border-color: #2C5384;
+    box-shadow: 0 0 0 0.2rem rgba(44, 83, 132, 0.25);
+}
+
+.password-input-with-icon::placeholder {
+    color: #666;
+}
+
+/* ===========================
+   👁️ Ícono del Ojo Dentro del Input
+   =========================== */
+.password-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    color: #495057;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.password-icon:hover {
+    color: #2C5384;
+}
+
+/* ===========================
+   🌙 Modo Oscuro - Dark Theme
+   =========================== */
+.dark-theme .password-icon {
+    color: #ffffff;  /* 👁️ Ícono del ojo en color blanco */
+}
+
+.dark-theme .password-icon:hover {
+    color: #bbbbbb;  /* 👁️ Color gris claro al pasar el mouse */
+}
+
+/* ===========================
+   💾 Modal Personalizado
+   =========================== */
+.modal-custom {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header-custom {
+  background-color: #2C5384;
+  color: white;
+  padding: 15px;
+  border-bottom: 1px solid white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.modal-footer-custom {
+  padding: 15px;
+  border-top: 1px solid #ddd;
+  text-align: right;
+}
+
+/* ===========================
+   📦 Contenedor Principal
+   =========================== */
+.main-content {
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ===========================
+   🟦 Encabezado del Módulo
+   =========================== */
+.header-custom {
+  background-color: #2C5384;
+  color: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===========================
+   🔍 Buscador
+   =========================== */
+.search-box {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+}
+
+/* ===========================
+   🗂️ Tabla de Usuarios
+   =========================== */
+.table-custom thead {
+  background-color: #2C5384;
+  color: white;
+  text-align: center;
+}
+
+.table-custom tbody td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 12px;
+}
+
+/* ===========================
+   📑 Paginación
+   =========================== */
+.ngb-pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===========================
+   🔘 Botones de Acción
+   =========================== */
+.btn-dark {
+  background-color: #343a40;
+  border-color: #343a40;
+  color: white;
+}
+
+.dark-theme .search-box {
+  border: 1px solid #555;
+}
+
+.btn-dark:hover {
+  background-color: #23272b;
+  border-color: #1d2124;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}

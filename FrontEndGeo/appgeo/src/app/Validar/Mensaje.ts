@@ -1,53 +1,46 @@
 export class Mensaje {
-    public mensajes = {
-        //Rol
-        'nombrerol': [
+    public mensajes: { [key: string]: { type: string; message: string }[] } = {
+        // 🔹 Rol
+        'nombre': [
             { type: 'required', message: 'El Nombre del rol es requerido.' },
-            { type: 'maxlength', message: 'La Nombre debe tener menos de 25 caracteres.' },
+            { type: 'maxlength', message: 'El Nombre debe tener menos de 25 caracteres.' },
             { type: 'pattern', message: 'El Nombre debe tener solo letras.' }
         ],
-        'permisosrol': [
-            { type: 'required', message: 'El Nombre del rol es requerido.' },
-            { type: 'maxlength', message: 'La Nombre debe tener menos de 25 caracteres.' },
-            { type: 'pattern', message: 'El Nombre debe tener solo letras.' }
-        ],
-
-        //Usuarios
+        // 🔹 Usuario
         'username': [
-            { type: 'required', message: 'El username es requerido.' },
-            { type: 'maxlength', message: 'El username no puede tener más de 50 caracteres.' },
-            { type: 'pattern', message: 'El username solo puede contener letras y números.' }
+            { type: 'required', message: 'El nombre de usuario es requerido.' },
+            { type: 'maxlength', message: 'El nombre de usuario no puede tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'El nombre de usuario solo puede contener letras y números.' }
         ],
         'password': [
             { type: 'required', message: 'La contraseña es requerida.' },
-            { type: 'minlength', message: 'La contraseña debe tener al menos 6 caracteres.' }
+            { type: 'minlength', message: 'La contraseña debe tener al menos 6 caracteres.' },
+            { type: 'pattern', message: 'La contraseña debe incluir una mayúscula, una minúscula y un número.' }
         ],
         'nombres': [
-            { type: 'required', message: 'El nombres es requerido.' },
-            { type: 'maxlength', message: 'El nombres no puede tener más de 50 caracteres.' },
-            { type: 'pattern', message: 'El nombres solo puede contener letras y números.' }
+            { type: 'required', message: 'Los nombres son requeridos.' },
+            { type: 'maxlength', message: 'Los nombres no pueden tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'Los nombres solo pueden contener letras.' }
         ],
         'apellidos': [
-            { type: 'required', message: 'El apellidos es requerido.' },
-            { type: 'maxlength', message: 'El apellidos no puede tener más de 50 caracteres.' },
-            { type: 'pattern', message: 'El apellidos solo puede contener letras y números.' }
+            { type: 'required', message: 'Los apellidos son requeridos.' },
+            { type: 'maxlength', message: 'Los apellidos no pueden tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'Los apellidos solo pueden contener letras.' }
         ],
         'ci': [
-            { type: 'required', message: 'El ci es requerido.' },
-            { type: 'maxlength', message: 'El ci no puede tener más de 50 caracteres.' },
-            { type: 'pattern', message: 'El ci solo puede contener letras y números.' }
-        ],
-
-        //Login
+            { type: 'required', message: 'El CI es requerido.' },
+            { type: 'maxlength', message: 'El CI no puede tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'El CI solo puede contener letras y números.' }
+        ],
         'usuario': [
-            { type: 'required', message: 'El username es requerido.' },
-            { type: 'maxlength', message: 'El username no puede tener más de 50 caracteres.' },
-            { type: 'pattern', message: 'El username solo puede contener letras y números.' }
+            { type: 'required', message: 'El nombre de usuario es requerido.' },
+            { type: 'maxlength', message: 'El nombre de usuario no puede tener más de 50 caracteres.' },
+            { type: 'pattern', message: 'El nombre de usuario solo puede contener letras y números.' }
         ],
         'contraseña': [
             { type: 'required', message: 'La contraseña es requerida.' },
-            { type: 'minlength', message: 'La contraseña debe tener al menos 6 caracteres.' }
+            { type: 'minlength', message: 'La contraseña debe tener al menos 6 caracteres.' },
+            { type: 'pattern', message: 'La contraseña debe incluir una mayúscula, una minúscula y un número.' }
         ]
-
-    }
+    };
 }

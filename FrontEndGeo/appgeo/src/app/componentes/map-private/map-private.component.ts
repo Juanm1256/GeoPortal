@@ -343,7 +343,10 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
 
   toggleLayers() {
     this.isLayersOpen = !this.isLayersOpen;
-  }
+    if (this.isLayersOpen) {
+        this.restoreLayerButtonStyles(); // ✅ Asegúrate de que esta línea esté presente
+    }
+}
 
   async toggleLayer(layerName: string, event: any): Promise<void> {
     const button = event.target.closest('.layer-btn');
@@ -630,23 +633,26 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
-
+  
+        // Eliminar todos los marcadores
         this.markerLayer.clearLayers();
-
+  
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
-
+  
+        // Remover todas las capas
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
-
+  
         this.capas = {};
         this.activeLayers = {};
-
+  
+        // Remover todas las capas base y agregar la predeterminada
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -654,11 +660,22 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         });
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
-
+  
+        // Restablecer los botones de capas
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
-
+  
+        // ✅ Ocultar el botón de gráficos y cerrar el panel lateral si está abierto
+        this.showSidebarButton = false;
+        this.sidebarOpen = false;
+  
+        // ✅ Destruir el gráfico si existe
+        if (this.pieChart) {
+          this.pieChart.destroy();
+          this.pieChart = null;
+        }
+  
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",

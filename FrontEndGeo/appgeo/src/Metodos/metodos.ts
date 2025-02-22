@@ -433,7 +433,7 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
   }
 
   async cargarTexturasuelo0(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo0 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_0',
       format: 'image/png',
       transparent: true,
@@ -442,12 +442,12 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo0);
+    return Texturasuelo0;
   }
 
   async cargarTexturasuelo10(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo10 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_10',
       format: 'image/png',
       transparent: true,
@@ -456,11 +456,11 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo10);
+    return Texturasuelo10;
   }
   async cargarTexturasuelo30(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo30 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_30',
       format: 'image/png',
       transparent: true,
@@ -469,11 +469,11 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo30);
+    return Texturasuelo30;
   }
   async cargarTexturasuelo60(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo60 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_60',
       format: 'image/png',
       transparent: true,
@@ -482,11 +482,11 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo60);
+    return Texturasuelo60;
   }
   async cargarTexturasuelo100(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo100 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_100',
       format: 'image/png',
       transparent: true,
@@ -495,11 +495,11 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo100);
+    return Texturasuelo100;
   }
   async cargarTexturasuelo200(maping: L.Map): Promise<L.Layer> {
-    const pH_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+    const Texturasuelo200 = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
       layers: 'capas_rastergeo:Textura_suelo_200',
       format: 'image/png',
       transparent: true,
@@ -508,7 +508,7 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
       crossOrigin: true,
     });
 
-    maping.addLayer(pH_suelo);
-    return pH_suelo;
+    maping.addLayer(Texturasuelo200);
+    return Texturasuelo200;
   }
 }
