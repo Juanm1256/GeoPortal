@@ -18,7 +18,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (userRole !== 'Administrador') {
+    if (userRole !== 'ADMINISTRADOR') {
       //console.warn('🚫 Usuario no autorizado para acceder a esta página.');
       this.router.navigate(['/map-public']);
       return false;

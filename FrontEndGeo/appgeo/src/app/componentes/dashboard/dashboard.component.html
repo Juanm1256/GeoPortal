@@ -1,9 +1,8 @@
 <!-- Spinner de carga -->
-<div class="spinner-container" *ngIf="isLoading" >
+<div class="spinner-container" *ngIf="isLoading" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="spinner"></div>
   <p>Cargando datos...</p>
 </div>
-
 <!-- Contenido del dashboard, se muestra solo cuando isLoading es false -->
 <div class="dashboard-container" *ngIf="!isLoading" [ngClass]="{'dark-theme': isDarkMode}">
   

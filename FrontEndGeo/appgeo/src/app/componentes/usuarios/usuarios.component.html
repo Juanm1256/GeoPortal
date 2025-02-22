@@ -1,160 +1,174 @@
 <!-- Abrir Modal -->
 <ng-template #content let-modal>
-  <div class="modal-content" [ngClass]="{'dark-theme': isDarkMode}">
-  <div class="modal-header">
-    <h4 class="modal-title">USUARIO</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body">
-    <div class="content-viewport">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="item-wrapper py-2">
-            <form [formGroup]="form" (ngSubmit)="Guardar()">
-              <!-- Campos de Persona -->
-              <div class="form-group mb-3">
-                <label for="nombres">Nombres</label>
-                <input type="text" class="form-control" id="nombres" placeholder="Ingresa los nombres" autocomplete="off" formControlName="nombres" required />
-                <small class="text-danger" *ngIf="form.get('nombres')?.invalid && form.get('nombres')?.touched">
-                  Nombre es obligatorio y solo acepta letras.
-                </small>
-              </div>
-              <div class="form-group mb-3">
-                <label for="apellidos">Apellidos</label>
-                <input type="text" class="form-control" id="apellidos" placeholder="Ingresa los apellidos" autocomplete="off" formControlName="apellidos" required />
-                <small class="text-danger" *ngIf="form.get('apellidos')?.invalid && form.get('apellidos')?.touched">
-                  Apellido es obligatorio y solo acepta letras.
-                </small>
-              </div>
-              <div class="form-group mb-3">
-                <label for="ci">CI</label>
-                <input type="text" class="form-control" id="ci" placeholder="Ingresa el CI" formControlName="ci" autocomplete="off" required />
-                <small class="text-danger" *ngIf="form.get('ci')?.invalid && form.get('ci')?.touched">
-                  CI es obligatorio y solo acepta caracteres alfanuméricos.
-                </small>
-              </div>
-              <!-- Campo: Rol -->
-              <div class="form-group mb-3">
-                <label for="idrol">Rol</label>
-                <select class="form-control" id="idrol" formControlName="idrol">
-                  <option *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombre }}</option>
-                </select>
-              </div>
-              <!-- Campo: Username -->
-              <div class="form-group mb-3">
-                <label for="username">Usuario</label>
-                <input type="text" class="form-control" id="username" placeholder="Ingresa el Nombre de usuario" autocomplete="off" formControlName="username" required />
-                <small class="text-danger" *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
-                  Usuario es obligatorio.
-                </small>
-              </div>
-              <!-- Campo: Contraseña -->
-              <div class="form-group mb-3">
-                <label for="password">Contraseña</label>
-                <input type="password" class="form-control" id="password" placeholder="Ingresa la contraseña" autocomplete="off" formControlName="password" required />
-                <small class="text-danger" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
-                  La contraseña debe tener al menos 6 caracteres.
-                </small>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-danger" (click)="modal.dismiss()">Cerrar</button>
-                <button class="btn btn-success" [disabled]="form.invalid" type="submit" [class.invalidado]="form.invalid" [class.validado]="form.valid" (click)="modal.close()">Guardar</button>
-              </div>
-            </form>
-          </div>
+  <div class="modal-content modal-custom" [ngClass]="{'dark-theme': isDarkMode}">
+    <div class="modal-header modal-header-custom">
+      <h4 class="modal-title">USUARIO</h4>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="Guardar()">
+        <!-- Nombres -->
+        <div class="mb-3">
+          <label for="nombres">Nombres</label>
+          <input type="text" class="form-control" id="nombres" placeholder="Ingresa los nombres"
+            formControlName="nombres" autocomplete="off" required />
+          <small class="text-danger" *ngIf="getErrorMessage('nombres')">
+            {{ getErrorMessage('nombres') }}
+          </small>
         </div>
-      </div>
+
+        <!-- Apellidos -->
+        <div class="mb-3">
+          <label for="apellidos">Apellidos</label>
+          <input type="text" class="form-control" id="apellidos" placeholder="Ingresa los apellidos"
+            formControlName="apellidos" autocomplete="off" required />
+          <small class="text-danger" *ngIf="getErrorMessage('apellidos')">
+            {{ getErrorMessage('apellidos') }}
+          </small>
+        </div>
+
+        <!-- CI -->
+        <div class="mb-3">
+          <label for="ci">CI</label>
+          <input type="text" class="form-control" id="ci" placeholder="Ingresa el CI" formControlName="ci"
+            autocomplete="off" required />
+          <small class="text-danger" *ngIf="getErrorMessage('ci')">
+            {{ getErrorMessage('ci') }}
+          </small>
+        </div>
+        <div class="mb-3">
+          <label for="idrol">Rol</label>
+          <select class="form-control" id="idrol" formControlName="idrol">
+            <option value="" disabled>Seleccione un rol</option>
+            <option *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombre }}</option>
+          </select>
+          <small class="text-danger" *ngIf="form.get('idrol')?.invalid && form.get('idrol')?.touched">
+            El rol es obligatorio.
+          </small>
+        </div>
+        
+        <!-- Username -->
+        <div class="mb-3">
+          <label for="username">Usuario</label>
+          <input type="text" class="form-control" id="username" placeholder="Ingresa el nombre de usuario"
+            formControlName="username" autocomplete="off" required />
+          <small class="text-danger" *ngIf="getErrorMessage('username')">
+            {{ getErrorMessage('username') }}
+          </small>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-3 position-relative">
+          <label for="password">Contraseña</label>
+          <div class="position-relative">
+              <input [type]="showPassword ? 'text' : 'password'" 
+                     class="form-control password-input-with-icon" 
+                     id="password" 
+                     placeholder="Ingresa la contraseña" 
+                     autocomplete="off" 
+                     formControlName="password" 
+                     required />
+              <i [ngClass]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" 
+                 class="password-icon" 
+                 (click)="togglePasswordVisibility()"></i>
+          </div>
+          <small class="text-danger" *ngIf="getErrorMessage('password')">
+            {{ getErrorMessage('password') }}
+          </small>
+        </div>
+
+        <div class="modal-footer modal-footer-custom">
+          <button type="button" class="btn btn-danger btn-rounded" (click)="modal.dismiss()">Cerrar</button>
+          <button class="btn btn-success btn-rounded" [disabled]="form.invalid" type="submit">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 </ng-template>
 
 <!-- Contenido Principal -->
-<div class="content-viewport" [ngClass]="{'dark-theme': isDarkMode}">
-  <div class="row">
-    <div class="col-lg-12">
-      <!-- Encabezado -->
-      <div class="row py-4 align-items-center">
-        <div class="col-sm-10">
-          <h2>USUARIO</h2>
-        </div>
-        <div class="col-sm-2 text-right">
-          <button type="button" class="btn btn-primary has-icon btn-rounded" (click)="Guardarinstruct(content)">
-            <i class="mdi mdi-plus-circle"></i> AGREGAR
-          </button>
-        </div>
-      </div>
-
-      <!-- Buscador -->
-      <div class="form-group row mb-4">
-        <div class="col-md-5">
-          <div class="input-group">
-            <select class="form-control col-md-3 text-center" [(ngModel)]="criterio">
-              <option selected value="username">Nombre de usuario</option>
-              <option value="idrol">Rol</option>
-              <option value="idpersona">Persona</option>
-            </select>
-            <input type="text" class="form-control" name="filter" placeholder="Buscar..." [(ngModel)]="search" />
-          </div>
-        </div>
-        <div class="col-md-7 text-right">
-          <button type="button" class="btn btn-success has-icon btn-rounded" (click)="LimpiarSearch()">
-            <i class="mdi mdi-reload"></i> LIMPIAR
-          </button>
-        </div>
-      </div>
-       <!-- 🔹 Spinner de carga -->
-       <div *ngIf="isLoading" class="d-flex justify-content-center mt-3">
-        <div class="spinner-grow" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-      <!-- Tabla de Usuarios -->
-      <div class="item-wrapper">
-        <div class="table-responsive" *ngIf="!isLoading">
-          <table class="table info-table table-striped">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nombre de usuario</th>
-                <th>Rol</th>
-                <th>Persona</th>
-                <th>Fecha de Registro</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let usuario of listaUsuarios | filterone:criterio:search | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize; let i = index">
-                <td>{{ usuario.idusuario }}</td>
-                <td>{{ usuario.username }}</td>
-                <td>{{ obtenerNombreRol(usuario.idrol) }}</td>
-                <td>{{ usuario.IdPersonanav?.nombres }} {{ usuario.IdPersonanav?.apellidos }}</td>
-                <td>{{ usuario.fechareg | date:'dd/MM/yyyy' }}</td>
-                <td>
-                  <label *ngIf="usuario.estado == 'Activo'" class="">Activo</label>
-                  <label *ngIf="usuario.estado == 'Inactivo'" class="">Inactivo</label>
-                </td>
-                <td>
-                  <button type="button" (click)="SeleccionarUsuario(content, usuario)" class="btn has-icon btn-rounded me-2" [ngClass]="isDarkMode ? 'btn-light' : 'btn-dark'">
-                    <i class="mdi mdi-lead-pencil"></i> Modificar
-                  </button>
-                  <button type="button" (click)="CambiarEstado(usuario, 'Inactivo')" class="btn btn-danger has-icon btn-rounded me-2" *ngIf="usuario.estado == 'Activo'">
-                    <i class="mdi mdi-delete"></i> Desactivar
-                  </button>
-                  <button type="button" (click)="CambiarEstado(usuario, 'Activo')" class="btn btn-success has-icon btn-rounded" *ngIf="usuario.estado == 'Inactivo'">
-                    <i class="mdi mdi-arrow-right-bold-circle"></i> Activar
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="float-end mt-3">
-          <ngb-pagination [pageSize]="pageSize" [collectionSize]="pagesizee" [(page)]="page" [boundaryLinks]="true"></ngb-pagination>
-        </div>
-      </div>
+<div class="content-viewport main-content" [ngClass]="{'dark-theme': isDarkMode}">
+  <div class="row py-4 align-items-center header-custom">
+    <div class="col-sm-10">
+      <h2>USUARIO</h2>
+    </div>
+    <div class="col-sm-2 text-end">
+      <button type="button" class="btn btn-primary btn-rounded" (click)="Guardarinstruct(content)">
+        <i class="mdi mdi-plus-circle"></i> AGREGAR
+      </button>
     </div>
   </div>
-</div>
 
+  <!-- Buscador -->
+  <div class="row mb-4 align-items-center search-box">
+    <div class="col-md-5">
+      <div class="input-group">
+        <select class="form-control text-center" [(ngModel)]="criterio">
+          <option selected value="username">Nombre de usuario</option>
+          <option value="idrol">Rol</option>
+          <option value="idpersona">Persona</option>
+        </select>
+        <input type="text" class="form-control" name="filter" placeholder="Buscar..." [(ngModel)]="search" />
+      </div>
+    </div>
+    <div class="col-md-7 text-end">
+      <button type="button" class="btn btn-success btn-rounded" (click)="LimpiarSearch()">
+        <i class="mdi mdi-reload"></i> LIMPIAR
+      </button>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center mt-3">
+    <div class="spinner-grow" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de Usuarios -->
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="table table-striped table-custom">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre de usuario</th>
+          <th>Rol</th>
+          <th>Persona</th>
+          <th>Fecha de Registro</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let usuario of listaUsuarios | filterone:criterio:search | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize; let i = index">
+          <td>{{ usuario.idusuario }}</td>
+          <td>{{ usuario.username }}</td>
+          <td>{{ obtenerNombreRol(usuario.idrol) }}</td>
+          <td>{{ usuario.IdPersonanav?.nombres }} {{ usuario.IdPersonanav?.apellidos }}</td>
+          <td>{{ usuario.fechareg | date:'dd/MM/yyyy' }}</td>
+          <td [ngClass]="{'text-success': usuario.estado === 'Activo', 'text-danger': usuario.estado === 'Inactivo'}">
+            {{ usuario.estado }}
+          </td>
+          <td>
+            <button type="button" (click)="SeleccionarUsuario(content, usuario)" class="btn btn-dark btn-rounded me-2">
+              <i class="mdi mdi-lead-pencil"></i> Modificar
+            </button>
+            <button type="button" (click)="CambiarEstado(usuario, 'Inactivo')" class="btn btn-danger btn-rounded me-2"
+              *ngIf="usuario.estado === 'Activo'">
+              <i class="mdi mdi-delete"></i> Desactivar
+            </button>
+            <button type="button" (click)="CambiarEstado(usuario, 'Activo')" class="btn btn-success btn-rounded"
+              *ngIf="usuario.estado === 'Inactivo'">
+              <i class="mdi mdi-arrow-right-bold-circle"></i> Activar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="float-end mt-3">
+    <ngb-pagination [pageSize]="pageSize" [collectionSize]="pagesizee" [(page)]="page"
+      [boundaryLinks]="true"></ngb-pagination>
+  </div>
+</div>

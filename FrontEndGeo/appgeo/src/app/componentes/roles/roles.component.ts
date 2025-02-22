@@ -13,6 +13,7 @@ import { ThemeService } from '../../servicios/theme.service';
 import { Permisos } from '../../interfaces/permisos';
 import { Subscription, firstValueFrom } from 'rxjs';
 
+
 @Component({
   selector: 'app-roles',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPaginationModule, FilteronePipe],
@@ -43,15 +44,11 @@ export class RolesComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      nombre: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(50),
-          Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$')
-        ]
-      ],
-      permisos: this.fb.array([])
+      nombre: ['', [
+        Validators.required,
+        Validators.maxLength(25),
+        Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$')
+      ]],
     });
   }
   async cargarRoles(): Promise<void> {
@@ -68,25 +65,38 @@ export class RolesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-  try {
-    await this.cargarRoles();
-    
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      (isDark) => this.isDarkMode = isDark
-    );
-
-    await Promise.all([
-      this.listadoRol(),
-      this.ListaPermiso()
-    ]);
-
-    if (!this.form.contains('permisos')) {
-      this.form.addControl('permisos', this.fb.array([])); 
+    try {
+      await this.cargarRoles();
+  
+      this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+        (isDark) => this.isDarkMode = isDark
+      );
+  
+      await Promise.all([
+        this.listadoRol(),
+        this.ListaPermiso()
+      ]);
+  
+      if (!this.form.contains('permisos')) {
+        this.form.addControl('permisos', this.fb.array([]));
+      }
+  
+      // Transformar todos los campos del formulario a mayúsculas excepto los que especifiques
+      Object.keys(this.form.controls).forEach((field) => {
+        if (field !== 'nombreEspecial') {  // Agrega aquí los campos que no quieres que se conviertan en mayúsculas
+          this.form.get(field)?.valueChanges.subscribe(value => {
+            if (value && typeof value === 'string' && value !== value.toUpperCase()) {
+              this.form.get(field)?.setValue(value.toUpperCase(), { emitEvent: false });
+            }
+          });
+        }
+      });
+  
+    } catch (error) {
+      console.error('Error en la inicialización:', error);
     }
-  } catch (error) {
-    console.error('Error en la inicialización:', error);
   }
-}
+  
 
   toggleTheme() {
     this.themeService.toggleTheme();
@@ -129,6 +139,7 @@ export class RolesComponent implements OnInit, OnDestroy {
   
       await this.listadoRol();
       this.form.reset();
+      this.modalService.dismissAll();
     } catch (error: any) {
       if (error.error?.errors) {
         Swal.fire({
@@ -217,6 +228,21 @@ export class RolesComponent implements OnInit, OnDestroy {
       }
     }
   }
+  getErrorMessage(controlName: string): string | null {
+    const control = this.form.get(controlName);
+    if (control && control.invalid && (control.dirty || control.touched)) {
+      const errors = control.errors;
+      if (errors) {
+        const errorKey = Object.keys(errors)[0]; // Obtener la primera clave de error
+        const mensajes = this.lista.mensajes[controlName]; // Obtener los mensajes correspondientes
+        if (mensajes) {
+          const mensaje = mensajes.find((msg) => msg.type === errorKey); // Buscar el mensaje que coincida con la clave de error
+          return mensaje ? mensaje.message : null;
+        }
+      }
+    }
+    return null;
+  }  
   LimpiarSearch() {
     this.search = '';
   }

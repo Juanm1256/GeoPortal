@@ -83,7 +83,7 @@
 .dashboard-container.dark-theme .chart-container {
   background-color: #1a1a1a;
 }
-/* Contenedor del spinner */
+/* 🌞 Modo Claro - Spinner */
 .spinner-container {
   display: flex;
   flex-direction: column;
@@ -92,6 +92,12 @@
   height: 100vh;
   text-align: center;
   font-size: 18px;
+  color: black; /* Texto negro para el modo claro */
+}
+
+/* 🌙 Modo Oscuro - Spinner */
+.spinner-container.dark-theme {
+  color: white; /* Texto blanco para el modo oscuro */
 }
 
 /* Animación del spinner */

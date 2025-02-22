@@ -1,77 +1,124 @@
-
-/* Estilos para el modo noche */
-.dark-theme {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-/* Estilos para la tabla en modo noche */
-.dark-theme .table {
-  background-color: #1a1a1a;
-  color: #ffffff ;
-}
-
-.dark-theme .table th {
-  background-color: #333 !important;
-  color: #fff !important;
-}
-
-.dark-theme .table td {
-  background-color: #2b2b2b !important;
-  color: #ddd !important;
-}
-
-.dark-theme .table-striped tbody tr:nth-of-type(odd) {
-  background-color: #252525 !important;
-}
-
-/* Estilos para cajas de texto en modo noche */
-.dark-theme .form-control {
-  background-color: #333 !important;
-  color: #ffffff !important;
-  border: 1px solid #555 !important;
-}
-
-.dark-theme .form-control::placeholder {
-  color: #bbb !important;
-}
-
-/* Estilos para el modal en modo noche */
-.dark-theme .modal-content {
-  background-color: #1a1a1a !important;
-  color: #ffffff !important;
-}
-
-.dark-theme .modal-header {
-  border-bottom: 1px solid #444 !important;
-}
-
-.dark-theme .modal-footer {
-  border-top: 1px solid #444 !important;
+/* ===========================
+   🌙 Modo Noche (Global)
+   =========================== */
+   .dark-theme {
+    background-color: #121212;
+    color: #ffffff;
 }
 
 .dark-theme .btn-close {
-  filter: invert(1) !important;
+    filter: invert(1) !important;
 }
 
-/* ===========================
-   📑 Paginación en Modo Noche  
-   =========================== */
-   .dark-theme .pagination {
+/* ✅ Cajas de texto en modo noche */
+.dark-theme .form-control {
+    background-color: #333 !important;
+    color: #ffffff !important;
+    border: 1px solid #555 !important;
+}
+
+.dark-theme .form-control::placeholder {
+    color: #bbb !important;
+}
+
+/* ✅ Paginación en modo noche */
+.dark-theme .pagination {
     background-color: #121212 !important;
-    padding: 10px;
     display: flex;
     justify-content: center;
     border-radius: 5px;
-  }
-  
-  .dark-theme .pagination .page-item .page-link {
+}
+
+.dark-theme .pagination .page-item .page-link {
     background-color: #333 !important;
     color: #ffffff !important;
     border: 1px solid #444 !important;
-  }
-  
-  .dark-theme .pagination .page-item.active .page-link {
+}
+
+.dark-theme .pagination .page-item.active .page-link {
     background-color: #007bff !important;
     border-color: #007bff !important;
-  }
+}
+
+/* ===========================
+   🗂️ Tabla en Modo Noche
+   =========================== */
+.btn-primary .table {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.dark-theme .table th {
+    background-color: #333 !important;
+    color: #fff !important;
+}
+
+.dark-theme .table td {
+    background-color: #2b2b2b !important;
+    color: #ddd !important;
+}
+
+.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #252525 !important;
+}
+
+/* ===========================
+   🗂️ Modal en Modo Noche
+   =========================== */
+.dark-theme .modal-content {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .modal-header {
+    border-bottom: 1px solid #444 !important;
+}
+
+.dark-theme .modal-footer {
+    border-top: 1px solid #444 !important;
+}
+
+/* ===========================
+   🔘 Botones Globales
+   =========================== */
+.btn-rounded {
+    border-radius: 50px;
+    font-weight: 500;
+    padding: 8px 15px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2C5384;
+    border-color: #2C5384;
+}
+
+.btn-primary:hover {
+    background-color: #23456b;
+    border-color: #23456b;
+}
+
+/* ===========================
+   ✅ Utilidades
+   =========================== */
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.float-end {
+    float: right;
+}
+
+.text-end {
+    text-align: end;
+}
+
+.d-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

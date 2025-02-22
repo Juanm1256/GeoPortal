@@ -623,57 +623,70 @@ private setupMapEventListeners(): void {
   }
 }
 
-  resetMapView() {
-    Swal.fire({
-      title: "¿Restablecer el mapa?",
-      text: "Se restablecerán todas las capas y volverás a la vista inicial.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, restablecer",
-      cancelButtonText: "Cancelar"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.map.setView([-16.54529, -64.7400], 6);
+resetMapView() {
+  Swal.fire({
+    title: "¿Restablecer el mapa?",
+    text: "Se restablecerán todas las capas y volverás a la vista inicial.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, restablecer",
+    cancelButtonText: "Cancelar"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.map.setView([-16.54529, -64.7400], 6);
 
-        this.markerLayer.clearLayers();
+      // Eliminar todos los marcadores
+      this.markerLayer.clearLayers();
 
-        if (this.marcadorSeleccionado) {
-          this.map.removeLayer(this.marcadorSeleccionado);
-          this.marcadorSeleccionado = null;
-        }
-
-        Object.keys(this.capas).forEach(layerName => {
-          if (this.capas[layerName]) {
-            this.map.removeLayer(this.capas[layerName]);
-          }
-        });
-
-        this.capas = {};
-        this.activeLayers = {};
-
-        this.map.eachLayer(layer => {
-          if (layer instanceof L.TileLayer) {
-            this.map.removeLayer(layer);
-          }
-        });
-        this.activeBaseLayer = this.baseMaps["Mapa OSM"];
-        this.map.addLayer(this.activeBaseLayer);
-
-        document.querySelectorAll(".layer-btn").forEach(btn => {
-          btn.classList.remove("active");
-        });
-
-        Swal.fire(
-          "Mapa Restablecido",
-          "El mapa ha vuelto a su estado inicial.",
-          "success"
-        );
+      if (this.marcadorSeleccionado) {
+        this.map.removeLayer(this.marcadorSeleccionado);
+        this.marcadorSeleccionado = null;
       }
-    });
-  }
 
+      // Remover todas las capas
+      Object.keys(this.capas).forEach(layerName => {
+        if (this.capas[layerName]) {
+          this.map.removeLayer(this.capas[layerName]);
+        }
+      });
+
+      this.capas = {};
+      this.activeLayers = {};
+
+      // Remover todas las capas base y agregar la predeterminada
+      this.map.eachLayer(layer => {
+        if (layer instanceof L.TileLayer) {
+          this.map.removeLayer(layer);
+        }
+      });
+      this.activeBaseLayer = this.baseMaps["Mapa OSM"];
+      this.map.addLayer(this.activeBaseLayer);
+
+      // Restablecer los botones de capas
+      document.querySelectorAll(".layer-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      // ✅ Ocultar el botón de gráficos y cerrar el panel lateral si está abierto
+      this.showSidebarButton = false;
+      this.sidebarOpen = false;
+
+      // ✅ Destruir el gráfico si existe
+      if (this.pieChart) {
+        this.pieChart.destroy();
+        this.pieChart = null;
+      }
+
+      Swal.fire(
+        "Mapa Restablecido",
+        "El mapa ha vuelto a su estado inicial.",
+        "success"
+      );
+    }
+  });
+}
   restoreLayerButtonStyles() {
     setTimeout(() => {
       document.querySelectorAll('.layer-btn').forEach(button => {
@@ -684,6 +697,7 @@ private setupMapEventListeners(): void {
       });
     }, 100);
   }
+
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
     const latlng = event.latlng;

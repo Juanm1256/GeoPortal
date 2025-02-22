@@ -17,23 +17,32 @@
                 <h2>INICIAR SESIÓN</h2>
                 <form [formGroup]="form" (ngSubmit)="Guardar()">
                     <div class="inputBox">
-                        <input type="text" class="form-control" id="usuario" placeholder="Usuario:" formControlName="usuario" autocomplete="off">
+                        <input type="text" class="form-control" id="usuario" placeholder="Usuario:"
+                            formControlName="usuario" autocomplete="off">
                         <small class="text-danger" *ngIf="form.get('usuario')?.invalid && form.get('usuario')?.touched">
                             Usuario es obligatorio.
                         </small>
                     </div>
-                    <div class="inputBox">
-                        <input type="password" class="form-control" id="contraseña" placeholder="Contraseña:" formControlName="contraseña">
-                        <small class="text-danger" *ngIf="form.get('contraseña')?.invalid && form.get('contraseña')?.touched">
+                    <div class="inputBox position-relative">
+                        <div class="position-relative">
+                            <input [type]="showPassword ? 'text' : 'password'"
+                                class="form-control password-input-with-icon" id="contraseña" placeholder="Contraseña:"
+                                formControlName="contraseña" required>
+                            <i [ngClass]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" class="password-icon"
+                                (click)="togglePasswordVisibility()"></i>
+                        </div>
+                        <small class="text-danger"
+                            *ngIf="form.get('contraseña')?.invalid && form.get('contraseña')?.touched">
                             Contraseña es obligatoria.
                         </small>
                     </div>
+
                     <div class="inputBox">
                         <button type="submit" [disabled]="form.invalid || isLoading" [class.loading]="isLoading">
-                          {{ isLoading ? 'Accediendo' : 'Ingresar' }}
+                            {{ isLoading ? 'Accediendo' : 'Ingresar' }}
                         </button>
-                      </div>
-                      
+                    </div>
+
                 </form>
             </div>
             <div class="images-container bottom">

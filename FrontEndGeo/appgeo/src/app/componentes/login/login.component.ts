@@ -15,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
   imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class LoginComponent {
+  showPassword: boolean = false;
   form: FormGroup;
   isLoading = false;
 
@@ -38,7 +39,9 @@ export class LoginComponent {
       ]
     });
   }
-
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
   async Guardar(): Promise<void> {
     try {
       if (this.form.invalid) return;
@@ -69,9 +72,9 @@ export class LoginComponent {
 
         await new Promise<void>(resolve => setTimeout(resolve, 2000));
 
-        if (userRole === 'Administrador') {
+        if (userRole === 'ADMINISTRADOR') {
           await this.router.navigate(['/dashboard']);
-        } else if (userRole === 'Visitante') {
+        } else if (userRole === 'VISITANTE') {
           await this.router.navigate(['/map-public']);
         } else {
           console.warn('⚠ Rol desconocido, redirigiendo al login.');
