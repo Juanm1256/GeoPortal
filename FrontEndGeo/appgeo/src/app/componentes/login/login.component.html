@@ -15,7 +15,7 @@
                     <img src="/assets/img/logo_iniaf.webp" alt="Imagen 1" class="login-image">
                 </div>
                 <h2>INICIAR SESIÓN</h2>
-                <form [formGroup]="form" (ngSubmit)="Guardar()">
+                <form [formGroup]="form" (submit)="Guardar($event)" novalidate>
                     <div class="inputBox">
                         <input type="text" class="form-control" id="usuario" placeholder="Usuario:"
                             formControlName="usuario" autocomplete="off">
@@ -23,11 +23,12 @@
                             Usuario es obligatorio.
                         </small>
                     </div>
+                
                     <div class="inputBox position-relative">
                         <div class="position-relative">
                             <input [type]="showPassword ? 'text' : 'password'"
                                 class="form-control password-input-with-icon" id="contraseña" placeholder="Contraseña:"
-                                formControlName="contraseña" required>
+                                formControlName="contraseña">
                             <i [ngClass]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" class="password-icon"
                                 (click)="togglePasswordVisibility()"></i>
                         </div>
@@ -36,14 +37,14 @@
                             Contraseña es obligatoria.
                         </small>
                     </div>
-
+                
                     <div class="inputBox">
-                        <button type="submit" [disabled]="form.invalid || isLoading" [class.loading]="isLoading">
-                            {{ isLoading ? 'Accediendo' : 'Ingresar' }}
+                        <button type="submit" [disabled]="isLoading">
+                            {{ isLoading ? 'Ingresando' : 'Ingresar' }}
                         </button>
                     </div>
-
                 </form>
+                
             </div>
             <div class="images-container bottom">
                 <img src="/assets/img/logo_mdryt.webp" alt="Imagen 2" class="login-image">

@@ -39,6 +39,10 @@ namespace AppGeoPortal.Implementacion
             }
             return sw;
         }
+        public async Task<bool> ExisteUsuario(string username)
+        {
+            return await context.Usuarios.AnyAsync(u => u.username == username);
+        }
 
         public async Task<List<Usuarios>> Listaractivos()
         {

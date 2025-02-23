@@ -132,7 +132,7 @@ section{
 }
 
 .form .inputBox button[type="submit"] {
-    background: #2196f3;
+    background: #2C5384;
     color: #fff;
     max-width: 100px;
     border-radius: 10px;
@@ -144,7 +144,7 @@ section{
 }
 
 .form .inputBox button[type="submit"]:hover {
-    background: #1976d2;
+    background: #2C5384;
     transform: translateY(-2px);
 }
 

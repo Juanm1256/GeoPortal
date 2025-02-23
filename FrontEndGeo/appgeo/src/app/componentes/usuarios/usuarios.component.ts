@@ -214,20 +214,25 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   async CambiarEstado(usuario: Usuarios, accion: string): Promise<void> {
     try {
-      usuario.estado = accion;
-      await firstValueFrom(this.usuarioService.PutUsuario(usuario.idusuario, usuario));
-
+      usuario.estado = accion; // Verifica que el estado se actualiza correctamente
+      console.log("Enviando usuario:", usuario); // 📌 Verifica qué se está enviando
+  
+      const response = await firstValueFrom(this.usuarioService.PutUsuario(usuario.idusuario, usuario));
+  
+      console.log("Respuesta del servidor:", response); // 📌 Verifica si hay respuesta del backend
+  
       Swal.fire({
         icon: accion === 'Activo' ? 'success' : 'error',
         title: accion === 'Activo' ? 'Usuario Activado!' : 'Usuario Desactivado!',
       });
-
+  
       await this.cargarUsuarios();
     } catch (error) {
       console.error('Error al cambiar estado:', error);
       Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado del usuario.' });
     }
   }
+  
 
   obtenerNombreRol(idrol: number): string {
     const rol = this.roles.find(r => r.idrol === idrol);
