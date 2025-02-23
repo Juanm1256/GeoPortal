@@ -7,8 +7,14 @@ import { catchError, EMPTY } from 'rxjs';
 const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const token = authService.getToken();
 
+  // ✅ Excluir la solicitud de login del interceptor
+  if (req.url.includes('/Login')) {
+    //console.info('➡️ Solicitud de login, no se agrega token.');
+    return next(req);
+  }
+
+  const token = authService.getToken();
   if (!token) {
     //console.warn('⚠ No hay token disponible, enviando solicitud sin autenticación.');
     return next(req);
@@ -30,14 +36,14 @@ const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(clonedRequest).pipe(
     catchError((error) => {
-      if (error.status ===401) {
+      if (error.status === 401) {
         authService.logout();
-        setTimeout(()=> router.navigate(['/login']), 0);
+        setTimeout(() => router.navigate(['/login']), 0);
         return EMPTY;
       }
       return EMPTY;
     })
-  )
+  );
 };
 
 export default jwtInterceptor;

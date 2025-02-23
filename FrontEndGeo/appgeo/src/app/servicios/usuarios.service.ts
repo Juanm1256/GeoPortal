@@ -35,14 +35,19 @@ export class UsuariosService {
     );
   }
 
+ 
+  
   PutUsuario(id: number, usuario: Usuarios): Observable<Usuarios> {
-    return this.http.put<Usuarios>(this.API + '/' + "Modificar" + '/' + id, usuario).pipe(
+    console.log("Llamando a API con URL:", this.API + '/' + "Modificar" + '/' + id); // 📌 Verifica la URL
+    return this.http.put<Usuarios>(`${this.API}/Modificar/${id}`, usuario).pipe(
       catchError(error => {
+        console.error("Error en la petición HTTP:", error);
         return of();
       })
     );
   }
-
+  
+ 
   DeleteUsuario(id: number): Observable<Usuarios> {
     return this.http.delete<Usuarios>(this.API + '/' + id).pipe(
       catchError(error => {

@@ -16,16 +16,331 @@ import { ColoresMapaUtil } from '../app/Colores/Colores';
 
 export class Metodos {
 
-  async CargarCapitalesDepartamentales(map: L.Map, capitalesDepartamentalesService: any): Promise<L.Layer> {
+
+  async CargarCuencas(
+    maping: L.Map,
+    cuencasService: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
+    const layerGroup = L.layerGroup();
+    let poligonoSeleccionado: L.Path | null = null;
+
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      cuencasService.listarTodos().subscribe({
+        next: (cuencas: Cuencas[]) => {
+          cuencas.forEach(cuenca => {
+            if (cuenca.geom) {
+              const geojson = JSON.parse(cuenca.geom);
+              if (geojson.type === 'MultiPolygon') {
+                const estiloPoligono = {
+                  color: '#191b1c',
+                  weight: 2,
+                  opacity: 1,
+                  fillColor: '#64B5F6',
+                  fillOpacity: 0
+                };
+                const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+
+                const polygon = L.geoJSON(geojson, {
+                  style: estiloPoligono,
+                  onEachFeature: (feature, layer) => {
+                    layer.on({
+                      mouseup: (e) => {
+                        const layer = e.target as L.Path;
+
+                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                          poligonoSeleccionado.setStyle(estiloPoligono);
+                        }
+
+                        // 🔹 Pintar el nuevo polígono seleccionado
+                        layer.setStyle({
+                          weight: 3,
+                          fillOpacity: 0.2,
+                          color: colorMouseOver,
+                          fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                        });
+
+                        poligonoSeleccionado = layer;
+                      }
+                    });
+                  }
+                });
+
+                layerGroup.addLayer(polygon);
+              }
+            }
+          });
+
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
+  }
+  async Cargarmercados(
+    maping: L.Map,
+    mercadoservices: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
+    const markerCluster = L.markerClusterGroup();
+
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      mercadoservices.listarTodos().subscribe({
+        next: (mercados: Mercados[]) => {
+          mercados.forEach(mercado => {
+            if (mercado.geom) {
+              const geojson = JSON.parse(mercado.geom);
+              if (geojson.type === 'Point') {
+                const [lon, lat] = geojson.coordinates;
+                const icono = L.icon({
+                  iconUrl: '../assets/leaflet/marker-icon-2x.png',
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                  popupAnchor: [0, -32]
+                });
+
+                const marker = L.marker([lat, lon], { icon: icono })
+                  .bindPopup(`
+                                  <div class="popup-content">
+                                      <p>${mercado.nombre}</p>
+                                      <p>Provincia: ${mercado.provincia}</p>
+                                      <p>Municipio: ${mercado.municipio}</p>
+                                  </div>`);
+
+                markerCluster.addLayer(marker);
+              }
+            }
+          });
+
+          maping.addLayer(markerCluster);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(markerCluster);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async CargarCapitalesDepartamentales(
+    map: L.Map,
+    capitalesDepartamentalesService: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void  // <-- Hacer el argumento opcional
+  ): Promise<L.Layer> {
+    const layerGroup = L.layerGroup();
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      capitalesDepartamentalesService.listarTodos().subscribe({
+        next: (cap_dep: CapitalesDepartamentales[]) => {
+          cap_dep.forEach((cap_deps: CapitalesDepartamentales) => {
+            if (cap_deps.geom) {
+              try {
+                const geojson = JSON.parse(cap_deps.geom);
+                if (geojson.type === 'Point') {
+                  const [lon, lat] = geojson.coordinates;
+                  const icono = L.icon({
+                    iconUrl: '../assets/leaflet/marker-icon-2x.png',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
+                  });
+
+                  const marker = L.marker([lat, lon], { icon: icono })
+                    .bindPopup(`
+                                        <div class="popup-content">
+                                            <strong>${cap_deps.cap_dep}</strong>
+                                            <br>
+                                            <strong>Código INE: ${cap_deps.cod_ine}</strong>
+                                        </div>
+                                    `);
+
+                  layerGroup.addLayer(marker);
+                }
+              } catch (error) {
+                console.error('Error parsing geom:', error);
+              }
+            }
+          });
+
+          map.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
+  }
+  async CargarLimitesDepartamentales(
+    maping: L.Map,
+    limitesdepservice: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
+    const layerGroup = L.layerGroup();
+    let poligonoSeleccionado: L.Path | null = null;
+
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      limitesdepservice.listarTodos().subscribe({
+        next: (lim_deps: LimitesDepartamentales[]) => {
+          lim_deps.forEach(lim_dep => {
+            if (lim_dep.geom) {
+              const geojson = JSON.parse(lim_dep.geom);
+
+              if (geojson.type === 'MultiPolygon') {
+                const estiloPoligono = {
+                  color: '#191b1c',
+                  weight: 2,
+                  opacity: 1,
+                  fillColor: '#64B5F6',
+                  fillOpacity: 0
+                };
+
+                const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+
+                const polygon = L.geoJSON(geojson, {
+                  style: estiloPoligono,
+                  onEachFeature: (feature, layer) => {
+                    layer.on({
+                      mouseup: (e) => {
+                        const layer = e.target as L.Path;
+
+                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                          poligonoSeleccionado.setStyle(estiloPoligono);
+                        }
+
+                        // 🔹 Pintar el nuevo polígono seleccionado
+                        layer.setStyle({
+                          weight: 3,
+                          fillOpacity: 0.2,
+                          color: colorMouseOver,
+                          fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                        });
+
+                        poligonoSeleccionado = layer;
+                      }
+                    });
+                  }
+                });
+
+                layerGroup.addLayer(polygon);
+              }
+            }
+          });
+
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
+  }
+  async CargarLimitesMunicipales(
+    maping: L.Map,
+    limitesmuservice: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
+    const layerGroup = L.layerGroup();
+    let poligonoSeleccionado: L.Path | null = null;
+
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      limitesmuservice.listarTodos().subscribe({
+        next: (lim_muns: LimitesMunicipales[]) => {
+          lim_muns.forEach(lim_mun => {
+            if (lim_mun.geom) {
+              const geojson = JSON.parse(lim_mun.geom);
+
+              if (geojson.type === 'MultiPolygon') {
+                const estiloPoligono = {
+                  color: '#191b1c',
+                  weight: 2,
+                  opacity: 1,
+                  fillColor: '#64B5F6',
+                  fillOpacity: 0
+                };
+
+                const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+
+                const polygon = L.geoJSON(geojson, {
+                  style: estiloPoligono,
+                  onEachFeature: (feature, layer) => {
+                    layer.on({
+                      mouseup: (e) => {
+                        const layer = e.target as L.Path;
+
+                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
+                          poligonoSeleccionado.setStyle(estiloPoligono);
+                        }
+
+                        // 🔹 Pintar el nuevo polígono seleccionado
+                        layer.setStyle({
+                          weight: 3,
+                          fillOpacity: 0.2,
+                          color: colorMouseOver,
+                          fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
+                        });
+
+                        poligonoSeleccionado = layer;
+                      }
+                    });
+                  }
+                });
+
+                layerGroup.addLayer(polygon);
+              }
+            }
+          });
+
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
+  }
+  async CargarProveedorAlevines(
+    maping: L.Map,
+    proveedoralevinesservice: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
-    capitalesDepartamentalesService.listarTodos().subscribe({
-      next: (cap_dep: CapitalesDepartamentales[]) => {
-        cap_dep.forEach((cap_deps: CapitalesDepartamentales) => {
-          if (cap_deps.geom) {
-            try {
-              const geojson = JSON.parse(cap_deps.geom);
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
 
+    return new Promise<L.Layer>((resolve, reject) => {
+      proveedoralevinesservice.listarTodos().subscribe({
+        next: (proveedores: ProveedorAlevines[]) => {
+          proveedores.forEach(proveedor => {
+            if (proveedor.geom) {
+              const geojson = JSON.parse(proveedor.geom);
               if (geojson.type === 'Point') {
                 const [lon, lat] = geojson.coordinates;
 
@@ -37,329 +352,126 @@ export class Metodos {
                 });
 
                 const marker = L.marker([lat, lon], { icon: icono })
-                  .bindPopup(`
-                                    <div class="popup-content">
-                                        <strong>${cap_deps.cap_dep}</strong>
-                                        <br>
-                                        <strong>Código INE: ${cap_deps.cod_ine}</strong>
-                                    </div>
-                                `);
+                  .bindPopup(`<strong>${proveedor.name}</strong>`);
 
                 layerGroup.addLayer(marker);
               }
-            } catch (error) {
-              //console.error('Error parsing geom:', error);
             }
-          }
-        });
+          });
 
-        map.addLayer(layerGroup);
-      }
-    });
-
-    return layerGroup;
-  }
-  async CargarCuencas(maping: L.Map, cuencasService: any): Promise<L.Layer> {
-    const layerGroup = L.layerGroup();
-    let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
-
-    cuencasService.listarTodos().subscribe((cuencas: Cuencas[]) => {
-        cuencas.forEach(cuenca => {
-            if (cuenca.geom) {
-                const geojson = JSON.parse(cuenca.geom);
-                if (geojson.type === 'MultiPolygon') {
-                    const estiloPoligono = {
-                        color: '#191b1c',
-                        weight: 2,
-                        opacity: 1,
-                        fillColor: '#64B5F6',
-                        fillOpacity: 0
-                    };
-                    const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
-
-                    const polygon = L.geoJSON(geojson, {
-                        style: estiloPoligono,
-                        onEachFeature: (feature, layer) => {
-                            layer.on({
-                                mouseup: (e) => {
-                                    const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
-
-                                    // 🔹 Despintar el polígono seleccionado anteriormente si existe
-                                    if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
-                                        poligonoSeleccionado.setStyle(estiloPoligono);
-                                    }
-
-                                    // 🔹 Pintar el nuevo polígono seleccionado
-                                    layer.setStyle({
-                                        weight: 3,
-                                        fillOpacity: 0.2,
-                                        color: colorMouseOver,
-                                        fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
-                                    });
-
-                                    // 🔹 Guardar la referencia del polígono seleccionado
-                                    poligonoSeleccionado = layer;
-                                }
-                            });
-                        }
-                    });
-
-                    layerGroup.addLayer(polygon);
-                }
-            }
-        });
-    });
-
-    maping.addLayer(layerGroup);
-    return layerGroup;
-}
-
-
-  async Cargarmercados(maping: L.Map, mercadoservices: any): Promise<L.Layer> {
-    const markerCluster = L.markerClusterGroup();
-
-    mercadoservices.listarTodos().subscribe((mercados: Mercados[]) => {
-      mercados.forEach(mercado => {
-        if (mercado.geom) {
-          const geojson = JSON.parse(mercado.geom);
-          if (geojson.type === 'Point') {
-            const [lon, lat] = geojson.coordinates;
-            const icono = L.icon({
-              iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -32]
-            });
-
-            const marker = L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<div class="popup-content">
-                <p>${mercado.nombre}</p>
-                <p>Provincia: ${mercado.provincia}</p>
-                <p>Municipio: ${mercado.municipio}</p>
-            </div>`);
-
-            markerCluster.addLayer(marker);
-          }
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
         }
       });
-
-      maping.addLayer(markerCluster);
     });
+  }
+  async CargarProveedorAlimentos(
+    maping: L.Map,
+    proveedoralimentoservice: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
+    const layerGroup = L.layerGroup();
 
-    return markerCluster;
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+
+    return new Promise<L.Layer>((resolve, reject) => {
+      proveedoralimentoservice.listarTodos().subscribe({
+        next: (datos: ProveedorAlimentos[]) => {
+          datos.forEach(dato => {
+            if (dato.geom) {
+              const geojson = JSON.parse(dato.geom);
+              if (geojson.type === 'Point') {
+                const [lon, lat] = geojson.coordinates;
+
+                const icono = L.icon({
+                  iconUrl: '../assets/leaflet/marker-icon-2x.png',
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                  popupAnchor: [0, -32]
+                });
+
+                const marker = L.marker([lat, lon], { icon: icono })
+                  .bindPopup(`<strong>${dato.name}</strong>`);
+
+                layerGroup.addLayer(marker);
+              }
+            }
+          });
+
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
+        }
+      });
+    });
   }
 
-  async CargarLimitesDepartamentales(maping: L.Map, limitesdepservice: any): Promise<L.Layer> {
+  async CargarProveedoresAsistenciaTecnica(
+    maping: L.Map,
+    proveedorasistenciatecnicaservice: any,
+    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+  ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
-    let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
 
-    limitesdepservice.listarTodos().subscribe((lim_deps: LimitesDepartamentales[]) => {
-        lim_deps.forEach(lim_dep => {
-            if (lim_dep.geom) {
-                const geojson = JSON.parse(lim_dep.geom);
+    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
 
-                if (geojson.type === 'MultiPolygon') {
-                    const estiloPoligono = {
-                        color: '#191b1c',
-                        weight: 2,
-                        opacity: 1,
-                        fillColor: '#64B5F6',
-                        fillOpacity: 0
-                    };
+    return new Promise<L.Layer>((resolve, reject) => {
+      proveedorasistenciatecnicaservice.listarTodos().subscribe({
+        next: (proveedores: ProveedorAsistenciaTecnica[]) => {
+          proveedores.forEach(proveedor => {
+            if (proveedor.geom) {
+              try {
+                const geojson = JSON.parse(proveedor.geom);
 
-                    const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
+                if (geojson.type === 'Point') {
+                  const lat = geojson.coordinates[1];
+                  const lon = geojson.coordinates[0];
 
-                    const polygon = L.geoJSON(geojson, {
-                        style: estiloPoligono,
-                        onEachFeature: (feature, layer) => {
-                            layer.on({
-                                mouseup: (e) => {
-                                    const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
-
-                                    // 🔹 Despintar el polígono seleccionado anteriormente si existe
-                                    if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
-                                        poligonoSeleccionado.setStyle(estiloPoligono);
-                                    }
-
-                                    // 🔹 Pintar el nuevo polígono seleccionado
-                                    layer.setStyle({
-                                        weight: 3,
-                                        fillOpacity: 0.2,
-                                        color: colorMouseOver,
-                                        fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
-                                    });
-
-                                    // 🔹 Guardar la referencia del polígono seleccionado
-                                    poligonoSeleccionado = layer;
-                                }
-                            });
-                        }
-                    });
-
-                    layerGroup.addLayer(polygon);
-                }
-            }
-        });
-    });
-
-    maping.addLayer(layerGroup);
-    return layerGroup;
-}
-async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.Layer> {
-  const layerGroup = L.layerGroup();
-  let poligonoSeleccionado: L.Path | null = null; // ✅ Cambiado a L.Path para usar setStyle
-
-  limitesmuservice.listarTodos().subscribe((lim_muns: LimitesMunicipales[]) => {
-      lim_muns.forEach(lim_mun => {
-          if (lim_mun.geom) {
-              const geojson = JSON.parse(lim_mun.geom);
-
-              if (geojson.type === 'MultiPolygon') {
-                  const estiloPoligono = {
-                      color: '#191b1c',
-                      weight: 2,
-                      opacity: 1,
-                      fillColor: '#64B5F6',
-                      fillOpacity: 0
-                  };
-
-                  const colorMouseOver = ColoresMapaUtil.obtenerColorAleatorio(ColoresMapaUtil.PALETA_PASTEL);
-
-                  const polygon = L.geoJSON(geojson, {
-                      style: estiloPoligono,
-                      onEachFeature: (feature, layer) => {
-                          layer.on({
-                              mouseup: (e) => {
-                                  const layer = e.target as L.Path; // ✅ Casting explícito a L.Path
-
-                                  // 🔹 Despintar el polígono seleccionado anteriormente si existe
-                                  if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
-                                      poligonoSeleccionado.setStyle(estiloPoligono);
-                                  }
-
-                                  // 🔹 Pintar el nuevo polígono seleccionado
-                                  layer.setStyle({
-                                      weight: 3,
-                                      fillOpacity: 0.2,
-                                      color: colorMouseOver,
-                                      fillColor: ColoresMapaUtil.ajustarOpacidadColor(colorMouseOver, 1)
-                                  });
-
-                                  // 🔹 Guardar la referencia del polígono seleccionado
-                                  poligonoSeleccionado = layer;
-                              }
-                          });
-                      }
+                  const icono = L.icon({
+                    iconUrl: '../assets/leaflet/marker-icon-2x.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
                   });
 
-                  layerGroup.addLayer(polygon);
+                  const marker = L.marker([lat, lon], { icon: icono })
+                    .bindPopup(`
+                                      <div class="popup-content">
+                                          <h3>${proveedor.name || 'Sin nombre'}</h3>
+                                          <p><strong>ID:</strong> ${proveedor.gid}</p>
+                                          <p><strong>Coordenadas:</strong></p>
+                                          <p>Lat: ${lat.toFixed(6)}</p>
+                                          <p>Lon: ${lon.toFixed(6)}</p>
+                                      </div>
+                                  `);
+
+                  layerGroup.addLayer(marker);
+                }
+              } catch (error) {
+                console.error(`Error procesando proveedor ${proveedor.gid}:`, error);
               }
-          }
-      });
-  });
-
-  maping.addLayer(layerGroup);
-  return layerGroup;
-}
-
-  async CargarProveedorAlevines(maping: L.Map, proveedoralevinesservice: any): Promise<L.Layer> {
-    const layerGroup = L.layerGroup();
-
-    proveedoralevinesservice.listarTodos().subscribe((proveedores: ProveedorAlevines[]) => {
-      proveedores.forEach(proveedor => {
-        if (proveedor.geom) {
-          const geojson = JSON.parse(proveedor.geom);
-          if (geojson.type === 'Point') {
-            const [lon, lat] = geojson.coordinates;
-
-            const icono = L.icon({
-              iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -32]
-            });
-
-            const marker = L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${proveedor.name}</strong>`);
-
-            layerGroup.addLayer(marker);
-          }
-        }
-      });
-      maping.addLayer(layerGroup);
-    });
-    return layerGroup;
-  }
-  async CargarProveedorAlimentos(maping: L.Map, proveedoralimentoservice: any): Promise<L.Layer> {
-    const layerGroup = L.layerGroup();
-
-    proveedoralimentoservice.listarTodos().subscribe((datos: ProveedorAlimentos[]) => {
-      datos.forEach(dato => {
-        if (dato.geom) {
-          const geojson = JSON.parse(dato.geom);
-          if (geojson.type === 'Point') {
-            const [lon, lat] = geojson.coordinates;
-
-            const icono = L.icon({
-              iconUrl: '../assets/leaflet/marker-icon-2x.png',
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -32]
-            });
-
-            const marker = L.marker([lat, lon], { icon: icono })
-              .bindPopup(`<strong>${dato.name}</strong>`);
-
-            layerGroup.addLayer(marker);
-          }
-        }
-      });
-      maping.addLayer(layerGroup);
-    });
-    return layerGroup;
-  }
-
-  async CargarProveedoresAsistenciaTecnica(maping: L.Map, proveedorasistenciatecnicaservice: any): Promise<L.Layer> {
-    const layerGroup = L.layerGroup();
-
-    proveedorasistenciatecnicaservice.listarTodos().subscribe((proveedores: ProveedorAsistenciaTecnica[]) => {
-      proveedores.forEach(proveedor => {
-        if (proveedor.geom) {
-          try {
-            const geojson = JSON.parse(proveedor.geom);
-
-            if (geojson.type === 'Point') {
-              const lat = geojson.coordinates[1];
-              const lon = geojson.coordinates[0];
-
-              const icono = L.icon({
-                iconUrl: '../assets/leaflet/marker-icon-2x.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34]
-              });
-
-              const marker = L.marker([lat, lon], { icon: icono })
-                .bindPopup(`
-                              <div class="popup-content">
-                                  <h3>${proveedor.name || 'Sin nombre'}</h3>
-                                  <p><strong>ID:</strong> ${proveedor.gid}</p>
-                                  <p><strong>Coordenadas:</strong></p>
-                                  <p>Lat: ${lat.toFixed(6)}</p>
-                                  <p>Lon: ${lon.toFixed(6)}</p>
-                              </div>
-                          `);
-
-              layerGroup.addLayer(marker);
             }
-          } catch (error) {
-            //console.error(`Error procesando proveedor ${proveedor.gid}:`, error);
-          }
+          });
+
+          maping.addLayer(layerGroup);
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          resolve(layerGroup);
+        },
+        error: (err: Error) => {
+          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          reject(err);
         }
       });
-      maping.addLayer(layerGroup);
     });
-    return layerGroup;
   }
 
   async CargarRedCaminos(maping: L.Map): Promise<L.Layer> {
@@ -375,7 +487,6 @@ async CargarLimitesMunicipales(maping: L.Map, limitesmuservice: any): Promise<L.
     maping.addLayer(redCaminos);
     return redCaminos;
   }
-
 
   async CargarRedHidrica(maping: L.Map): Promise<L.Layer> {
     const redHidrica = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms", {

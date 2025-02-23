@@ -42,63 +42,66 @@ export class LoginComponent {
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
-  async Guardar(): Promise<void> {
-    try {
-      if (this.form.invalid) return;
+  async Guardar(event: Event): Promise<void> {
+    event.preventDefault();
+    this.form.markAllAsTouched();
+    if (this.form.invalid) return;
 
-      this.isLoading = true;
-      document.body.style.cursor = 'wait';
+    this.isLoading = true;
+    document.body.style.cursor = 'wait';
 
-      const login: Login = {
+    const login: Login = {
         Username: this.form.get('usuario')?.value,
         Password: this.form.get('contraseña')?.value,
         RefrescarToken: true
-      };
+    };
+    try {
+        const response: any = await firstValueFrom(this.authService.login(login));
+        
 
-      const response = await firstValueFrom(this.authService.login(login));
-      const token = response.Token || response.Token;
-
-      if (token) {
-        this.authService.saveToken(token);
-        const userRole = this.authService.getUserRole();
-
-        await Swal.fire({
-          icon: 'success',
-          title: '¡Acceso exitoso!',
-          text: 'Usuario y contraseña correctos.',
-          timer: 2000,
-          showConfirmButton: false
-        });
-
-        await new Promise<void>(resolve => setTimeout(resolve, 2000));
-
-        if (userRole === 'ADMINISTRADOR') {
-          await this.router.navigate(['/dashboard']);
-        } else if (userRole === 'VISITANTE') {
-          await this.router.navigate(['/map-public']);
+        const token = response.Token || response.token;
+        if (token) {
+            this.authService.saveToken(token);
+            const userRole = this.authService.getUserRole();
+            await Swal.fire({
+                icon: 'success',
+                title: '¡Acceso exitoso!',
+                text: 'Usuario y contraseña correctos.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            if (userRole === 'ADMINISTRADOR') {
+                this.router.navigate(['/dashboard']);
+            } else if (userRole === 'VISITANTE') {
+                this.router.navigate(['/map-public']);
+            } else {
+                console.warn('⚠️ Rol desconocido, redirigiendo a login');
+                this.router.navigate(['/login']);
+            }
         } else {
-          console.warn('⚠ Rol desconocido, redirigiendo al login.');
-          await this.router.navigate(['/login']);
+            console.error('❌ El servidor no devolvió un token JWT');
+            await this.mostrarError('El servidor no devolvió un token JWT');
         }
-      } else {
-        await this.mostrarError('El servidor no devolvió un token JWT');
-      }
     } catch (error) {
-      await this.mostrarError('Credenciales incorrectas o error en el servidor.');
+        console.error('❌ Error en la petición:', error);
+        await this.mostrarError('Credenciales incorrectas o error en el servidor.');
     } finally {
-      this.isLoading = false;
-      document.body.style.cursor = 'default';
+        this.isLoading = false;
+        document.body.style.cursor = 'default';
     }
-  }
+}
 
+
+  
   private async mostrarError(mensaje: string): Promise<void> {
     this.isLoading = false;
     document.body.style.cursor = 'default';
-
+  
     await Swal.fire({
       icon: 'error',
       title: 'Error',
       text: mensaje
     });
   }
+  
 }

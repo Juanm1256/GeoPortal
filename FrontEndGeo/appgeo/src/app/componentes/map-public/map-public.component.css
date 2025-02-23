@@ -2,10 +2,11 @@
   position: absolute;
   overflow: hidden;
 }
-/* Spinner cuando la capa está cargando */
-/*#map-private.loading-cursor {
+/* 🌀 Spinner de Carga para el Mapa */
+.loading-cursor {
   cursor: wait !important;
-}*/
+}
+
 /* Modal draggable */
 .draggable {
   position: fixed !important;
@@ -323,10 +324,11 @@ canvas#pieChart {
 /*        MODO NOCTURNO         */
 /* ============================= */
 
-.dark-theme {
+.dark-theme .sidebar-content{
   background: #1e1e1e;
   color: #ffffff;
 }
+
 
 /* Herramientas en modo nocturno */
 .dark-theme .toolbar {
