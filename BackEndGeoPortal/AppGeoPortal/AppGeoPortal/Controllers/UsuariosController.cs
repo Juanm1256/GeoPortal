@@ -57,21 +57,21 @@ namespace AppGeoPortal.Controllers
         {
             try
             {
+                // Coloca el punto de interrupción aquí 👇
                 var insertar = await _usuario.Insertar(usuarios);
+
                 if (insertar)
                 {
                     return CreatedAtAction(nameof(ListarTodos), new { id = usuarios.idusuario }, usuarios);
                 }
 
-                return BadRequest("No se pudo insertar el usuario");
-
+                return BadRequest("Usuario ya existe o no se pudo insertar el usuario"); // 👈 Revisa si esta línea se ejecuta
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al insetar el usuario: {ex.Message}");
+                return StatusCode(500, $"Error al insertar el usuario: {ex.Message}");
             }
         }
-
         [Authorize]
         [HttpPut("Modificar/{id:int}")]
         [PermisoRequerido("Modificar")]

@@ -10,5 +10,7 @@ namespace AppGeoPortal.Contrato
         public Task<bool> Modificar(Usuarios usuarios, int id);
         public Task<bool> Delete(int id);
         public Task<Usuarios> ObtenerById(int id);
+        Task<bool> ExisteUsuario(string username);
+
     }
 }

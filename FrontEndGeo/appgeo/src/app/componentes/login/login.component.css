@@ -1,3 +1,45 @@
+/* ===========================
+   🔒 Input de Contraseña
+   =========================== */
+   .password-input-with-icon {
+    width: 100%;
+    padding: 10px 40px 10px 20px; /* Espaciado derecho para el ícono */
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 35px;
+    font-size: 16px;
+    color: #333;
+    transition: all 0.3s ease;
+    outline: none;
+    border-right: none;
+}
+
+.password-input-with-icon:focus {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.password-input-with-icon::placeholder {
+    color: #666;
+}
+
+/* ===========================
+   👁️ Ícono del Ojo Dentro del Input
+   =========================== */
+.password-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    color: #495057;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.password-icon:hover {
+    color: #2C5384;
+}
+
 *{
     margin: 0;
     padding: auto;
@@ -90,7 +132,7 @@ section{
 }
 
 .form .inputBox button[type="submit"] {
-    background: #2196f3;
+    background: #2C5384;
     color: #fff;
     max-width: 100px;
     border-radius: 10px;
@@ -102,7 +144,7 @@ section{
 }
 
 .form .inputBox button[type="submit"]:hover {
-    background: #1976d2;
+    background: #2C5384;
     transform: translateY(-2px);
 }
 

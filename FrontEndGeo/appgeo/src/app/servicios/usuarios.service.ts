@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, of } from 'rxjs';
 import { Usuarios } from '../interfaces/usuarios';
 import { HttpClient } from '@angular/common/http';
-
+import { defaultIfEmpty, throwError } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -27,22 +27,28 @@ export class UsuariosService {
     );
   }
 
-  PostUsuario(usuario: Usuarios): Observable<Usuarios> {
-    return this.http.post<Usuarios>(this.API + '/' + "Insertar", usuario).pipe(
+
+  PostUsuario(usuario: Usuarios): Observable<any> {
+    return this.http.post(this.API + '/' + "Insertar", usuario).pipe(
+      defaultIfEmpty(null),  // ✅ Devuelve null si la respuesta está vacía
       catchError(error => {
-        return of();
+        console.error("❌ Error en PostUsuario:", error);
+        return throwError(() => error); // Lanza el error para que se capture en el componente
       })
     );
-  }
-
+}
+  
   PutUsuario(id: number, usuario: Usuarios): Observable<Usuarios> {
-    return this.http.put<Usuarios>(this.API + '/' + "Modificar" + '/' + id, usuario).pipe(
+    console.log("Llamando a API con URL:", this.API + '/' + "Modificar" + '/' + id); // 📌 Verifica la URL
+    return this.http.put<Usuarios>(`${this.API}/Modificar/${id}`, usuario).pipe(
       catchError(error => {
+        console.error("Error en la petición HTTP:", error);
         return of();
       })
     );
   }
-
+  
+ 
   DeleteUsuario(id: number): Observable<Usuarios> {
     return this.http.delete<Usuarios>(this.API + '/' + id).pipe(
       catchError(error => {

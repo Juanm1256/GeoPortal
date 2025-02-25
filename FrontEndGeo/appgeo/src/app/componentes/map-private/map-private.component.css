@@ -1,14 +1,18 @@
 
-/* Spinner cuando la capa está cargando */
-/*#map-private.loading-cursor {
+/* 🌀 Spinner de Carga para el Mapa */
+.loading-cursor {
   cursor: wait !important;
-}*/
+}
 /* Modal draggable */
 .draggable {
-  position: fixed !important;
   z-index: 1050;
+  position: fixed;
   top: 100px;
   left: 10%;
+  width: 550px;  /* Ancho máximo del modal */
+  max-height: 600px; /* Altura máxima del modal */
+  overflow: hidden; /* Oculta el desbordamiento fuera del modal */
+  border-radius: 10px; /* Bordes redondeados */
   cursor: grab;
 }
 
@@ -16,6 +20,39 @@
   cursor: grabbing;
 }
 
+/* Contenido desplazable dentro del modal */
+.modal-content {
+  max-height: 100%; /* Asegura que el contenido no desborde el modal */
+  overflow: hidden;
+}
+
+.modal-body {
+  max-height: 300px; /* Limita la altura del cuerpo para el scroll */
+  overflow-y: auto; /* Desplazamiento vertical */
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Tabla dentro del modal */
+.modal-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-body th, .modal-body td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 15px;
+  
+  border-top: 1px solid #dee2e6;
+}
 /* ============================= */
 /*          MODO CLARO           */
 /* ============================= */
@@ -228,7 +265,7 @@
   cursor: pointer;
   transform: translateY(-50%);
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  
   transition: background 0.3s;
 }
 
@@ -291,7 +328,7 @@ canvas#pieChart {
 /*        MODO NOCTURNO         */
 /* ============================= */
 
-.dark-theme {
+.dark-theme .sidebar-content{
   background: #1e1e1e;
   color: #ffffff;
 }
@@ -322,7 +359,7 @@ canvas#pieChart {
 }
 
 .dark-theme .layer-btn.active {
-  background: #2C5384 !important;
+  background: #28a745 !important;
 }
 
 /* Panel lateral derecho en modo nocturno */
@@ -347,8 +384,8 @@ canvas#pieChart {
 }
 
 .dark-theme .toggle-sidebar-btn {
-  background: #2C5384;
-  color: white;
+  background: #2C5384!important;
+  color: white!important;
 }
 
 .dark-theme .toggle-sidebar-btn:hover {

@@ -18,6 +18,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
   styleUrl: './usuarios.component.css'
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
+  showPassword: boolean = false;
   isLoading: boolean = true; // ⬅ Estado del spinner
   isDarkMode: boolean = false;
   listaUsuarios: Usuarios[] = [];
@@ -43,6 +44,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     private rolService: RolesService,
   ) {
     this.form = this.fb.group({
+      idrol: ['', Validators.required], // ✅ Inicializado como cadena vacía
       username: ['', [
         Validators.required,
         Validators.maxLength(50),
@@ -51,9 +53,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       password: ['', [
         Validators.required,
         Validators.minLength(6),
-        Validators.pattern('^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+( [A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]+)*$')
+        Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ@#$%&._+-]{6,}$')
       ]],
-      idrol: ['', Validators.required],
       nombres: ['', [
         Validators.required,
         Validators.maxLength(50),
@@ -68,10 +69,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         Validators.required,
         Validators.maxLength(50),
         Validators.pattern('^[A-Za-z0-9]+$')
-      ]],
+      ]]
     });
   }
-
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
   async ngOnInit(): Promise<void> {
     try {
       this.themeSubscription = this.themeService.isDarkMode$.subscribe(
@@ -79,11 +82,21 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           this.isDarkMode = isDark;
         }
       );
-  
+
       await Promise.all([
         this.cargarUsuarios(),
         this.cargarRoles()
       ]);
+      // Transformar todos los campos excepto 'username' y 'password' a mayúsculas
+      Object.keys(this.form.controls).forEach((field) => {
+        if (field !== 'username' && field !== 'password') {
+          this.form.get(field)?.valueChanges.subscribe(value => {
+            if (value && typeof value === 'string' && value !== value.toUpperCase()) {
+              this.form.get(field)?.setValue(value.toUpperCase(), { emitEvent: false });
+            }
+          });
+        }
+      });
     } catch (error) {
       console.error('Error en la inicialización:', error);
     }
@@ -121,49 +134,76 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   async Guardar(): Promise<void> {
     try {
-      const today = new Date();
-  
-      const usuario: Usuarios = {
-        idusuario: this.id || 0,
-        username: this.form.get('username')?.value,
-        password_hash: this.form.get('password')?.value,
-        fechareg: today,
-        idrol: this.form.get('idrol')?.value,
-        idpersona: this.idpersona || 0,
-        estado: 'Activo',
-        IdPersonanav: {
-          idpersona: this.idpersona || 0,
-          nombres: this.form.get('nombres')?.value,
-          apellidos: this.form.get('apellidos')?.value,
-          ci: this.form.get('ci')?.value,
-          fechareg: today,
-          estado: 'Activo',
-        },
-        IdRolnav: undefined,
-      };
-  
-      if (!this.id) {
-        await firstValueFrom(this.usuarioService.PostUsuario(usuario));
-        Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
-        await this.cargarUsuarios();
-        this.form.reset();
-      } else {
-        await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));
-        Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
-        await this.cargarUsuarios();
-      }
+        const today = new Date();
+
+        const usuario: Usuarios = {
+            idusuario: this.id || 0,
+            username: this.form.get('username')?.value,
+            password_hash: this.form.get('password')?.value,
+            fechareg: today,
+            idrol: this.form.get('idrol')?.value,
+            idpersona: this.idpersona || 0,
+            estado: 'Activo',
+            IdPersonanav: {
+                idpersona: this.idpersona || 0,
+                nombres: this.form.get('nombres')?.value,
+                apellidos: this.form.get('apellidos')?.value,
+                ci: this.form.get('ci')?.value,
+                fechareg: today,
+                estado: 'Activo',
+            },
+            IdRolnav: undefined,
+        };
+
+        if (!this.id) {
+            const response = await firstValueFrom(this.usuarioService.PostUsuario(usuario));
+            console.log("✅ Respuesta del servidor:", response);
+
+            if (response === null) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Usuario duplicado',
+                    text: 'El nombre de usuario ya existe. Por favor, elija otro.'
+                });
+            } else {
+                Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
+                await this.cargarUsuarios();
+                this.form.reset();
+            }
+        } else {
+            const response = await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));
+            if (response) {
+                Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
+                await this.cargarUsuarios();
+                this.form.reset();
+                this.modalService.dismissAll();
+            }
+        }
     } catch (error: any) {
-      if (error.error?.errors) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error en el Formulario',
-          html: error.error.errors[Object.keys(error.error.errors)[0]]
-        });
-      } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Algo salió mal.' });
-      }
+        console.error("❌ Error completo:", error);
+
+        if (error.status === 400 && error.error === "Usuario ya existe") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Usuario duplicado',
+                text: 'El nombre de usuario ya existe. Por favor, elija otro.'
+            });
+        } else if (error.status === 400) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error en el formulario',
+                text: error.error || 'Algo salió mal.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error inesperado',
+                text: 'Hubo un problema al procesar la solicitud.'
+            });
+        }
     }
-  }
+}
+
 
   async Guardarinstruct(content: any): Promise<void> {
     try {
@@ -172,7 +212,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       this.form.markAsPristine();
       this.id = undefined;
       this.idpersona = undefined;
-      this.form.reset();
+      this.form.reset({ idrol: '' }); // ✅ Restablece idrol como cadena vacía para seleccionar la opción por defecto
     } catch (error) {
       console.error('Error al abrir el modal:', error);
     }
@@ -187,7 +227,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       this.form.patchValue({
         username: usuario.username,
         password: "",
-        idrol: usuario.idrol,
+        idrol: usuario.idrol ?? null, // ✅ Asegura que si no hay rol, se muestra la opción por defecto
         nombres: usuario.IdPersonanav?.nombres,
         apellidos: usuario.IdPersonanav?.apellidos,
         ci: usuario.IdPersonanav?.ci
@@ -229,8 +269,25 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     const rol = this.roles.find(r => r.idrol === idrol);
     return rol ? rol.nombre : 'Sin rol';
   }
+  // Método para obtener mensajes de error
+  getErrorMessage(controlName: string): string | null {
+    const control = this.form.get(controlName);
+    if (control && control.invalid && (control.dirty || control.touched)) {
+      const errors = control.errors;
+      if (errors) {
+        const errorKey = Object.keys(errors)[0];
+        const mensajes = this.lista.mensajes[controlName];
+        if (mensajes) {
+          const mensaje = mensajes.find((msg: any) => msg.type === errorKey);
+          return mensaje ? mensaje.message : null;
+        }
+      }
+    }
+    return null;
+  }
 
   ngOnDestroy() {
     this.themeSubscription.unsubscribe();
   }
+
 }

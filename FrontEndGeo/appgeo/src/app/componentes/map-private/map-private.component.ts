@@ -343,9 +343,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
 
   toggleLayers() {
     this.isLayersOpen = !this.isLayersOpen;
-  }
-
-  async toggleLayer(layerName: string, event: any): Promise<void> {
+    if (this.isLayersOpen) {
+        this.restoreLayerButtonStyles(); // ✅ Asegúrate de que esta línea esté presente
+    }
+}
+async toggleLayer(layerName: string, event: any): Promise<void> {
     const button = event.target.closest('.layer-btn');
     this.sidebarOpen = false;
     if (this.pieChart) this.pieChart.destroy();
@@ -395,39 +397,34 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       //console.error(`Error al alternar la capa ${layerName}:`, error);
     }
   }
-
-
   private async loadLayer(layerName: string): Promise<L.Layer | L.LayerGroup> {
     try {
       let layer: L.Layer | L.LayerGroup;
-
-      // 🔄 Cursor spinner antes de iniciar la carga
-      this.map.getContainer().classList.add('loading-cursor');
-
+      this.setMapLoadingCursor(true);
       switch (layerName) {
         case 'cuencas':
-          layer = await this.metodos.CargarCuencas(this.map, this.cuencasService);
+          layer = await this.metodos.CargarCuencas(this.map, this.cuencasService, this.setMapLoadingCursor.bind(this));
           break;
         case 'mercados':
-          layer = await this.metodos.Cargarmercados(this.map, this.mercadoservices);
+          layer = await this.metodos.Cargarmercados(this.map, this.mercadoservices, this.setMapLoadingCursor.bind(this));
           break;
         case 'capitalesDepartamentales':
-          layer = await this.metodos.CargarCapitalesDepartamentales(this.map, this.cap_depservice);
+          layer = await this.metodos.CargarCapitalesDepartamentales(this.map, this.cap_depservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'limitesDepartamentales':
-          layer = await this.metodos.CargarLimitesDepartamentales(this.map, this.limitesdepservice);
+          layer = await this.metodos.CargarLimitesDepartamentales(this.map, this.limitesdepservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'limitesMunicipales':
-          layer = await this.metodos.CargarLimitesMunicipales(this.map, this.limitesmuservice);
+          layer = await this.metodos.CargarLimitesMunicipales(this.map, this.limitesmuservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'proveedorAlevines':
-          layer = await this.metodos.CargarProveedorAlevines(this.map, this.proveedoralevinesservice);
+          layer = await this.metodos.CargarProveedorAlevines(this.map, this.proveedoralevinesservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'proveedorAlimentos':
-          layer = await this.metodos.CargarProveedorAlimentos(this.map, this.proveedoralimentoservice);
+          layer = await this.metodos.CargarProveedorAlimentos(this.map, this.proveedoralimentoservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'proveedorAsistenciaTecnica':
-          layer = await this.metodos.CargarProveedoresAsistenciaTecnica(this.map, this.proveedorasistenciatecnicaservice);
+          layer = await this.metodos.CargarProveedoresAsistenciaTecnica(this.map, this.proveedorasistenciatecnicaservice, this.setMapLoadingCursor.bind(this));
           break;
         case 'redCaminos':
           layer = await this.metodos.CargarRedCaminos(this.map);
@@ -469,23 +466,34 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       if (!layer) {
         throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
-
-      // ✅ Detectar eventos de carga de la capa
+      // ✅ Detectar eventos de carga para manejar el spinner
       if (layer instanceof L.TileLayer || layer instanceof L.TileLayer.WMS) {
-        layer.on('loading', () => this.map.getContainer().classList.add('loading-cursor'));
-        layer.on('load', () => this.map.getContainer().classList.remove('loading-cursor'));
-        layer.on('tileerror', () => this.map.getContainer().classList.remove('loading-cursor'));
+        layer.on('loading', () => this.setMapLoadingCursor(true));  // Mostrar spinner al iniciar la carga
+        layer.on('load', () => this.setMapLoadingCursor(false));    // Quitar spinner al finalizar la carga
+        layer.on('tileerror', () => this.setMapLoadingCursor(false)); // Quitar spinner si hay error
+      } else {
+        this.setMapLoadingCursor(false); // Si no es un WMS o TileLayer, quitar spinner
       }
-
       return layer;
     } catch (error) {
-      // ❌ En caso de error, quitar el cursor spinner
+      //console.error(`Error al cargar la capa ${layerName}:`, error);
       this.map.getContainer().classList.remove('loading-cursor');
       throw error;
     }
   }
 
-
+  private setMapLoadingCursor(isLoading: boolean): void {
+    const mapContainer = this.map.getContainer();
+    if (mapContainer) {
+      if (isLoading) {
+        mapContainer.classList.add('loading-cursor');
+      } else {
+        mapContainer.classList.remove('loading-cursor');
+      }
+    } else {
+      console.warn('⚠️ No se encontró el contenedor del mapa');
+    }
+  }
 
   checkGraphButtonVisibility() {
     const activeLayers = [
@@ -630,23 +638,26 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
-
+  
+        // Eliminar todos los marcadores
         this.markerLayer.clearLayers();
-
+  
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
-
+  
+        // Remover todas las capas
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
-
+  
         this.capas = {};
         this.activeLayers = {};
-
+  
+        // Remover todas las capas base y agregar la predeterminada
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -654,11 +665,22 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         });
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
-
+  
+        // Restablecer los botones de capas
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
-
+  
+        // ✅ Ocultar el botón de gráficos y cerrar el panel lateral si está abierto
+        this.showSidebarButton = false;
+        this.sidebarOpen = false;
+  
+        // ✅ Destruir el gráfico si existe
+        if (this.pieChart) {
+          this.pieChart.destroy();
+          this.pieChart = null;
+        }
+  
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",

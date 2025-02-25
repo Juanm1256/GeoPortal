@@ -41,14 +41,7 @@ export class RolesService {
       })
     );
   }
-  PutRol(id: number, rol: Roles): Observable<Roles>{
-    return this.http.put<Roles>(this.API+'/Roles/'+"Modificar"+'/'+id, rol).pipe(
-      catchError(error => {
-        //console.warn('⚠ Error al obtener las capitales departamentales:', error);
-        return of();
-      })
-    );
-  }
+
   DeleteRol(id: number):Observable<Roles>{
     return this.http.delete<Roles>(this.API+'/Roles/'+id).pipe(
       catchError(error => {

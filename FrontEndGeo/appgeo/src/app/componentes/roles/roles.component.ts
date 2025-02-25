@@ -33,7 +33,9 @@ export class RolesComponent implements OnInit, OnDestroy {
   pagesizee: any;
   search = '';
   criterio = 'nombrerol';
-  themeSubscription!: Subscription;
+
+  // Componente para manejar todas las suscripciones y poder limpiarlas al destruir el componente
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     public themeService: ThemeService, 
@@ -43,17 +45,14 @@ export class RolesComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      nombre: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(50),
-          Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$')
-        ]
-      ],
-      permisos: this.fb.array([])
+      nombre: ['', [
+        Validators.required,
+        Validators.maxLength(25),
+        Validators.pattern('^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$')
+      ]],
     });
   }
+
   async cargarRoles(): Promise<void> {
     try {
       this.isLoading = true;
@@ -68,25 +67,44 @@ export class RolesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-  try {
-    await this.cargarRoles();
-    
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      (isDark) => this.isDarkMode = isDark
-    );
-
-    await Promise.all([
-      this.listadoRol(),
-      this.ListaPermiso()
-    ]);
-
-    if (!this.form.contains('permisos')) {
-      this.form.addControl('permisos', this.fb.array([])); 
+    try {
+      await this.cargarRoles();
+  
+      // Suscribirse al servicio de tema y agregar la suscripción al composite
+      const themeSub = this.themeService.isDarkMode$.subscribe(
+        (isDark) => this.isDarkMode = isDark
+      );
+      this.subscriptions.add(themeSub);
+  
+      await Promise.all([
+        this.listadoRol(),
+        this.ListaPermiso()
+      ]);
+  
+      if (!this.form.contains('permisos')) {
+        this.form.addControl('permisos', this.fb.array([]));
+      }
+  
+      // Transformar todos los campos del formulario a mayúsculas, excepto los especificados
+      Object.keys(this.form.controls).forEach((field) => {
+        if (field !== 'nombreEspecial') {
+          const control = this.form.get(field);
+          if (control) {
+            const sub = control.valueChanges.subscribe(value => {
+              if (value && typeof value === 'string' && value !== value.toUpperCase()) {
+                control.setValue(value.toUpperCase(), { emitEvent: false });
+              }
+            });
+            this.subscriptions.add(sub);
+          }
+        }
+      });
+  
+    } catch (error) {
+      console.error('Error en la inicialización:', error);
     }
-  } catch (error) {
-    console.error('Error en la inicialización:', error);
   }
-}
+  
 
   toggleTheme() {
     this.themeService.toggleTheme();
@@ -129,6 +147,7 @@ export class RolesComponent implements OnInit, OnDestroy {
   
       await this.listadoRol();
       this.form.reset();
+      this.modalService.dismissAll();
     } catch (error: any) {
       if (error.error?.errors) {
         Swal.fire({
@@ -217,11 +236,29 @@ export class RolesComponent implements OnInit, OnDestroy {
       }
     }
   }
+
+  getErrorMessage(controlName: string): string | null {
+    const control = this.form.get(controlName);
+    if (control && control.invalid && (control.dirty || control.touched)) {
+      const errors = control.errors;
+      if (errors) {
+        const errorKey = Object.keys(errors)[0];
+        const mensajes = this.lista.mensajes[controlName];
+        if (mensajes) {
+          const mensaje = mensajes.find((msg) => msg.type === errorKey);
+          return mensaje ? mensaje.message : null;
+        }
+      }
+    }
+    return null;
+  }  
+
   LimpiarSearch() {
     this.search = '';
   }
+
   ngOnDestroy() {
-    this.themeSubscription.unsubscribe();
+    // Se limpian todas las suscripciones para evitar fugas y errores durante el teardown
+    this.subscriptions.unsubscribe();
   }
-  
 }
