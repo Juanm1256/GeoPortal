@@ -13,6 +13,7 @@ import { ThemeService } from '../../servicios/theme.service';
 import { Permisos } from '../../interfaces/permisos';
 import { Subscription, firstValueFrom } from 'rxjs';
 
+
 @Component({
   selector: 'app-roles',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPaginationModule, FilteronePipe],
@@ -33,9 +34,7 @@ export class RolesComponent implements OnInit, OnDestroy {
   pagesizee: any;
   search = '';
   criterio = 'nombrerol';
-
-  // Componente para manejar todas las suscripciones y poder limpiarlas al destruir el componente
-  private subscriptions: Subscription = new Subscription();
+  themeSubscription!: Subscription;  // ✅ Solo esta suscripción
 
   constructor(
     public themeService: ThemeService, 
@@ -52,7 +51,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       ]],
     });
   }
-
   async cargarRoles(): Promise<void> {
     try {
       this.isLoading = true;
@@ -70,11 +68,10 @@ export class RolesComponent implements OnInit, OnDestroy {
     try {
       await this.cargarRoles();
   
-      // Suscribirse al servicio de tema y agregar la suscripción al composite
-      const themeSub = this.themeService.isDarkMode$.subscribe(
+      // ✅ Suscripción al tema
+      this.themeSubscription = this.themeService.isDarkMode$.subscribe(
         (isDark) => this.isDarkMode = isDark
       );
-      this.subscriptions.add(themeSub);
   
       await Promise.all([
         this.listadoRol(),
@@ -85,18 +82,14 @@ export class RolesComponent implements OnInit, OnDestroy {
         this.form.addControl('permisos', this.fb.array([]));
       }
   
-      // Transformar todos los campos del formulario a mayúsculas, excepto los especificados
+      // Transformar todos los campos del formulario a mayúsculas excepto los que especifiques
       Object.keys(this.form.controls).forEach((field) => {
-        if (field !== 'nombreEspecial') {
-          const control = this.form.get(field);
-          if (control) {
-            const sub = control.valueChanges.subscribe(value => {
-              if (value && typeof value === 'string' && value !== value.toUpperCase()) {
-                control.setValue(value.toUpperCase(), { emitEvent: false });
-              }
-            });
-            this.subscriptions.add(sub);
-          }
+        if (field !== 'nombreEspecial') {  // Agrega aquí los campos que no quieres que se conviertan en mayúsculas
+          this.form.get(field)?.valueChanges.subscribe(value => {
+            if (value && typeof value === 'string' && value !== value.toUpperCase()) {
+              this.form.get(field)?.setValue(value.toUpperCase(), { emitEvent: false });
+            }
+          });
         }
       });
   
@@ -236,29 +229,28 @@ export class RolesComponent implements OnInit, OnDestroy {
       }
     }
   }
-
   getErrorMessage(controlName: string): string | null {
     const control = this.form.get(controlName);
     if (control && control.invalid && (control.dirty || control.touched)) {
       const errors = control.errors;
       if (errors) {
-        const errorKey = Object.keys(errors)[0];
-        const mensajes = this.lista.mensajes[controlName];
+        const errorKey = Object.keys(errors)[0]; // Obtener la primera clave de error
+        const mensajes = this.lista.mensajes[controlName]; // Obtener los mensajes correspondientes
         if (mensajes) {
-          const mensaje = mensajes.find((msg) => msg.type === errorKey);
+          const mensaje = mensajes.find((msg) => msg.type === errorKey); // Buscar el mensaje que coincida con la clave de error
           return mensaje ? mensaje.message : null;
         }
       }
     }
     return null;
   }  
-
   LimpiarSearch() {
     this.search = '';
   }
-
   ngOnDestroy() {
-    // Se limpian todas las suscripciones para evitar fugas y errores durante el teardown
-    this.subscriptions.unsubscribe();
+    // ✅ Solo cancelamos la suscripción si existe
+    if (this.themeSubscription) {
+      this.themeSubscription.unsubscribe();
+    }
   }
 }
