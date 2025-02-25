@@ -12,6 +12,7 @@ import { ThemeService } from '../../servicios/theme.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
+  standalone: true,
   selector: 'app-usuarios',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPaginationModule, FilteronePipe],
   templateUrl: './usuarios.component.html',

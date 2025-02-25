@@ -5,11 +5,7 @@ import { Router } from '@angular/router';
 import {jwtDecode} from 'jwt-decode'; // ✅ Asegúrate de instalarlo: `npm install jwt-decode`
 import { Login } from '../interfaces/login';
 import { tap } from 'rxjs/operators';
-
-interface LoginResponse {
-  Expira: Date;
-  Token: string;
-}
+import { LoginResponse } from '../interfaces/login-response';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +57,7 @@ export class AuthService {
         }
       }
 
-      //console.log('✅ Token guardado correctamente');
+      console.log("Este es el token para las pruebas de estres"+token);
     } catch (error) {
       //console.error('❌ Error al decodificar el token:', error);
     }
