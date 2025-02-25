@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MapPrivateComponent } from './map-private.component';
 
 describe('MapPrivateComponent', () => {
@@ -8,9 +8,11 @@ describe('MapPrivateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MapPrivateComponent]
-    })
-    .compileComponents();
+      imports: [
+        HttpClientTestingModule,
+        MapPrivateComponent
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MapPrivateComponent);
     component = fixture.componentInstance;
