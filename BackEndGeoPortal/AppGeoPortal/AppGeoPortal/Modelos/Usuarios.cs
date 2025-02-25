@@ -16,7 +16,7 @@ namespace AppGeoPortal.Modelos
         public string estado { get; set; }
 
         [ForeignKey("idpersona")]
-        public virtual Personas IdPersonanav { get; set; }
+        public virtual Personas? IdPersonanav { get; set; }
         [ForeignKey("idrol")]
         public virtual Roles? IdRolnav { get; set; }
 
