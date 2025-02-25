@@ -239,26 +239,32 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   async CambiarEstado(usuario: Usuarios, accion: string): Promise<void> {
-    try {
-      usuario.estado = accion; // Verifica que el estado se actualiza correctamente
-      console.log("Enviando usuario:", usuario); // 📌 Verifica qué se está enviando
-  
-      const response = await firstValueFrom(this.usuarioService.PutUsuario(usuario.idusuario, usuario));
-  
-      console.log("Respuesta del servidor:", response); // 📌 Verifica si hay respuesta del backend
-  
-      Swal.fire({
-        icon: accion === 'Activo' ? 'success' : 'error',
-        title: accion === 'Activo' ? 'Usuario Activado!' : 'Usuario Desactivado!',
-      });
-  
-      await this.cargarUsuarios();
-    } catch (error) {
-      console.error('Error al cambiar estado:', error);
-      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado del usuario.' });
+      try {
+        const dto: Usuarios = {
+          idusuario: usuario.idusuario,
+          idpersona: usuario.idpersona,
+          username: usuario.username,
+          password_hash: usuario.password_hash,
+          idrol: usuario.idrol,
+          fechareg: usuario.fechareg,
+          estado: accion
+        };
+    
+        if (usuario.idusuario) {
+          await firstValueFrom(this.usuarioService.PutUsuario(usuario.idusuario, dto));
+          
+          Swal.fire({
+            icon: accion === 'Inactivo' ? 'error' : 'success',
+            title: `El rol ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
+          });
+          
+          await this.cargarUsuarios();
+          this.form.reset();
+        }
+      } catch (error) {
+        console.error('Error al modificar el rol:', error);
+      }
     }
-  }
-  
 
   obtenerNombreRol(idrol: number): string {
     const rol = this.roles.find(r => r.idrol === idrol);
