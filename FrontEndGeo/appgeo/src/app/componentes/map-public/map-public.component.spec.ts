@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MapPublicComponent } from './map-public.component';
 
 describe('MapPublicComponent', () => {
@@ -8,7 +8,10 @@ describe('MapPublicComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MapPublicComponent]
+      imports: [
+        HttpClientTestingModule, // Provee HttpClient para los servicios inyectados
+        MapPublicComponent
+      ]
     })
     .compileComponents();
 

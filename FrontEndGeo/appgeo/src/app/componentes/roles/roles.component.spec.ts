@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RolesComponent } from './roles.component';
 
 describe('RolesComponent', () => {
@@ -8,7 +8,10 @@ describe('RolesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RolesComponent]
+      imports: [
+        HttpClientTestingModule, // Proporciona el proveedor para HttpClient
+        RolesComponent
+      ]
     })
     .compileComponents();
 

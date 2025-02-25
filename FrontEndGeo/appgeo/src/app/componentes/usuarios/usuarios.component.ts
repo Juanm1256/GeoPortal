@@ -134,51 +134,76 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   async Guardar(): Promise<void> {
     try {
-      const today = new Date();
+        const today = new Date();
 
-      const usuario: Usuarios = {
-        idusuario: this.id || 0,
-        username: this.form.get('username')?.value,
-        password_hash: this.form.get('password')?.value,
-        fechareg: today,
-        idrol: this.form.get('idrol')?.value,
-        idpersona: this.idpersona || 0,
-        estado: 'Activo',
-        IdPersonanav: {
-          idpersona: this.idpersona || 0,
-          nombres: this.form.get('nombres')?.value,
-          apellidos: this.form.get('apellidos')?.value,
-          ci: this.form.get('ci')?.value,
-          fechareg: today,
-          estado: 'Activo',
-        },
-        IdRolnav: undefined,
-      };
+        const usuario: Usuarios = {
+            idusuario: this.id || 0,
+            username: this.form.get('username')?.value,
+            password_hash: this.form.get('password')?.value,
+            fechareg: today,
+            idrol: this.form.get('idrol')?.value,
+            idpersona: this.idpersona || 0,
+            estado: 'Activo',
+            IdPersonanav: {
+                idpersona: this.idpersona || 0,
+                nombres: this.form.get('nombres')?.value,
+                apellidos: this.form.get('apellidos')?.value,
+                ci: this.form.get('ci')?.value,
+                fechareg: today,
+                estado: 'Activo',
+            },
+            IdRolnav: undefined,
+        };
 
-      if (!this.id) {
-        await firstValueFrom(this.usuarioService.PostUsuario(usuario));
-        Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
-        await this.cargarUsuarios();
-        this.form.reset();
-      } else {
-        await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));
-        Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
-        await this.cargarUsuarios();
-        this.form.reset();
-        this.modalService.dismissAll();
-      }
+        if (!this.id) {
+            const response = await firstValueFrom(this.usuarioService.PostUsuario(usuario));
+            console.log("✅ Respuesta del servidor:", response);
+
+            if (response === null) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Usuario duplicado',
+                    text: 'El nombre de usuario ya existe. Por favor, elija otro.'
+                });
+            } else {
+                Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
+                await this.cargarUsuarios();
+                this.form.reset();
+            }
+        } else {
+            const response = await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));
+            if (response) {
+                Swal.fire({ icon: 'success', title: 'Usuario Modificado!' });
+                await this.cargarUsuarios();
+                this.form.reset();
+                this.modalService.dismissAll();
+            }
+        }
     } catch (error: any) {
-      if (error.error?.errors) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error en el Formulario',
-          html: error.error.errors[Object.keys(error.error.errors)[0]]
-        });
-      } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Algo salió mal.' });
-      }
+        console.error("❌ Error completo:", error);
+
+        if (error.status === 400 && error.error === "Usuario ya existe") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Usuario duplicado',
+                text: 'El nombre de usuario ya existe. Por favor, elija otro.'
+            });
+        } else if (error.status === 400) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error en el formulario',
+                text: error.error || 'Algo salió mal.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error inesperado',
+                text: 'Hubo un problema al procesar la solicitud.'
+            });
+        }
     }
-  }
+}
+
 
   async Guardarinstruct(content: any): Promise<void> {
     try {
