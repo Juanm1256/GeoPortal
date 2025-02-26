@@ -731,17 +731,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     const capasConModal = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
     const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
 
-    if (!capaActiva) {
-      console.warn("⚠️ No hay una capa activa con funcionalidad de modal.");
-      return;
-    }
 
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
-            this.mostrarModalInformacion(departamentoInfo, capaActiva);
+            this.mostrarModalInformacion(departamentoInfo);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
             //console.log('⚠️ No se encontró información en esta ubicación');
@@ -792,17 +788,17 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
 
 
-  mostrarModalInformacion(propiedades: any, capa: string) {
+  mostrarModalInformacion(propiedades: any) {
     this.modalInfo = [
       { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
       { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
       { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-      { key: 'Total de Mercados:', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-      { key: 'Total de Municipios:', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-      { key: 'Mercados en Municipio:', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
-      { key: 'Número de Provincias:', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-      { key: 'Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-      { key: 'Ríos en Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
+      { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
+      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
+      { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
+      { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
+      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
     ];
 
     this.showModal = true;
