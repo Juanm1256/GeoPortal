@@ -1,5 +1,7 @@
 ﻿using AppGeoPortal.Contrato;
+using AppGeoPortal.Middleware.Atributes;
 using AppGeoPortal.Modelos.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,8 +17,9 @@ namespace AppGeoPortal.Controllers
         {
             _departamentoService = departamentoService;
         }
-
+        [Authorize]
         [HttpGet("informacion")]
+        [PermisoRequerido("Ver")]
         public async Task<ActionResult<DepartamentoInfoDTO>> ObtenerInformacionDepartamento(
         [FromQuery] double longitud,
         [FromQuery] double latitud)

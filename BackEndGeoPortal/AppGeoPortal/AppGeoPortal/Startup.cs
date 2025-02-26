@@ -135,7 +135,9 @@ namespace AppGeoPortal
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseAuthorization(); 
+            app.UseAuthorization();
+
+            app.UseMiddleware<RegistroLimitMiddleware>();
 
             app.UseMiddleware<PermisosMiddleware>(); 
 

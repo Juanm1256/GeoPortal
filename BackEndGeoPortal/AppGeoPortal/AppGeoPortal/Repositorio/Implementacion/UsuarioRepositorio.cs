@@ -54,7 +54,7 @@ namespace AppGeoPortal.Repositorio.Implementacion
 
             var permisos = userAccount.ObtenerPermisosActivos() ?? new List<string>();
 
-            return await ConstruirToken(username, userAccount.IdRolnav.nombre, userAccount.estado, userAccount.IdRolnav.estado, permisos);
+            return await ConstruirToken( userAccount.idusuario, username, userAccount.IdRolnav.nombre, userAccount.estado, userAccount.IdRolnav.estado, permisos);
         }
         
 
@@ -90,10 +90,10 @@ namespace AppGeoPortal.Repositorio.Implementacion
 
             var permisos = userAccount.ObtenerPermisosActivos() ?? new List<string>();
 
-            return await ConstruirToken(username, userAccount.IdRolnav.nombre, userAccount.estado, userAccount.IdRolnav.estado, permisos);
+            return await ConstruirToken( userAccount.idusuario, username, userAccount.IdRolnav.nombre, userAccount.estado, userAccount.IdRolnav.estado, permisos);
         }
 
-        public async Task<TokenData> ConstruirToken(string username, string rol, string estadoUsuario, string estadoRol, IEnumerable<string> permisos)
+        public async Task<TokenData> ConstruirToken(int idusuario, string username, string rol, string estadoUsuario, string estadoRol, IEnumerable<string> permisos)
         {
             var issuer = _configuration["JwtConfig:Issuer"];
             var audience = _configuration["JwtConfig:Audience"];
@@ -104,6 +104,7 @@ namespace AppGeoPortal.Repositorio.Implementacion
             var claims = new List<Claim>
     {
         new Claim(JwtRegisteredClaimNames.Name, username),
+        new Claim("idusuario", idusuario.ToString()),
         new Claim("Rol", rol),
         new Claim("EstadoUsuario", estadoUsuario),
         new Claim("EstadoRol", estadoRol)
