@@ -18,18 +18,28 @@ import { Metodos } from '../../../Metodos/metodos';
 import * as bootstrap from 'bootstrap';
 import Chart from 'chart.js/auto';
 import { ThemeService } from '../../servicios/theme.service';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, Observable, Subscription, switchMap } from 'rxjs';
 import { Texturas } from '../../interfaces/texturas';
 import { TexturasService } from '../../servicios/maps/texturas.service';
 import { DepartamentoinfoService } from '../../servicios/maps/departamentoinfo.service';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { LimitesMunicipales } from '../../interfaces/limites-municipales';
 
 @Component({
   selector: 'app-map-public',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './map-public.component.html',
   styleUrl: './map-public.component.css'
 })
 export class MapPublicComponent implements OnInit, OnDestroy {
+  //search
+    searchControl = new FormControl();
+    filteredMunicipios: LimitesMunicipales[] = [];
+    isSearching = false;
+    private searchMarker: L.Marker | null = null;
+    private limitesMunicipalesHighlight: L.LayerGroup | null = null;
+
+
   userRole: string | null = null;
   showSidebarButton: boolean = false;
   isDarkMode: boolean = false;
@@ -95,6 +105,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     try {
       this.userRole = this.authService.getUserRole();
       this.makeModalDraggable();
+      this.initSearch();
       (window as any).removeMarker = this.removeMarker.bind(this);
       await this.initMap();
       this.checkGraphButtonVisibility();
@@ -802,5 +813,189 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     this.modalInfo = [];
   }
 
+  //buscador
+  async initSearch(): Promise<void> {
+    try {
+      // Cargar los municipios de forma asíncrona
+      const municipios = await firstValueFrom(this.limitesmuservice.listarTodos());
+      
+      // Procesar cada municipio para obtener sus coordenadas
+      for (const municipio of municipios) {  // Cambiar forEach por for...of para usar await
+        if (municipio.geom) {
+          try {
+            const geojson = JSON.parse(municipio.geom);
+            if (geojson.type === 'MultiPolygon') {
+              // Calcular centroide de forma asíncrona
+              const centroid = await this.metodos.calculateCentroid(geojson);
+              if (centroid) {
+                // Agregar temporalmente lat/lng al objeto
+                (municipio as any).lng = centroid[0];
+                (municipio as any).lat = centroid[1];
+              }
+            }
+          } catch (error) {
+            console.error(`Error al analizar geometría para municipio:`, error);
+          }
+        }
+      }
+      
+      // Guardar los datos en una variable global del componente
+      (this as any).municipiosData = municipios;
+      
+      // Configurar la búsqueda reactiva
+      this.searchControl.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(async term => {
+          this.isSearching = true;
+          if (!term || term.length < 2) {
+            this.filteredMunicipios = [];
+            this.isSearching = false;
+            return [];
+          }
+          return await this.filterMunicipios(term);
+        })
+      ).subscribe({
+        next: (results) => {
+          this.filteredMunicipios = results;
+          this.isSearching = false;
+        },
+        error: (error) => {
+          console.error('Error al filtrar municipios:', error);
+          this.isSearching = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error al inicializar búsqueda:', error);
+    }
+  }
 
+  // Método asíncrono para filtrar municipios
+  async filterMunicipios(term: string): Promise<LimitesMunicipales[]> {
+    term = term.toLowerCase().trim();
+
+    try {
+      // Usar la variable donde guardamos los municipios
+      const municipios = (this as any).municipiosData || [];
+
+      // Filtrar localmente
+      const filtered = municipios.filter((municipio: LimitesMunicipales) => 
+        municipio.mun.toLowerCase().includes(term) ||
+        (municipio.dep && municipio.dep.toLowerCase().includes(term)) ||
+        (municipio.prov && municipio.prov.toLowerCase().includes(term))
+      );
+
+      return filtered;
+    } catch (error) {
+      console.error('Error al filtrar municipios:', error);
+      return [];
+    }
+  }
+
+  async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
+    this.filteredMunicipios = [];
+  
+    try {
+      // Verificar si tenemos coordenadas
+      let lat = (municipio as any).lat;
+      let lng = (municipio as any).lng;
+  
+      // Si no tenemos coordenadas, calcularlas
+      if (!lat || !lng) {
+        if (municipio.geom) {
+          const geojson = JSON.parse(municipio.geom);
+          const centroid = await this.metodos.calculateCentroid(geojson);
+          if (centroid) {
+            lng = centroid[0];
+            lat = centroid[1];
+          }
+        }
+      }
+  
+      // Resaltar el municipio en el mapa
+      await this.highlightMunicipio(municipio);
+  
+      // Eliminar marcador anterior si existe
+      if (this.searchMarker) {
+        this.map.removeLayer(this.searchMarker);
+        this.searchMarker = null;
+      }
+  
+      // Solo hacer zoom a las coordenadas sin agregar marcador ni popup
+      if (lat && lng) {
+        this.map.setView([lat, lng], 12);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar municipio:', error);
+    }
+  }
+
+  async highlightMunicipio(municipio: LimitesMunicipales): Promise<void> {
+    try {
+      // Crear o limpiar la capa de resaltado
+      if (!this.limitesMunicipalesHighlight) {
+        this.limitesMunicipalesHighlight = L.layerGroup().addTo(this.map);
+      } else {
+        this.limitesMunicipalesHighlight.clearLayers();
+      }
+      
+      // Parsear la geometría
+      const geojson = JSON.parse(municipio.geom);
+      
+      // Estilo para el municipio resaltado
+      const highlightStyle = {
+        color: '#0e0e0d',
+        weight: 3,
+        opacity: 1,
+        fillColor: 'transparent', // Agregado para asegurar transparencia
+        fillOpacity: 0 // Establece la opacidad de relleno a 0
+      };
+      
+      // Crear y agregar la capa GeoJSON con interactividad
+      const layer = L.geoJSON(geojson, {
+        style: highlightStyle,
+        onEachFeature: (feature, layer) => {
+          layer.on('click', (e) => {
+            // Usar el punto de clic del evento para llamar a consultarInformacionFeature
+            this.consultarInformacionFeature(e);
+          });
+        }
+      }).addTo(this.limitesMunicipalesHighlight);
+      
+      // Ajustar el mapa a los límites del municipio
+      this.map.fitBounds(layer.getBounds());
+    } catch (error) {
+      console.error('Error al resaltar municipio:', error);
+      
+      // Si hay error, intentar solo hacer zoom a las coordenadas
+      const lat = (municipio as any).lat;
+      const lng = (municipio as any).lng;
+      
+      if (lat && lng) {
+        this.map.setView([lat, lng], 12);
+      }
+    }
+  }
+
+  clearSearch(): void {
+    // Limpiar el control de búsqueda
+    this.searchControl.setValue('');
+    
+    // Limpiar los municipios filtrados
+    this.filteredMunicipios = [];
+    
+    // Limpiar el resaltado de municipios en el mapa
+    if (this.limitesMunicipalesHighlight) {
+      this.limitesMunicipalesHighlight.clearLayers();
+    }
+    
+    // Eliminar marcador de búsqueda si existe
+    if (this.searchMarker) {
+      this.map.removeLayer(this.searchMarker);
+      this.searchMarker = null;
+    }
+    
+    // Volver a la vista inicial del mapa
+    this.map.setView([-16.54529, -64.7400], 6);
+  }
 }

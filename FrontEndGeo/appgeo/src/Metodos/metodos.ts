@@ -622,4 +622,27 @@ export class Metodos {
     maping.addLayer(Texturasuelo200);
     return Texturasuelo200;
   }
+
+  async calculateCentroid(geojson: any): Promise<[number, number] | null> {
+    try {
+      if (geojson.type === 'MultiPolygon') {
+        // Por simplicidad, usar el primer polígono
+        const coordinates = geojson.coordinates[0][0]; // Primer polígono, anillo exterior
+        
+        let sumX = 0;
+        let sumY = 0;
+        
+        coordinates.forEach((coord: number[]) => {
+          sumX += coord[0];
+          sumY += coord[1];
+        });
+        
+        return [sumX / coordinates.length, sumY / coordinates.length];
+      }
+      return null;
+    } catch (error) {
+      console.error('Error al calcular centroide:', error);
+      return null;
+    }
+  }
 }
