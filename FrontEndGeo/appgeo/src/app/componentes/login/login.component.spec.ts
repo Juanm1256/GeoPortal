@@ -8,11 +8,11 @@ import { of, throwError } from 'rxjs';
 import Swal from 'sweetalert2';
 import { LoginResponse } from '../../interfaces/login-response';
 
-describe('LoginComponent', () => {
-  let component: LoginComponent;
+describe('ComponenteLogin', () => {
+  let componente: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
-  let router: jasmine.SpyObj<Router>;
+  let servicioAuth: jasmine.SpyObj<AuthService>;
+  let servicioRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['login', 'saveToken', 'getUserRole']);
@@ -28,40 +28,40 @@ describe('LoginComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
-    component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    componente = fixture.componentInstance;
+    servicioAuth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    servicioRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     fixture.detectChanges();
   });
 
   // ✅ 1. Creación del componente
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
   });
 
-  // ✅ 2. Formulario
-  it('should initialize the form with empty values', () => {
-    expect(component.form.get('usuario')?.value).toBe('');
-    expect(component.form.get('contraseña')?.value).toBe('');
+  // ✅ 2. Validaciones del formulario
+  it('Debe inicializar el formulario con valores vacíos', () => {
+    expect(componente.form.get('usuario')?.value).toBe('');
+    expect(componente.form.get('contraseña')?.value).toBe('');
   });
 
-  it('should invalidate the form when fields are empty', () => {
-    component.form.get('usuario')?.setValue('');
-    component.form.get('contraseña')?.setValue('');
-    expect(component.form.invalid).toBeTrue();
+  it('Debe invalidar el formulario cuando los campos están vacíos', () => {
+    componente.form.get('usuario')?.setValue('');
+    componente.form.get('contraseña')?.setValue('');
+    expect(componente.form.invalid).toBeTrue();
   });
 
-  it('should validate the usuario field', () => {
-    const usuario = component.form.get('usuario');
-    usuario?.setValue('user123');
+  it('Debe validar el campo usuario', () => {
+    const usuario = componente.form.get('usuario');
+    usuario?.setValue('usuario123');
     expect(usuario?.valid).toBeTrue();
 
     usuario?.setValue('');
     expect(usuario?.invalid).toBeTrue();
   });
 
-  it('should validate the contraseña field', () => {
-    const contraseña = component.form.get('contraseña');
+  it('Debe validar el campo contraseña', () => {
+    const contraseña = componente.form.get('contraseña');
     contraseña?.setValue('password123');
     expect(contraseña?.valid).toBeTrue();
 
@@ -70,65 +70,63 @@ describe('LoginComponent', () => {
   });
 
   // ✅ 3. Mostrar/Ocultar Contraseña
-  it('should toggle password visibility', () => {
-    expect(component.showPassword).toBeFalse();
-    component.togglePasswordVisibility();
-    expect(component.showPassword).toBeTrue();
-    component.togglePasswordVisibility();
-    expect(component.showPassword).toBeFalse();
+  it('Debe alternar la visibilidad de la contraseña', () => {
+    expect(componente.showPassword).toBeFalse();
+    componente.togglePasswordVisibility();
+    expect(componente.showPassword).toBeTrue();
+    componente.togglePasswordVisibility();
+    expect(componente.showPassword).toBeFalse();
   });
 
-  // ✅ 4. Método Guardar - Éxito
-  it('should call AuthService.login and save token on success (ADMINISTRADOR)', async () => {
-    const mockResponse = { Token: 'mockToken', Expira: new Date() };
-    authService.login.and.returnValue(of(mockResponse))    
-    authService.getUserRole.and.returnValue('ADMINISTRADOR');
+  // ✅ 4. Método Guardar - Éxito en la autenticación
+  it('Debe llamar a AuthService.login y guardar el token en caso de éxito (ADMINISTRADOR)', async () => {
+    const respuestaMock = { Token: 'mockToken', Expira: new Date() };
+    servicioAuth.login.and.returnValue(of(respuestaMock));    
+    servicioAuth.getUserRole.and.returnValue('ADMINISTRADOR');
 
-    component.form.setValue({ usuario: 'admin', contraseña: 'password123' });
-    await component.Guardar(new Event('submit'));
+    componente.form.setValue({ usuario: 'admin', contraseña: 'password123' });
+    await componente.Guardar(new Event('submit'));
 
-    expect(authService.login).toHaveBeenCalled();
-    expect(authService.saveToken).toHaveBeenCalledWith('mockToken');
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(servicioAuth.login).toHaveBeenCalled();
+    expect(servicioAuth.saveToken).toHaveBeenCalledWith('mockToken');
+    expect(servicioRouter.navigate).toHaveBeenCalledWith(['/dashboard']);
   });
 
-  it('should call AuthService.login and save token on success (VISITANTE)', async () => {
-    const mockResponse = { Token: 'mockToken', Expira: new Date() };
-    authService.login.and.returnValue(of(mockResponse));
-    authService.getUserRole.and.returnValue('VISITANTE');
+  it('Debe llamar a AuthService.login y guardar el token en caso de éxito (VISITANTE)', async () => {
+    const respuestaMock = { Token: 'mockToken', Expira: new Date() };
+    servicioAuth.login.and.returnValue(of(respuestaMock));
+    servicioAuth.getUserRole.and.returnValue('VISITANTE');
 
-    component.form.setValue({ usuario: 'visitor', contraseña: 'password123' });
-    await component.Guardar(new Event('submit'));
+    componente.form.setValue({ usuario: 'visitante', contraseña: 'password123' });
+    await componente.Guardar(new Event('submit'));
 
-    expect(authService.login).toHaveBeenCalled();
-    expect(authService.saveToken).toHaveBeenCalledWith('mockToken');
-    expect(router.navigate).toHaveBeenCalledWith(['/map-public']);
+    expect(servicioAuth.login).toHaveBeenCalled();
+    expect(servicioAuth.saveToken).toHaveBeenCalledWith('mockToken');
+    expect(servicioRouter.navigate).toHaveBeenCalledWith(['/map-public']);
   });
 
-  // ✅ 4. Método Guardar - Error
-  it('should show error if login fails', async () => {
+  // ✅ 5. Método Guardar - Manejo de errores
+  it('Debe mostrar error si el inicio de sesión falla', async () => {
     const swalSpy = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
   
-    authService.login.and.returnValue(throwError(() => new Error('Credenciales incorrectas')));
+    servicioAuth.login.and.returnValue(throwError(() => new Error('Credenciales incorrectas')));
   
-    component.form.setValue({ usuario: 'wronguser', contraseña: 'wrongpassword' });
-    await component.Guardar(new Event('submit'));
+    componente.form.setValue({ usuario: 'usuarioIncorrecto', contraseña: 'claveIncorrecta' });
+    await componente.Guardar(new Event('submit'));
   
     expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
       icon: 'error',
       title: 'Error',
-      text: 'Credenciales incorrectas o error en el servidor.' // ✅ Mensaje corregido
+      text: 'Credenciales incorrectas o error en el servidor.'
     }));
   });
-  
 
-  it('should show error if no token is returned', async () => {
+  it('Debe mostrar error si el servidor no devuelve un token', async () => {
     const swalSpy = spyOn(Swal, 'fire');
-    authService.login.and.returnValue(of({ Token: '', Expira: new Date() } as LoginResponse));
+    servicioAuth.login.and.returnValue(of({ Token: '', Expira: new Date() } as LoginResponse));
 
-
-    component.form.setValue({ usuario: 'user', contraseña: 'password123' });
-    await component.Guardar(new Event('submit'));
+    componente.form.setValue({ usuario: 'usuario', contraseña: 'password123' });
+    await componente.Guardar(new Event('submit'));
 
     expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
       icon: 'error',
@@ -137,16 +135,16 @@ describe('LoginComponent', () => {
     }));
   });
 
-  // ✅ 5. Método mostrarError
-  it('should call Swal.fire when mostrarError is called', async () => {
+  // ✅ 6. Método mostrarError
+  it('Debe llamar a Swal.fire cuando mostrarError es invocado', async () => {
     const swalSpy = spyOn(Swal, 'fire');
-    await component['mostrarError']('Mensaje de error');
-  
+    await componente['mostrarError']('Mensaje de error');
+
     expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
       icon: 'error',
       title: 'Error',
-      text: jasmine.any(String) // ✅ Permite cualquier texto de error
+      text: jasmine.any(String) // ✅ Permite cualquier mensaje de error
     }));
   });
-  
+
 });

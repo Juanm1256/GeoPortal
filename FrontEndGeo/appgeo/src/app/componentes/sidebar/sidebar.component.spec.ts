@@ -3,63 +3,63 @@ import { SidebarComponent } from './sidebar.component';
 import { ThemeService } from '../../servicios/theme.service';
 import { Subject } from 'rxjs';
 
-describe('SidebarComponent', () => {
-  let component: SidebarComponent;
+describe('ComponenteSidebar', () => {
+  let componente: SidebarComponent;
   let fixture: ComponentFixture<SidebarComponent>;
-  let themeServiceStub: Partial<ThemeService>;
+  let temaServicioStub: Partial<ThemeService>;
   let isDarkModeSubject: Subject<boolean>;
 
   beforeEach(async () => {
-    // Mock de ThemeService
+    // Simulación del servicio ThemeService
     isDarkModeSubject = new Subject<boolean>();
-    themeServiceStub = {
+    temaServicioStub = {
       isDarkMode$: isDarkModeSubject.asObservable(),
       toggleTheme: jasmine.createSpy('toggleTheme')
     };
 
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
-      providers: [{ provide: ThemeService, useValue: themeServiceStub }]
+      providers: [{ provide: ThemeService, useValue: temaServicioStub }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SidebarComponent);
-    component = fixture.componentInstance;
+    componente = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
   });
 
-  it('should subscribe to ThemeService and update isDarkMode', () => {
+  it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
     isDarkModeSubject.next(true);
-    expect(component.isDarkMode).toBeTrue();
+    expect(componente.isDarkMode).toBeTrue();
 
     isDarkModeSubject.next(false);
-    expect(component.isDarkMode).toBeFalse();
+    expect(componente.isDarkMode).toBeFalse();
   });
 
-  it('should call toggleTheme when toggleTheme is called', () => {
-    component.toggleTheme();
-    expect(themeServiceStub.toggleTheme).toHaveBeenCalled();
+  it('Debe llamar a toggleTheme cuando se ejecuta toggleTheme', () => {
+    componente.toggleTheme();
+    expect(temaServicioStub.toggleTheme).toHaveBeenCalled();
   });
 
-  it('should toggle isSidebarCollapsed and isSidebarGeo', () => {
-    component.isSidebarCollapsed = false;
-    component.isSidebarGeo = false;
+  it('Debe alternar isSidebarCollapsed e isSidebarGeo', () => {
+    componente.isSidebarCollapsed = false;
+    componente.isSidebarGeo = false;
 
-    component.toggleSidebar();
-    expect(component.isSidebarCollapsed).toBeTrue();
-    expect(component.isSidebarGeo).toBeTrue();
+    componente.toggleSidebar();
+    expect(componente.isSidebarCollapsed).toBeTrue();
+    expect(componente.isSidebarGeo).toBeTrue();
 
-    component.toggleSidebar();
-    expect(component.isSidebarCollapsed).toBeFalse();
-    expect(component.isSidebarGeo).toBeFalse();
+    componente.toggleSidebar();
+    expect(componente.isSidebarCollapsed).toBeFalse();
+    expect(componente.isSidebarGeo).toBeFalse();
   });
 
-  it('should unsubscribe from ThemeService on destroy', () => {
-    const unsubscribeSpy = spyOn(component['themeSubscription'], 'unsubscribe');
-    component.ngOnDestroy();
+  it('Debe cancelar la suscripción a ThemeService al destruirse', () => {
+    const unsubscribeSpy = spyOn(componente['themeSubscription'], 'unsubscribe');
+    componente.ngOnDestroy();
     expect(unsubscribeSpy).toHaveBeenCalled();
   });
 });
