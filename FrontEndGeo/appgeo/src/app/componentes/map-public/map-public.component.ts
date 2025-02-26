@@ -744,7 +744,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     }
   
     const latlng = event.latlng;
-    console.log(latlng);
+    //console.log(latlng);
     
     // Obtener la capa activa que debe mostrar el modal
     const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];

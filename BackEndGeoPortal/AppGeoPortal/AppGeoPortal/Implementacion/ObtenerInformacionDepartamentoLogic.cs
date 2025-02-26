@@ -26,58 +26,74 @@ namespace AppGeoPortal.Implementacion
                     WITH punto AS (
                         SELECT ST_SetSRID(ST_MakePoint({0}, {1}), 4326) AS geom
                     ),
+                    ubicacion_actual AS (
+                        -- Primero identificamos el departamento y municipio donde está el punto
+                        SELECT 
+                            COALESCE(ld.dep, 'N/A') AS departamento,
+                            COALESCE(lm.mun, 'N/A') AS municipio,
+                            COALESCE(lm.prov, 'N/A') AS provincia
+                        FROM punto p
+                        LEFT JOIN capas.limites_departamentales ld ON ST_Contains(ST_Transform(ld.geom, 4326), p.geom) 
+                        LEFT JOIN capas.limites_municipales lm ON ST_Contains(ST_Transform(lm.geom, 4326), p.geom)
+                        LIMIT 1
+                    ),
                     info_geografica AS (
                         SELECT 
-                            COALESCE((SELECT dep FROM capas.limites_departamentales WHERE ST_Contains(geom, punto.geom)), 'N/A') AS Departamento,
-                            COALESCE((SELECT prov FROM capas.limites_municipales WHERE ST_Contains(geom, punto.geom)), 'N/A') AS ProvinciaPunto,
-                            COALESCE((SELECT mun FROM capas.limites_municipales WHERE ST_Contains(geom, punto.geom)), 'N/A') AS MunicipioPunto,
-                            COALESCE((SELECT cuenca FROM capas.cuencas WHERE ST_Contains(geom, punto.geom)), 'N/A') AS CuencaPunto
-                        FROM punto
+                            ua.departamento AS Departamento,
+                            ua.provincia AS ProvinciaPunto,
+                            ua.municipio AS MunicipioPunto,
+                            COALESCE((SELECT cuenca FROM capas.cuencas 
+                                     WHERE ST_Contains(ST_Transform(geom, 4326), (SELECT geom FROM punto))
+                                     LIMIT 1), 'N/A') AS CuencaPunto
+                        FROM ubicacion_actual ua
                     ),
                     rios_municipio AS (
-                        SELECT COALESCE(STRING_AGG(DISTINCT nom, ', '), 'N/A') AS NombreRios
+                        SELECT COALESCE(STRING_AGG(DISTINCT rh.nom, ', '), 'N/A') AS NombreRios
                         FROM capas_geo.red_hidrica rh
-                        JOIN capas.limites_municipales lm ON ST_Intersects(rh.geom, lm.geom)
-                        WHERE ST_Contains(lm.geom, ST_SetSRID(ST_MakePoint({0}, {1}), 4326))
+                        JOIN capas.limites_municipales lm ON 
+                            ST_Intersects(ST_Transform(rh.geom, 4326), ST_Transform(lm.geom, 4326))
+                            AND lm.mun = (SELECT municipio FROM ubicacion_actual)
+                            AND lm.dep = (SELECT departamento FROM ubicacion_actual)
                     ),
                     mercados_municipio AS (
-                        SELECT COALESCE(COUNT(*), 0) AS CantidadMercados
+                        -- Contamos solo los mercados que están en el municipio Y departamento correcto
+                        SELECT COUNT(*) AS CantidadMercados
                         FROM capas.mercados_project mp
-                        JOIN capas.limites_municipales lm ON 
-                            REGEXP_REPLACE(UPPER(mp.municipio), '[DE\s]', '', 'g') 
-                            LIKE 
-                            REGEXP_REPLACE(UPPER(lm.mun), '[DE\s]', '', 'g')
-                        WHERE ST_Contains(lm.geom, ST_SetSRID(ST_MakePoint({0}, {1}), 4326))
+                        JOIN ubicacion_actual ua ON 
+                            UPPER(mp.municipio) = UPPER(ua.municipio) AND
+                            UPPER(mp.departamen) = UPPER(ua.departamento)
                     ),
                     consulta_principal AS (
                         SELECT 
-                            COALESCE(UPPER(mp.departamen), 'N/A') AS Departamento,
+                            ig.Departamento,
                             ig.ProvinciaPunto,
                             ig.MunicipioPunto,
                             ig.CuencaPunto,
                             rm.NombreRios AS RiosMunicipio,
-                            COALESCE(COUNT(DISTINCT mp.nombre), 0) AS NumeroMercados,
+                            -- Mercados en todo el departamento
+                            COALESCE((
+                                SELECT COUNT(DISTINCT mp.nombre) 
+                                FROM capas.mercados_project mp 
+                                WHERE UPPER(mp.departamen) = UPPER(ig.Departamento)
+                            ), 0) AS NumeroMercados,
+                            -- Mercados solo en el municipio específico del departamento correcto
                             COALESCE((SELECT CantidadMercados FROM mercados_municipio), 0) AS NumeroMercadosMunicipio,
-                            COALESCE(COUNT(DISTINCT lm.prov), 0) AS NumeroProvincias,
-                            COALESCE(COUNT(DISTINCT lm.mun), 0) AS NumeroMunicipios
+                            -- Provincias en el departamento
+                            COALESCE((
+                                SELECT COUNT(DISTINCT lm.prov) 
+                                FROM capas.limites_municipales lm 
+                                WHERE UPPER(lm.dep) = UPPER(ig.Departamento)
+                            ), 0) AS NumeroProvincias,
+                            -- Municipios en el departamento
+                            COALESCE((
+                                SELECT COUNT(DISTINCT lm.mun) 
+                                FROM capas.limites_municipales lm 
+                                WHERE UPPER(lm.dep) = UPPER(ig.Departamento)
+                            ), 0) AS NumeroMunicipios
                         FROM 
-                            capas.mercados_project mp
-                        INNER JOIN 
-                            capas.limites_departamentales ld ON UPPER(mp.departamen) = ld.dep
-                        INNER JOIN
-                            capas.limites_municipales lm ON UPPER(mp.departamen) = lm.dep
-                        CROSS JOIN 
                             info_geografica ig
-                        CROSS JOIN
+                        CROSS JOIN 
                             rios_municipio rm
-                        WHERE 
-                            UPPER(mp.departamen) = ig.Departamento
-                        GROUP BY 
-                            mp.departamen, 
-                            ig.ProvinciaPunto, 
-                            ig.MunicipioPunto, 
-                            ig.CuencaPunto,
-                            rm.NombreRios
                     )
                     SELECT * FROM consulta_principal", longitud, latitud)
                 .ToListAsync();

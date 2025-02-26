@@ -17,7 +17,7 @@ namespace AppGeoPortal.Implementacion
             var connection = context.Database.GetDbConnection();
             await connection.OpenAsync();
 
-            var query = @"SELECT gid, objectid, dep, prov, mun, cod_dep, cod_prov, cod_mun, shape_leng, shape_area, ST_AsGeoJSON(geom) AS geom FROM capas.limites_municipales";
+            var query = @"SELECT gid, dep, prov, mun, cod_dep, cod_prov, cod_mun, shape_leng, shape_area, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom FROM capas.limites_municipales";
 
             var lista = new List<Lim_Mun>();
 
@@ -32,16 +32,15 @@ namespace AppGeoPortal.Implementacion
                         lista.Add(new Lim_Mun
                         {
                             gid = reader.GetInt32(0),
-                            objectid = reader.GetDouble(1),
-                            dep = reader.GetString(2),
-                            prov = reader.GetString(3),
-                            mun = reader.GetString(4),
-                            cod_dep = reader.GetString(5),
-                            cod_prov = reader.GetString(6),
-                            cod_mun = reader.GetString(7),
-                            shape_leng = reader.GetDecimal(8),
-                            shape_area = reader.GetDecimal(9),
-                            geom = reader.GetString(10),
+                            dep = reader.GetString(1),
+                            prov = reader.GetString(2),
+                            mun = reader.GetString(3),
+                            cod_dep = reader.GetString(4),
+                            cod_prov = reader.GetString(5),
+                            cod_mun = reader.GetString(6),
+                            shape_leng = reader.GetDecimal(7),
+                            shape_area = reader.GetDecimal(8),
+                            geom = reader.GetString(9),
                         });
                     }
                 }
