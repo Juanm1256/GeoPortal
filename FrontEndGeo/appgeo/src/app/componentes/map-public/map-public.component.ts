@@ -289,7 +289,19 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         8: '#073408',
         9: '#dc1010'
       };
-
+  
+      // Mapeo de valores a nombres descriptivos
+      const textureNameMap: { [key: number]: string } = {
+        0: 'Arcilloso',
+        1: 'Arenoso',
+        3: 'Limoso',
+        4: 'Franco',
+        6: 'Franco Arcilloso',
+        7: 'Franco Arenoso',
+        8: 'Franco Limoso',
+        9: 'Arcillo Arenoso'
+      };
+  
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
         'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
         'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
@@ -298,17 +310,17 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
         'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
       };
-
+  
       this.layerInfo = {
         nombre: layerName,
         descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
       };
-
+  
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
           this.layerData = data.map(item => ({
-            label: `Valor ${item.Value}`,
+            label: textureNameMap[item.Value] || `Valor ${item.Value}`,
             value: item.Porcentaje,
             color: colorMap[item.Value] || '#cccccc'
           }));
@@ -725,13 +737,19 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
+    // Verificar si el clic está dentro del área de búsqueda
+    const searchContainer = document.querySelector('.map-search-container');
+    if (searchContainer && searchContainer.contains(event.originalEvent.target as Node)) {
+      return; // Salir del método si el clic está dentro del buscador
+    }
+  
     const latlng = event.latlng;
-
+    console.log(latlng);
+    
     // Obtener la capa activa que debe mostrar el modal
-    const capasConModal = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+    const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
     const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
-
-
+  
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {

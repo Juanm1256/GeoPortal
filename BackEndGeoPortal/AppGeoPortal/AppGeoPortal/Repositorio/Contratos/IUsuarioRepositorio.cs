@@ -7,6 +7,6 @@ namespace AppGeoPortal.Repositorio.Contratos
         public Task<TokenData> VerficarCredenciales(string username, string password);
         public Task<string> EncriptarPassword(string password);
         public Task<TokenData> GenerarNuevoToken(string username);
-        public Task<TokenData> ConstruirToken(string username, string rol, string estadoUsuario, string estadoRol, IEnumerable<string> permisos);
+        public Task<TokenData> ConstruirToken(int idusuario, string username, string rol, string estadoUsuario, string estadoRol, IEnumerable<string> permisos);
     }
 }
