@@ -37,7 +37,6 @@ describe('LimitesMunicipalesService', () => {
     const mockData: LimitesMunicipales[] = [
       {
         gid: 1,
-        objectid: 12345,
         dep: 'La Paz',
         prov: 'Murillo',
         mun: 'La Paz',

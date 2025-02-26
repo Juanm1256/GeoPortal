@@ -742,7 +742,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     }
   
     const latlng = event.latlng;
-    console.log(latlng);
+    //console.log(latlng);
     
     // Obtener la capa activa que debe mostrar el modal
     const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];

@@ -1,6 +1,5 @@
 export interface LimitesMunicipales {
     gid:number;
-    objectid:number;
     dep: string;
     prov: string;
     mun: string;

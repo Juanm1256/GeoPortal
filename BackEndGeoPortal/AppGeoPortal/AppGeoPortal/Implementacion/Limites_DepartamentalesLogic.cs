@@ -17,7 +17,8 @@ namespace AppGeoPortal.Implementacion
             var connection = context.Database.GetDbConnection();
             await connection.OpenAsync();
 
-            var query = @"SELECT gid, objectid, dep, cod_dep, shape_leng, shape_area, ST_AsGeoJSON(geom) AS geom FROM capas.limites_departamentales";
+            var query = @"SELECT gid, dep, cod_dep, shape_leng, shape_area, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom FROM capas.limites_departamentales";
+
 
             var lista = new List<Lim_Dep>();
 
@@ -32,12 +33,11 @@ namespace AppGeoPortal.Implementacion
                         lista.Add(new Lim_Dep
                         {
                             gid = reader.GetInt32(0),
-                            objectid = reader.GetDouble(1),
-                            dep = reader.GetString(2),
-                            cod_dep = reader.GetString(3),
-                            shape_leng = reader.GetDecimal(4),
-                            shape_area = reader.GetDecimal(5),
-                            geom = reader.GetString(6),
+                            dep = reader.GetString(1),
+                            cod_dep = reader.GetString(2),
+                            shape_leng = reader.GetDecimal(3),
+                            shape_area = reader.GetDecimal(4),
+                            geom = reader.GetString(5),
                         });
                     }
                 }

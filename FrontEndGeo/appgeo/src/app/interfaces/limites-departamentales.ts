@@ -1,6 +1,5 @@
 export interface LimitesDepartamentales {
     gid:number;
-    objectid:number;
     dep: string;
     cod_dep: string;
     shape_leng: number;

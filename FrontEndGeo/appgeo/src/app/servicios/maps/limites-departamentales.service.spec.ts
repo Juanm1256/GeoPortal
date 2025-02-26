@@ -37,7 +37,6 @@ describe('LimitesDepartamentalesService', () => {
     const mockData: LimitesDepartamentales[] = [
       {
         gid: 1,
-        objectid: 12345,
         dep: 'Santa Cruz',
         cod_dep: '07',
         shape_leng: 12000.5,
