@@ -5,18 +5,18 @@ import { AuthService } from '../../servicios/auth.service';
 import { ThemeService } from '../../servicios/theme.service';
 import { Subject } from 'rxjs';
 
-describe('LayoutComponent', () => {
-  let component: LayoutComponent;
+describe('ComponenteLayout', () => {
+  let componente: LayoutComponent;
   let fixture: ComponentFixture<LayoutComponent>;
 
-  // Stub para AuthService
+  // Simulación de AuthService
   const authServiceStub = {
     getToken: jasmine.createSpy('getToken').and.returnValue(null),
     getUserRole: jasmine.createSpy('getUserRole').and.returnValue('admin'),
     logout: jasmine.createSpy('logout')
   };
 
-  // Stub para ThemeService (usando un Subject para simular el observable)
+  // Simulación de ThemeService (usando un Subject para simular el observable)
   const isDarkModeSubject = new Subject<boolean>();
   const themeServiceStub = {
     isDarkMode$: isDarkModeSubject,
@@ -36,41 +36,41 @@ describe('LayoutComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(LayoutComponent);
-    component = fixture.componentInstance;
+    componente = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
   });
 
-  it('should subscribe to ThemeService and update isDarkMode', () => {
+  it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
     // Emitir valores para simular cambios en el tema
     isDarkModeSubject.next(true);
     fixture.detectChanges();
-    expect(component.isDarkMode).toBeTrue();
+    expect(componente.isDarkMode).toBeTrue();
 
     isDarkModeSubject.next(false);
     fixture.detectChanges();
-    expect(component.isDarkMode).toBeFalse();
+    expect(componente.isDarkMode).toBeFalse();
   });
 
-  it('toggleSidebar should toggle isSidebarCollapsed', () => {
-    expect(component.isSidebarCollapsed).toBeFalse();
-    component.toggleSidebar();
-    expect(component.isSidebarCollapsed).toBeTrue();
-    component.toggleSidebar();
-    expect(component.isSidebarCollapsed).toBeFalse();
+  it('toggleSidebar debe alternar isSidebarCollapsed', () => {
+    expect(componente.isSidebarCollapsed).toBeFalse();
+    componente.toggleSidebar();
+    expect(componente.isSidebarCollapsed).toBeTrue();
+    componente.toggleSidebar();
+    expect(componente.isSidebarCollapsed).toBeFalse();
   });
 
-  it('should obtain userRole from AuthService on init', () => {
+  it('Debe obtener el rol del usuario desde AuthService en la inicialización', () => {
     expect(authServiceStub.getUserRole).toHaveBeenCalled();
-    expect(component.userRole).toEqual('admin');
+    expect(componente.userRole).toEqual('admin');
   });
 
-  it('should unsubscribe from themeSubscription on ngOnDestroy', () => {
-    spyOn(component.themeSubscription, 'unsubscribe');
-    component.ngOnDestroy();
-    expect(component.themeSubscription.unsubscribe).toHaveBeenCalled();
+  it('Debe cancelar la suscripción a themeSubscription en ngOnDestroy', () => {
+    spyOn(componente.themeSubscription, 'unsubscribe');
+    componente.ngOnDestroy();
+    expect(componente.themeSubscription.unsubscribe).toHaveBeenCalled();
   });
 });
