@@ -1,7 +1,7 @@
 import { FilteronePipe } from './filterone.pipe';
 
 describe('FilteronePipe', () => {
-  it('create an instance', () => {
+  it('Debe crearse la instancia', () => {
     const pipe = new FilteronePipe();
     expect(pipe).toBeTruthy();
   });

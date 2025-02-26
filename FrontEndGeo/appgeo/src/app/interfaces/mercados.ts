@@ -1,6 +1,6 @@
 export interface Mercados {
     gid:number;
-    ogc_fid:DoubleRange;
+    ogc_fid:number;
     departmen: string;
     provincia: string;
     municipio: string;

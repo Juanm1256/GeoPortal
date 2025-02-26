@@ -8,131 +8,131 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 import Swal from 'sweetalert2';
 
-describe('RolesComponent', () => {
-  let component: RolesComponent;
+describe('ComponenteRoles', () => {
+  let componente: RolesComponent;
   let fixture: ComponentFixture<RolesComponent>;
-  let rolesService: jasmine.SpyObj<RolesService>;
-  let rolesPermisoService: jasmine.SpyObj<RolesPermisoService>;
-  let modalService: jasmine.SpyObj<NgbModal>;
+  let servicioRoles: jasmine.SpyObj<RolesService>;
+  let servicioRolesPermiso: jasmine.SpyObj<RolesPermisoService>;
+  let servicioModal: jasmine.SpyObj<NgbModal>;
 
   beforeEach(async () => {
-    rolesService = jasmine.createSpyObj('RolesService', ['ListarTodos', 'ListarPermiso']);
-    rolesPermisoService = jasmine.createSpyObj('RolesPermisoService', ['insertar', 'modificar']);
-    modalService = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+    servicioRoles = jasmine.createSpyObj('RolesService', ['ListarTodos', 'ListarPermiso']);
+    servicioRolesPermiso = jasmine.createSpyObj('RolesPermisoService', ['insertar', 'modificar']);
+    servicioModal = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
   
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, RolesComponent],
       providers: [
-        { provide: RolesService, useValue: rolesService },
-        { provide: RolesPermisoService, useValue: rolesPermisoService },
-        { provide: NgbModal, useValue: modalService }
+        { provide: RolesService, useValue: servicioRoles },
+        { provide: RolesPermisoService, useValue: servicioRolesPermiso },
+        { provide: NgbModal, useValue: servicioModal }
       ]
     }).compileComponents();
   
     fixture = TestBed.createComponent(RolesComponent);
-    component = fixture.componentInstance;
+    componente = fixture.componentInstance;
   
     // ✅ Simula la suscripción al tema
-    component.themeSubscription = jasmine.createSpyObj('Subscription', ['unsubscribe']);
+    componente.themeSubscription = jasmine.createSpyObj('Subscription', ['unsubscribe']);
   
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
   });
 
-  it('should load roles on init', async () => {
-    const mockRoles = [{ idrol: 1, nombre: 'Admin', estado: 'Activo', permisos: ['Crear', 'Editar'] }];
-    rolesService.ListarTodos.and.returnValue(of(mockRoles));
+  it('Debe cargar los roles al inicializar', async () => {
+    const rolesMock = [{ idrol: 1, nombre: 'Admin', estado: 'Activo', permisos: ['Crear', 'Editar'] }];
+    servicioRoles.ListarTodos.and.returnValue(of(rolesMock));
 
-    await component.cargarRoles();
-    expect(component.listaRol).toEqual(mockRoles);
-    expect(component.isLoading).toBeFalse();
+    await componente.cargarRoles();
+    expect(componente.listaRol).toEqual(rolesMock);
+    expect(componente.isLoading).toBeFalse();
   });
 
-  // ✅ Test: should insert a new role
-  it('should insert a new role', async () => {
-    const mockPermisos = [1, 2];
-    (component as any).fb = TestBed.inject(FormBuilder);
-    component.form.addControl('permisos', (component as any).fb.array([])); // ✅ Añadimos el control manualmente
+  // ✅ Prueba: Debe insertar un nuevo rol
+  it('Debe insertar un nuevo rol', async () => {
+    const permisosMock = [1, 2];
+    (componente as any).fb = TestBed.inject(FormBuilder);
+    componente.form.addControl('permisos', (componente as any).fb.array([])); // ✅ Se añade el control manualmente
 
-    // ✅ Añadimos los permisos antes de usar setValue
-    mockPermisos.forEach(id => component.permisos.push(new FormControl(id)));
+    // ✅ Se añaden los permisos antes de usar setValue
+    permisosMock.forEach(id => componente.permisos.push(new FormControl(id)));
 
-    component.form.patchValue({ nombre: 'NEW ROLE', permisos: mockPermisos }); // ✅ Usamos patchValue para evitar errores
+    componente.form.patchValue({ nombre: 'NUEVO ROL', permisos: permisosMock }); // ✅ Se usa patchValue para evitar errores
 
-    await component.Guardar();
+    await componente.Guardar();
 
-    expect(rolesPermisoService.insertar).toHaveBeenCalledWith({
-      nombreRol: 'NEW ROLE',
+    expect(servicioRolesPermiso.insertar).toHaveBeenCalledWith({
+      nombreRol: 'NUEVO ROL',
       estado: 'Activo',
-      IdPermisos: mockPermisos
+      IdPermisos: permisosMock
     });
   });
 
-  // ✅ Test: should update an existing role
-  it('should update an existing role', async () => {
-    const mockPermisos = [1];
-    (component as any).fb = TestBed.inject(FormBuilder);
-    component.form.addControl('permisos', (component as any).fb.array([])); // ✅ Añadimos el control manualmente
+  // ✅ Prueba: Debe actualizar un rol existente
+  it('Debe actualizar un rol existente', async () => {
+    const permisosMock = [1];
+    (componente as any).fb = TestBed.inject(FormBuilder);
+    componente.form.addControl('permisos', (componente as any).fb.array([])); // ✅ Se añade el control manualmente
 
-    // ✅ Añadimos los permisos antes de usar setValue
-    mockPermisos.forEach(id => component.permisos.push(new FormControl(id)));
+    // ✅ Se añaden los permisos antes de usar setValue
+    permisosMock.forEach(id => componente.permisos.push(new FormControl(id)));
 
-    component.form.patchValue({ nombre: 'UPDATED ROLE', permisos: mockPermisos }); // ✅ Usamos patchValue
-    component.id = '1';
+    componente.form.patchValue({ nombre: 'ROL ACTUALIZADO', permisos: permisosMock }); // ✅ Se usa patchValue
+    componente.id = '1';
 
-    await component.Guardar();
+    await componente.Guardar();
 
-    expect(rolesPermisoService.modificar).toHaveBeenCalledWith({
-      nombreRol: 'UPDATED ROLE',
+    expect(servicioRolesPermiso.modificar).toHaveBeenCalledWith({
+      nombreRol: 'ROL ACTUALIZADO',
       estado: 'Activo',
-      IdPermisos: mockPermisos
+      IdPermisos: permisosMock
     }, '1');
   });
 
-  it('should change role state', async () => {
-    const mockRol = { idrol: 1, nombre: 'Test Role', estado: 'Activo', permisos: ['Crear'] };
-    rolesPermisoService.modificar.and.returnValue(of(true));
+  it('Debe cambiar el estado del rol', async () => {
+    const rolMock = { idrol: 1, nombre: 'Rol de prueba', estado: 'Activo', permisos: ['Crear'] };
+    servicioRolesPermiso.modificar.and.returnValue(of(true));
 
     const swalSpy = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
-    await component.CambiarEstado(mockRol, 'Inactivo');
+    await componente.CambiarEstado(rolMock, 'Inactivo');
 
-    expect(rolesPermisoService.modificar).toHaveBeenCalled();
+    expect(servicioRolesPermiso.modificar).toHaveBeenCalled();
     expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'error', title: 'El rol ha sido desactivado!' }));
   });
 
-  it('should open modal for creating role', async () => {
-    modalService.open.and.returnValue({ result: Promise.resolve() } as any);
-    await component.Guardarinstruct('mockContent');
-    expect(modalService.open).toHaveBeenCalledWith('mockContent');
+  it('Debe abrir el modal para crear un rol', async () => {
+    servicioModal.open.and.returnValue({ result: Promise.resolve() } as any);
+    await componente.Guardarinstruct('mockContent');
+    expect(servicioModal.open).toHaveBeenCalledWith('mockContent');
   });
 
-  it('should open modal and select role', async () => {
-    const mockRol = { idrol: 1, nombre: 'Test Role', estado: 'Activo', permisos: ['1', '2'] };
-    modalService.open.and.returnValue({ result: Promise.resolve() } as any);
+  it('Debe abrir el modal y seleccionar un rol', async () => {
+    const rolMock = { idrol: 1, nombre: 'Rol de prueba', estado: 'Activo', permisos: ['1', '2'] };
+    servicioModal.open.and.returnValue({ result: Promise.resolve() } as any);
 
-    await component.SeleccionarRol('mockContent', mockRol);
+    await componente.SeleccionarRol('mockContent', rolMock);
 
-    expect(modalService.open).toHaveBeenCalledWith('mockContent');
-    expect(component.form.value.nombre).toBe('Test Role');
+    expect(servicioModal.open).toHaveBeenCalledWith('mockContent');
+    expect(componente.form.value.nombre).toBe('Rol de prueba');
   });
 
-  it('should clear search', () => {
-    component.search = 'Test';
-    component.LimpiarSearch();
-    expect(component.search).toBe('');
+  it('Debe limpiar la búsqueda', () => {
+    componente.search = 'Prueba';
+    componente.LimpiarSearch();
+    expect(componente.search).toBe('');
   });
 
-  it('should toggle theme', () => {
-    const themeSpy = spyOn(component.themeService, 'toggleTheme');
-    component.toggleTheme();
+  it('Debe alternar el tema', () => {
+    const themeSpy = spyOn(componente.themeService, 'toggleTheme');
+    componente.toggleTheme();
     expect(themeSpy).toHaveBeenCalled();
   });
 
-  it('should unsubscribe on destroy', () => {
-    component.ngOnDestroy();
-    expect(component.themeSubscription.unsubscribe).toHaveBeenCalled();
+  it('Debe desuscribirse al destruir el componente', () => {
+    componente.ngOnDestroy();
+    expect(componente.themeSubscription.unsubscribe).toHaveBeenCalled();
   });
 });

@@ -16,7 +16,7 @@ import { ProveedorasistenciatecnicaService } from '../../servicios/maps/proveedo
 import { ElementRef } from '@angular/core';
 
 // Datos de prueba para cada servicio
-const usuariosData = [{ nombre: 'User1' }, { nombre: 'User2' }];
+const usuariosData = [{ nombre: 'Usuario1' }, { nombre: 'Usuario2' }];
 const rolesData = [{}, {}];
 const capitalesDepData = [{}, {}];       // 2 elementos
 const cuencasData = [{}];                // 1 elemento
@@ -27,18 +27,18 @@ const proveedoresAlevinesData = [{}];    // 1 elemento
 const proveedoresAlimentosData = [{}];   // 1 elemento
 const proveedoresAsistenciaData = [{}];  // 1 elemento
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
+describe('ComponenteDashboard', () => {
+  let componente: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
 
-  // Stub para ThemeService: se utiliza un Subject para simular isDarkMode$
+  // Simulación del ThemeService: se usa un Subject para simular isDarkMode$
   const isDarkModeSubject = new Subject<boolean>();
   const themeServiceStub = {
     isDarkMode$: isDarkModeSubject,
     toggleTheme: jasmine.createSpy('toggleTheme')
   };
 
-  // Stubs para los servicios que retornan observables con datos de prueba
+  // Simulación de los servicios que retornan observables con datos de prueba
   const usuariosServiceStub = {
     ListarTodos: jasmine.createSpy('ListarTodos').and.returnValue(of(usuariosData))
   };
@@ -94,38 +94,39 @@ describe('DashboardComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DashboardComponent);
-    component = fixture.componentInstance;
+    componente = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
   });
 
-  it('should subscribe to ThemeService and update isDarkMode', () => {
+  it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
     // Emite true y verifica la actualización
     isDarkModeSubject.next(true);
     fixture.detectChanges();
-    expect(component.isDarkMode).toBeTrue();
+    expect(componente.isDarkMode).toBeTrue();
 
     // Emite false y verifica la actualización
     isDarkModeSubject.next(false);
     fixture.detectChanges();
-    expect(component.isDarkMode).toBeFalse();
+    expect(componente.isDarkMode).toBeFalse();
   });
-  it('should load data and update totals correctly', async () => {
+
+  it('Debe cargar los datos y actualizar los totales correctamente', async () => {
     // Llamamos a cargarDatos y esperamos su finalización
-    await component.cargarDatos();
+    await componente.cargarDatos();
     fixture.detectChanges();
   
     // Verificamos que se hayan actualizado las propiedades
-    expect(component.totalUsuarios).toEqual(usuariosData.length);
-    expect(component.totalRoles).toEqual(rolesData.length);
+    expect(componente.totalUsuarios).toEqual(usuariosData.length);
+    expect(componente.totalRoles).toEqual(rolesData.length);
     // totalCapas es el número de arrays enviados en el forkJoin (8)
-    expect(component.totalCapas).toEqual(8);
+    expect(componente.totalCapas).toEqual(8);
   
     // Verificamos la data procesada en cantidadPorCapa
-    expect(component.cantidadPorCapa).toEqual([
+    expect(componente.cantidadPorCapa).toEqual([
       { nombre: 'Capitales Departamentales', cantidad: capitalesDepData.length },
       { nombre: 'Cuencas', cantidad: cuencasData.length },
       { nombre: 'Límites Departamentales', cantidad: limitesDepData.length },
@@ -137,19 +138,16 @@ describe('DashboardComponent', () => {
     ]);
   
     // Verifica que el último usuario sea el correcto
-    expect(component.ultimoUsuario).toEqual(usuariosData[usuariosData.length - 1]);
+    expect(componente.ultimoUsuario).toEqual(usuariosData[usuariosData.length - 1]);
   });
 
-  // Se podrían agregar pruebas para actualizarGrafico,
-  // aunque probar Chart.js directamente suele requerir stubbing adicional o
-  // verificar que se haya creado chartInstance, por ejemplo:
-  it('should create a chart instance after actualizarGrafico is called', async () => {
+  it('Debe crear una instancia del gráfico después de llamar a actualizarGrafico', async () => {
     // Simular que el canvas existe:
     const canvasEl = document.createElement('canvas');
-    component.chartCanvas = { nativeElement: canvasEl } as ElementRef<HTMLCanvasElement>;
+    componente.chartCanvas = { nativeElement: canvasEl } as ElementRef<HTMLCanvasElement>;
 
     // Ejecutar la actualización del gráfico
-    await (component as any).actualizarGrafico();
-    expect((component as any).chartInstance).toBeTruthy();
+    await (componente as any).actualizarGrafico();
+    expect((componente as any).chartInstance).toBeTruthy();
   });
 });

@@ -1,9 +1,9 @@
 export interface LimitesDepartamentales {
     gid:number;
-    objectid:DoubleRange;
+    objectid:number;
     dep: string;
     cod_dep: string;
-    shape_leng: DoubleRange;
-    shape_area: DoubleRange;
+    shape_leng: number;
+    shape_area: number;
     geom: any;
 }

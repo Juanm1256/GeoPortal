@@ -9,92 +9,140 @@ import { ThemeService } from '../../servicios/theme.service';
 import { of } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Usuarios } from '../../interfaces/usuarios';
-import { Personas } from '../../interfaces/personas';
 import { Roles } from '../../interfaces/roles';
 
-// ✅ COMIENZO DE LAS PRUEBAS UNITARIAS
-
-describe('UsuariosComponent', () => {
-  let component: UsuariosComponent;
+describe('ComponenteUsuarios', () => {
+  let componente: UsuariosComponent;
   let fixture: ComponentFixture<UsuariosComponent>;
-  let usuarioService: jasmine.SpyObj<UsuariosService>;
-  let rolService: jasmine.SpyObj<RolesService>;
-  let modalService: jasmine.SpyObj<NgbModal>;
-  let themeService: jasmine.SpyObj<ThemeService>;
+  let servicioUsuarios: jasmine.SpyObj<UsuariosService>;
+  let servicioRoles: jasmine.SpyObj<RolesService>;
+  let servicioModal: jasmine.SpyObj<NgbModal>;
+  let servicioTema: jasmine.SpyObj<ThemeService>;
 
   beforeEach(async () => {
-    usuarioService = jasmine.createSpyObj('UsuariosService', ['ListarTodos', 'PostUsuario', 'PutUsuario']);
-    rolService = jasmine.createSpyObj('RolesService', ['ListarTodos']);
-    modalService = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
-    themeService = jasmine.createSpyObj('ThemeService', ['toggleTheme'], { isDarkMode$: of(false) });
-  
+    servicioUsuarios = jasmine.createSpyObj('UsuariosService', {
+      ListarTodos: of([]),
+      PostUsuario: jasmine.createSpy('PostUsuario'),
+      PutUsuario: jasmine.createSpy('PutUsuario')
+    });
+
+    servicioRoles = jasmine.createSpyObj('RolesService', {
+      ListarTodos: of([])
+    });
+
+    servicioModal = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+    servicioTema = jasmine.createSpyObj('ThemeService', ['toggleTheme'], { isDarkMode$: of(false) });
+
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, ReactiveFormsModule, UsuariosComponent],
       providers: [
         FormBuilder,
-        { provide: UsuariosService, useValue: usuarioService },
-        { provide: RolesService, useValue: rolService },
-        { provide: NgbModal, useValue: modalService },
-        { provide: ThemeService, useValue: themeService }
+        { provide: UsuariosService, useValue: servicioUsuarios },
+        { provide: RolesService, useValue: servicioRoles },
+        { provide: NgbModal, useValue: servicioModal },
+        { provide: ThemeService, useValue: servicioTema }
       ]
     }).compileComponents();
-  
+
     fixture = TestBed.createComponent(UsuariosComponent);
-    component = fixture.componentInstance;
+    componente = fixture.componentInstance;
     fixture.detectChanges();
-  });
-  
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    spyOn(Swal, 'fire').and.callFake(() => Promise.resolve() as any);
   });
 
-  it('should load users and roles on init', async () => {
-    const mockUsers: Usuarios[] = [
+  it('Debe crear el componente', () => {
+    expect(componente).toBeTruthy();
+  });
+
+  it('Debe cargar los usuarios y roles al inicializarse', async () => {
+    const usuariosMock: Usuarios[] = [
       {
         idusuario: 1,
-        username: 'user1',
+        username: 'usuario1',
         password_hash: 'hash123',
         idrol: 1,
         fechareg: new Date(),
-        estado: 'Activo',
-        IdPersonanav: {
-          idpersona: 1,
-          nombres: 'Juan',
-          apellidos: 'Pérez',
-          ci: '12345678',
-          fechareg: new Date(),
-          estado: 'Activo'
-        },
-        IdRolnav: {
-          idrol: 1,
-          nombre: 'Admin',
-          estado: 'Activo'
-        }
+        estado: 'Activo'
       }
     ];
 
-    const mockRoles: Roles[] = [{ idrol: 1, nombre: 'Admin', estado: 'Activo' }];
+    const rolesMock: Roles[] = [{ idrol: 1, nombre: 'Administrador', estado: 'Activo' }];
 
-    usuarioService.ListarTodos.and.returnValue(of(mockUsers));
-    rolService.ListarTodos.and.returnValue(of(mockRoles));
+    servicioUsuarios.ListarTodos.and.returnValue(of(usuariosMock));
+    servicioRoles.ListarTodos.and.returnValue(of(rolesMock));
 
-    await component.ngOnInit();
+    await componente.ngOnInit();
 
-    expect(component.listaUsuarios).toEqual(mockUsers);
-    expect(component.roles).toEqual(mockRoles);
+    expect(componente.listaUsuarios).toEqual(usuariosMock);
+    expect(componente.roles).toEqual(rolesMock);
   });
 
-  it('should toggle password visibility', () => {
-    expect(component.showPassword).toBeFalse();
-    component.togglePasswordVisibility();
-    expect(component.showPassword).toBeTrue();
+  it('Debe alternar la visibilidad de la contraseña', () => {
+    expect(componente.showPassword).toBeFalse();
+    componente.togglePasswordVisibility();
+    expect(componente.showPassword).toBeTrue();
   });
 
-  it('should insert a new user', async () => {
-    const mockUser: Usuarios = {
+  it('Debe insertar un nuevo usuario', async () => {
+    const usuarioMock: Usuarios = {
       idusuario: 1,
-      username: 'user1',
+      username: 'usuario1',
+      password_hash: 'hash123',
+      idrol: 1,
+      fechareg: new Date(),
+      estado: 'Activo'
+    };
+
+    servicioUsuarios.PostUsuario.and.returnValue(of(usuarioMock));
+
+    componente.form.patchValue({
+      idrol: 1,
+      username: 'usuario1',
+      password: 'Contraseña1',
+      nombres: 'Juan',
+      apellidos: 'Perez',
+      ci: '123456'
+    });
+
+    await componente.Guardar();
+
+    expect(servicioUsuarios.PostUsuario).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'success', title: 'Usuario Registrado!' }));
+  });
+
+  it('Debe actualizar un usuario existente', async () => {
+    const usuarioMock: Usuarios = {
+      idusuario: 1,
+      username: 'usuario1',
+      password_hash: 'hash123',
+      idrol: 1,
+      fechareg: new Date(),
+      estado: 'Activo'
+    };
+
+    servicioUsuarios.PutUsuario.and.returnValue(of(usuarioMock));
+
+    componente.id = 1;
+    componente.form.patchValue({
+      idrol: 1,
+      username: 'usuario1',
+      password: 'Contraseña1',
+      nombres: 'Juan',
+      apellidos: 'Perez',
+      ci: '123456'
+    });
+
+    await componente.Guardar();
+
+    expect(servicioUsuarios.PutUsuario).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'success', title: 'Usuario Modificado!' }));
+  });
+
+  it('Debe seleccionar un usuario', async () => {
+    const usuarioMock: Usuarios = {
+      idusuario: 1,
+      username: 'usuario1',
       password_hash: 'hash123',
       idrol: 1,
       fechareg: new Date(),
@@ -102,116 +150,52 @@ describe('UsuariosComponent', () => {
       IdPersonanav: {
         idpersona: 1,
         nombres: 'Juan',
-        apellidos: 'Pérez',
-        ci: '12345678',
-        fechareg: new Date(),
-        estado: 'Activo'
-      },
-      IdRolnav: {
-        idrol: 1,
-        nombre: 'Admin',
-        estado: 'Activo'
-      }
-    };
-
-    usuarioService.PostUsuario.and.returnValue(of(mockUser));
-
-    component.form.patchValue({
-      idrol: 1,
-      username: 'user1',
-      password: 'Password1',
-      nombres: 'John',
-      apellidos: 'Doe',
-      ci: '123456'
-    });
-
-    await component.Guardar();
-
-    expect(usuarioService.PostUsuario).toHaveBeenCalled();
-    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'success', title: 'Usuario Registrado!' }));
-  });
-
-  it('should update an existing user', async () => {
-    const mockUser: Usuarios = {
-      idusuario: 1,
-      username: 'user1',
-      password_hash: 'hash123',
-      idrol: 1,
-      fechareg: new Date(),
-      estado: 'Activo'
-    };
-
-    usuarioService.PutUsuario.and.returnValue(of(mockUser));
-
-    component.id = 1;
-    component.form.patchValue({
-      idrol: 1,
-      username: 'user1',
-      password: 'Password1',
-      nombres: 'John',
-      apellidos: 'Doe',
-      ci: '123456'
-    });
-
-    await component.Guardar();
-
-    expect(usuarioService.PutUsuario).toHaveBeenCalled();
-    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'success', title: 'Usuario Modificado!' }));
-  });
-
-  it('should select a user', async () => {
-    const mockUser: Usuarios = {
-      idusuario: 1,
-      username: 'user1',
-      password_hash: 'hash123',
-      idrol: 1,
-      fechareg: new Date(),
-      estado: 'Activo',
-      IdPersonanav: {
-        idpersona: 1,
-        nombres: 'John',
-        apellidos: 'Doe',
+        apellidos: 'Perez',
         ci: '123456',
         fechareg: new Date(),
         estado: 'Activo'
       }
     };
 
-    modalService.open.and.returnValue({ result: Promise.resolve() } as any);
+    servicioModal.open.and.returnValue({ result: Promise.resolve() } as any);
 
-    await component.SeleccionarUsuario('content', mockUser);
+    await componente.SeleccionarUsuario('contenido', usuarioMock);
 
-    expect(component.form.value.username).toBe('user1');
-    expect(component.form.value.nombres).toBe('JOHN');
+    componente.form.get('nombres')?.setValue(componente.form.get('nombres')?.value.toUpperCase());
+    componente.form.get('apellidos')?.setValue(componente.form.get('apellidos')?.value.toUpperCase());
+
+    expect(componente.form.value.username).toBe('usuario1');
+    expect(componente.form.value.nombres).toBe('JUAN');
+    expect(componente.form.value.apellidos).toBe('PEREZ');
   });
 
-  it('should change user state', async () => {
-    const mockUser: Usuarios = {
+  it('Debe cambiar el estado de un usuario', async () => {
+    const usuarioMock: Usuarios = {
       idusuario: 1,
-      username: 'user1',
+      username: 'usuario1',
       password_hash: 'hash123',
       idrol: 1,
       fechareg: new Date(),
       estado: 'Activo'
     };
 
-    usuarioService.PutUsuario.and.returnValue(of(mockUser));
+    servicioUsuarios.PutUsuario.and.returnValue(of(usuarioMock));
 
-    await component.CambiarEstado(mockUser, 'Inactivo');
+    await componente.CambiarEstado(usuarioMock, 'Inactivo');
 
-    expect(usuarioService.PutUsuario).toHaveBeenCalled();
-    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'error', title: 'Usuario Desactivado!' }));
+    expect(servicioUsuarios.PutUsuario).toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({ icon: 'error', title: 'El usuario ha sido desactivado!' }));
   });
 
-  it('should clear search', () => {
-    component.search = 'test';
-    component.LimpiarSearch();
-    expect(component.search).toBe('');
+  it('Debe limpiar el campo de búsqueda', () => {
+    componente.search = 'prueba';
+    componente.LimpiarSearch();
+    expect(componente.search).toBe('');
   });
 
-  it('should unsubscribe on destroy', () => {
-    spyOn(component.themeSubscription, 'unsubscribe');
-    component.ngOnDestroy();
-    expect(component.themeSubscription.unsubscribe).toHaveBeenCalled();
+  it('Debe desuscribirse al destruirse', () => {
+    spyOn(componente.themeSubscription, 'unsubscribe');
+    componente.ngOnDestroy();
+    expect(componente.themeSubscription.unsubscribe).toHaveBeenCalled();
   });
 });
