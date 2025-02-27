@@ -16,6 +16,7 @@ namespace AppGeoPortal.Middleware.Implementacion
         public async Task Invoke(HttpContext context)
         {
             var endpoint = context.GetEndpoint();
+
             if (endpoint == null)
             {
                 await _next(context);
@@ -30,7 +31,7 @@ namespace AppGeoPortal.Middleware.Implementacion
             }
 
             var user = context.User;
-            if (!user.Identity.IsAuthenticated)
+            if (user?.Identity == null || !user.Identity.IsAuthenticated)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await context.Response.WriteAsync("Usuario no autenticado.");

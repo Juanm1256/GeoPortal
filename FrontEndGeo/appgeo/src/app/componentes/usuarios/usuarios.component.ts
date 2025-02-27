@@ -170,6 +170,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                 Swal.fire({ icon: 'success', title: 'Usuario Registrado!' });
                 await this.cargarUsuarios();
                 this.form.reset();
+                this.modalService.dismissAll();
             }
         } else {
             const response = await firstValueFrom(this.usuarioService.PutUsuario(this.id, usuario));

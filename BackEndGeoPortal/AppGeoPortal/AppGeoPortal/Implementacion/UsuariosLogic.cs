@@ -30,15 +30,35 @@ namespace AppGeoPortal.Implementacion
         public async Task<bool> Insertar(Usuarios usuarios)
         {
             bool sw = false;
-            usuarios.password_hash = PasswordHashHandler.HashPassword(usuarios.password_hash);
-            context.Usuarios.Add(usuarios);
-            int response = await context.SaveChangesAsync();
-            if (response == 2)
+
+            using (var transaction = await context.Database.BeginTransactionAsync())
             {
-                sw = true;
+                try
+                {
+                    usuarios.password_hash = PasswordHashHandler.HashPassword(usuarios.password_hash);
+                    context.Usuarios.Add(usuarios);
+                    int response = await context.SaveChangesAsync();
+
+                    if (response == 2) 
+                    {
+                        await transaction.CommitAsync();
+                        sw = true;
+                    }
+                    else
+                    {
+                        await transaction.RollbackAsync(); 
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync(); 
+                    throw;
+                }
             }
+
             return sw;
         }
+
         public async Task<bool> ExisteUsuario(string username)
         {
             return await context.Usuarios.AnyAsync(u => u.username == username);
