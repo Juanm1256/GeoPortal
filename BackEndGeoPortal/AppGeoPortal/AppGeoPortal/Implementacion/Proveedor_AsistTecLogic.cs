@@ -15,6 +15,13 @@ namespace AppGeoPortal.Implementacion
         }
         public async Task<List<ProveedorAsisTec>> ListarTodos()
         {
+            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
+            if (isInMemory)
+            {
+                return await context.ProveedorAsistenciaTecnica
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
             var connection = context.Database.GetDbConnection();
             await connection.OpenAsync();
 

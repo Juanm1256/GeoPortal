@@ -14,10 +14,17 @@ namespace AppGeoPortal.Implementacion
         }
         public async Task<List<Cap_Dep>> ListarTodos()
         {
+            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
+            if (isInMemory)
+            {
+                return await context.Cap_Deps
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
             var connection = context.Database.GetDbConnection();
             await connection.OpenAsync();
 
-        var query = @"SELECT gid, objectid, cap_dep, cod_ine, ST_AsGeoJSON(geom) AS geom FROM capas.capitales_departamentales";
+            var query = @"SELECT gid, objectid, cap_dep, cod_ine, ST_AsGeoJSON(geom) AS geom FROM capas.capitales_departamentales";
 
             var lista = new List<Cap_Dep>();
 
@@ -43,5 +50,6 @@ namespace AppGeoPortal.Implementacion
 
             return lista;
         }
+
     }
 }

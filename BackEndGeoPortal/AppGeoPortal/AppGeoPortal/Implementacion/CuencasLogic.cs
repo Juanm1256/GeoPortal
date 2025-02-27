@@ -2,18 +2,32 @@
 using AppGeoPortal.Contrato;
 using AppGeoPortal.Modelos.Maps;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AppGeoPortal.Implementacion
 {
     public class CuencasLogic : ICuencasContrato
     {
         private readonly AppDbContext context;
+
         public CuencasLogic(AppDbContext context)
         {
             this.context = context;
         }
+
         public async Task<List<Cuencas>> ListarTodos()
         {
+            // Si está en memoria, usa EF Core
+            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
+            if (isInMemory)
+            {
+                return await context.Cuencas
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+
+            // Si es una base de datos relacional, usa consulta SQL nativa
             var connection = context.Database.GetDbConnection();
             await connection.OpenAsync();
 
