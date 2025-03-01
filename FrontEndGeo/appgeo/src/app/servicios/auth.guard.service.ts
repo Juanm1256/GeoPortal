@@ -13,13 +13,11 @@ export class AuthGuard implements CanActivate {
     const userRole = this.authService.getUserRole();
 
     if (!token || this.authService.isTokenExpired()) {
-      //console.warn('⚠ No hay token, redirigiendo al login.');
       this.router.navigate(['/login']);
       return false;
     }
 
     if (userRole !== 'ADMINISTRADOR') {
-      //console.warn('🚫 Usuario no autorizado para acceder a esta página.');
       this.router.navigate(['/map-public']);
       return false;
     }

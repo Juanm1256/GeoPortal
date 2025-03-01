@@ -18,7 +18,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isSidebarCollapsed = false;
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
-  userRole: string | null = null; // ✅ Variable para el rol del usuario
+  userRole: string | null = null; 
 
   constructor(
     public themeService: ThemeService,
@@ -32,7 +32,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.userRole = this.authService.getUserRole(); // ✅ Obtener el rol del usuario
+    this.userRole = this.authService.getUserRole();
   }
 
   toggleSidebar() {
