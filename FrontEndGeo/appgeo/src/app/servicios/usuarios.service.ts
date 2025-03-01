@@ -30,16 +30,15 @@ export class UsuariosService {
 
   PostUsuario(usuario: Usuarios): Observable<any> {
     return this.http.post(this.API + '/' + "Insertar", usuario).pipe(
-      defaultIfEmpty(null),  // ✅ Devuelve null si la respuesta está vacía
+      defaultIfEmpty(null),  
       catchError(error => {
-        console.error("❌ Error en PostUsuario:", error);
-        return throwError(() => error); // Lanza el error para que se capture en el componente
+        return throwError(() => error);
       })
     );
 }
   
   PutUsuario(id: number, usuario: Usuarios): Observable<Usuarios> {
-    console.log("Llamando a API con URL:", this.API + '/' + "Modificar" + '/' + id); // 📌 Verifica la URL
+    console.log("Llamando a API con URL:", this.API + '/' + "Modificar" + '/' + id);
     return this.http.put<Usuarios>(`${this.API}/Modificar/${id}`, usuario).pipe(
       catchError(error => {
         console.error("Error en la petición HTTP:", error);

@@ -20,7 +20,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
   showPassword: boolean = false;
-  isLoading: boolean = true; // ⬅ Estado del spinner
+  isLoading: boolean = true;
   isDarkMode: boolean = false;
   listaUsuarios: Usuarios[] = [];
   form: FormGroup;
@@ -45,7 +45,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     private rolService: RolesService,
   ) {
     this.form = this.fb.group({
-      idrol: ['', Validators.required], // ✅ Inicializado como cadena vacía
+      idrol: ['', Validators.required],
       username: ['', [
         Validators.required,
         Validators.maxLength(50),
@@ -88,7 +88,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         this.cargarUsuarios(),
         this.cargarRoles()
       ]);
-      // Transformar todos los campos excepto 'username' y 'password' a mayúsculas
       Object.keys(this.form.controls).forEach((field) => {
         if (field !== 'username' && field !== 'password') {
           this.form.get(field)?.valueChanges.subscribe(value => {
@@ -99,7 +98,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         }
       });
     } catch (error) {
-      console.error('Error en la inicialización:', error);
     }
   }
 
@@ -110,7 +108,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       this.listaUsuarios = data;
       this.pagesizee = this.listaUsuarios.length;
     } catch (error) {
-      console.error('Error al obtener los usuarios:', error);
     } finally {
       this.isLoading = false;
     }
@@ -125,7 +122,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       const data = await firstValueFrom(this.rolService.ListarTodos());
       this.roles = data;
     } catch (error) {
-      console.error('Error al cargar roles:', error);
     }
   }
 
@@ -158,8 +154,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
         if (!this.id) {
             const response = await firstValueFrom(this.usuarioService.PostUsuario(usuario));
-            console.log("✅ Respuesta del servidor:", response);
-
             if (response === null) {
                 Swal.fire({
                     icon: 'error',
@@ -182,7 +176,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
             }
         }
     } catch (error: any) {
-        console.error("❌ Error completo:", error);
 
         if (error.status === 400 && error.error === "Usuario ya existe") {
             Swal.fire({
@@ -214,9 +207,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       this.form.markAsPristine();
       this.id = undefined;
       this.idpersona = undefined;
-      this.form.reset({ idrol: '' }); // ✅ Restablece idrol como cadena vacía para seleccionar la opción por defecto
+      this.form.reset({ idrol: '' }); 
     } catch (error) {
-      console.error('Error al abrir el modal:', error);
     }
   }
 
@@ -229,13 +221,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       this.form.patchValue({
         username: usuario.username,
         password: "",
-        idrol: usuario.idrol ?? null, // ✅ Asegura que si no hay rol, se muestra la opción por defecto
+        idrol: usuario.idrol ?? null, 
         nombres: usuario.IdPersonanav?.nombres,
         apellidos: usuario.IdPersonanav?.apellidos,
         ci: usuario.IdPersonanav?.ci
       });
     } catch (error) {
-      console.error('Error al seleccionar usuario:', error);
     }
   }
 
@@ -256,14 +247,13 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         
         Swal.fire({
           icon: accion === 'Inactivo' ? 'error' : 'success',
-          title: `El usuario ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!` // 🔥 Corregido "ususario" a "usuario"
+          title: `El usuario ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
         });
         
         await this.cargarUsuarios();
         this.form.reset();
       }
     } catch (error) {
-      console.error('Error al modificar el rol:', error);
     }
   }
   
@@ -272,7 +262,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     const rol = this.roles.find(r => r.idrol === idrol);
     return rol ? rol.nombre : 'Sin rol';
   }
-  // Método para obtener mensajes de error
   getErrorMessage(controlName: string): string | null {
     const control = this.form.get(controlName);
     if (control && control.invalid && (control.dirty || control.touched)) {
@@ -292,5 +281,4 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.themeSubscription.unsubscribe();
   }
-
 }

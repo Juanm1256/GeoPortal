@@ -8,21 +8,16 @@ const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // ✅ Excluir la solicitud de login del interceptor
   if (req.url.includes('/Login')) {
-    //console.info('➡️ Solicitud de login, no se agrega token.');
     return next(req);
   }
 
   const token = authService.getToken();
   if (!token) {
-    //console.warn('⚠ No hay token disponible, enviando solicitud sin autenticación.');
     return next(req);
   }
 
-  // ✅ Verificar si el token ha expirado
   if (authService.isTokenExpired()) {
-    //console.warn('⛔ El token ha expirado, redirigiendo al login...');
     authService.logout();
     router.navigate(['/login']);
     return EMPTY;

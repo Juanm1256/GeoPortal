@@ -113,7 +113,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDark;
       });
     } catch (error) {
-      //console.error('Error en la inicialización:', error);
     }
   }
   ngOnDestroy() {
@@ -124,19 +123,17 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       this.themeSubscription.unsubscribe();
     }
   }
-  // ✅ Deshabilita las interacciones del mapa
   public disableMapInteractions(): void {
     if (this.map) {
-      this.map.dragging.disable(); // Deshabilita el arrastre
-      this.map.scrollWheelZoom.disable(); // Deshabilita el zoom con la rueda del mouse
-      this.map.doubleClickZoom.disable(); // Deshabilita el zoom por doble clic
-      this.map.boxZoom.disable(); // Deshabilita el zoom con caja
-      this.map.keyboard.disable(); // Deshabilita el control con teclado
-      this.map.off('click'); // Deshabilita los eventos de clic
+      this.map.dragging.disable(); 
+      this.map.scrollWheelZoom.disable(); 
+      this.map.doubleClickZoom.disable(); 
+      this.map.boxZoom.disable(); 
+      this.map.keyboard.disable(); 
+      this.map.off('click'); 
     }
   }
 
-  // ✅ Habilita las interacciones del mapa
   public enableMapInteractions(): void {
     if (this.map) {
       this.map.dragging.enable();
@@ -144,7 +141,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       this.map.doubleClickZoom.enable();
       this.map.boxZoom.enable();
       this.map.keyboard.enable();
-      this.map.on('click', this.consultarInformacionFeature.bind(this)); // Reasigna el evento de clic
+      this.map.on('click', this.consultarInformacionFeature.bind(this));
     }
   }
   makeModalDraggable(): void {
@@ -202,7 +199,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       L.control.layers(this.baseMaps).addTo(this.map);
       this.setupMapEventListeners();
     } catch (error) {
-      //console.error('Error al inicializar el mapa:', error);
       throw error;
     }
   }
@@ -224,7 +220,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           }, 500);
         });
       } catch (error) {
-        //console.error('Error al cambiar la capa base:', error);
       }
     });
 
@@ -238,26 +233,21 @@ export class MapPublicComponent implements OnInit, OnDestroy {
               try {
                 await this.consultarInformacionFeature(e);
               } catch (error) {
-                //console.error('Error al obtener información de la característica:', error);
               }
             }
           });
         } catch (error) {
-          //console.error('Error al obtener información de la característica:', error);
         }
       }
     });
   }
   toggleSidebar() {
-    //console.log("🔹 toggleSidebar() llamado");
-    //console.log("🔹 showSidebarButton:", this.showSidebarButton);
 
     if (this.showSidebarButton) {
       this.sidebarOpen = !this.sidebarOpen;
-      //console.log("🔹 sidebarOpen:", this.sidebarOpen);
 
       if (this.sidebarOpen) {
-        this.openSidebarWithLayerData('Textura del Suelo');  // 🔥 Llama esta función aquí
+        this.openSidebarWithLayerData('Textura del Suelo');
         setTimeout(() => this.showPieChart(), 300);
       } else {
         if (this.pieChart) {
@@ -265,7 +255,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         }
       }
     } else {
-      //console.warn("⚠️ showSidebarButton es falso. El panel no se mostrará.");
     }
   }
   isAnyLayerActive(): boolean {
@@ -273,7 +262,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       'Textura_suelo_0', 'Textura_suelo_10',
       'Textura_suelo_30', 'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'
     ];
-    //console.log("🔹 isAnyLayerActive():", activeLayers.some(layer => this.activeLayers[layer]));
     return activeLayers.some(layer => this.activeLayers[layer]);
   }
 
@@ -328,7 +316,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         }
       }
     } catch (error) {
-      //console.error('Error al abrir el panel lateral:', error);
     }
   }
 
@@ -368,7 +355,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         });
       }
     } catch (error) {
-      //console.error('Error al mostrar el gráfico:', error);
     }
   }
 
@@ -410,13 +396,11 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.activeLayers[layerName] = false;
         button.classList.remove('active');
 
-        // 🔹 Si la capa es 'modgene' o si no hay capas activas, eliminar el marcador
         if (layerName === 'modgene' && this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
 
-        // 🔹 Comprobar si no hay capas activas de la lista específica y eliminar el marcador
         const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
         const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
 
@@ -428,7 +412,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
       this.checkGraphButtonVisibility();
     } catch (error) {
-      //console.error(`Error al alternar la capa ${layerName}:`, error);
     }
   }
   private async loadLayer(layerName: string): Promise<L.Layer | L.LayerGroup> {
@@ -518,17 +501,15 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       if (!layer) {
         throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
-      // ✅ Detectar eventos de carga para manejar el spinner
       if (layer instanceof L.TileLayer || layer instanceof L.TileLayer.WMS) {
-        layer.on('loading', () => this.setMapLoadingCursor(true));  // Mostrar spinner al iniciar la carga
-        layer.on('load', () => this.setMapLoadingCursor(false));    // Quitar spinner al finalizar la carga
-        layer.on('tileerror', () => this.setMapLoadingCursor(false)); // Quitar spinner si hay error
+        layer.on('loading', () => this.setMapLoadingCursor(true));  
+        layer.on('load', () => this.setMapLoadingCursor(false));   
+        layer.on('tileerror', () => this.setMapLoadingCursor(false));
       } else {
-        this.setMapLoadingCursor(false); // Si no es un WMS o TileLayer, quitar spinner
+        this.setMapLoadingCursor(false); 
       }
       return layer;
     } catch (error) {
-      //console.error(`Error al cargar la capa ${layerName}:`, error);
       this.map.getContainer().classList.remove('loading-cursor');
       throw error;
     }
@@ -543,7 +524,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         mapContainer.classList.remove('loading-cursor');
       }
     } else {
-      console.warn('⚠️ No se encontró el contenedor del mapa');
     }
   }
 
@@ -563,7 +543,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       const { latitude, longitude } = position.coords;
       this.map.setView([latitude, longitude], 15);
     } catch (error) {
-      //console.error('Error al obtener la ubicación del usuario:', error);
     }
   }
 
@@ -586,7 +565,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     this.map.addLayer(this.activeBaseLayer);
   }
 
-  /*** MARCADORES ***/
   addCustomMarker() {
     const center = this.map.getCenter();
     const { lat, lng } = center;
@@ -601,7 +579,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
     const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
 
-    // **Función para actualizar el popup con la nueva posición**
     const updatePopup = () => {
       const newLatLng = marker.getLatLng();
       marker.setPopupContent(`
@@ -625,7 +602,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         </div>
       `);
 
-    // **Actualizar el popup cuando el marcador se mueva**
     marker.on('dragend', updatePopup);
 
     marker.addTo(this.markerLayer);
@@ -649,7 +625,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   async captureMap(): Promise<void> {
     const mapElement = document.getElementById('map-private');
     if (!mapElement) {
-      //console.error("No se encontró el mapa");
       return;
     }
 
@@ -674,7 +649,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       link.download = `mapa_${new Date().getTime()}.png`;
       link.click();
     } catch (error) {
-      //console.error('Error al capturar el mapa:', error);
     }
   }
 
@@ -692,7 +666,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
 
-        // Eliminar todos los marcadores
         this.markerLayer.clearLayers();
 
         if (this.marcadorSeleccionado) {
@@ -700,7 +673,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           this.marcadorSeleccionado = null;
         }
 
-        // Remover todas las capas
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
@@ -710,7 +682,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.capas = {};
         this.activeLayers = {};
 
-        // Remover todas las capas base y agregar la predeterminada
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -719,16 +690,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
 
-        // Restablecer los botones de capas
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
 
-        // ✅ Ocultar el botón de gráficos y cerrar el panel lateral si está abierto
         this.showSidebarButton = false;
         this.sidebarOpen = false;
 
-        // ✅ Destruir el gráfico si existe
         if (this.pieChart) {
           this.pieChart.destroy();
           this.pieChart = null;
@@ -755,16 +723,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
-    // Verificar si el clic está dentro del área de búsqueda
     const searchContainer = document.querySelector('.map-search-container');
     if (searchContainer && searchContainer.contains(event.originalEvent.target as Node)) {
-      return; // Salir del método si el clic está dentro del buscador
+      return;
     }
   
     const latlng = event.latlng;
-    //console.log(latlng);
     
-    // Obtener la capa activa que debe mostrar el modal
     const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
     const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
   
@@ -776,11 +741,9 @@ export class MapPublicComponent implements OnInit, OnDestroy {
             this.mostrarModalInformacion(departamentoInfo);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
-            //console.log('⚠️ No se encontró información en esta ubicación');
           }
         },
         error: (error) => {
-          //console.error('❌ Error al consultar información:', error);
         }
       });
   }
@@ -790,19 +753,16 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
 
-    // 🔹 Verificar si alguna de las capas válidas está activa
     const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
 
-    // 🔹 Si no hay capas activas, eliminar el marcador y salir
     if (!capaActiva) {
       if (this.marcadorSeleccionado) {
         this.map.removeLayer(this.marcadorSeleccionado);
-        this.marcadorSeleccionado = null; // Limpiar referencia
+        this.marcadorSeleccionado = null;
       }
       return;
     }
 
-    // 🔹 Icono personalizado
     const customIcon = L.icon({
       iconUrl: 'assets/leaflet/marker-icon-red.png',
       iconSize: [32, 40],
@@ -810,19 +770,14 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       popupAnchor: [0, -32]
     });
 
-    // 🔹 Eliminar marcador anterior si existe
     if (this.marcadorSeleccionado) {
       this.map.removeLayer(this.marcadorSeleccionado);
     }
 
-    // 🔹 Crear y agregar el marcador rojo con popup
     this.marcadorSeleccionado = L.marker(latlng, { icon: customIcon })
 
       .addTo(this.map)
-
   }
-
-
 
   mostrarModalInformacion(propiedades: any) {
     this.modalInfo = [
@@ -845,36 +800,26 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     this.modalInfo = [];
   }
 
-  //buscador
   async initSearch(): Promise<void> {
     try {
-      // Cargar los municipios de forma asíncrona
       const municipios = await firstValueFrom(this.limitesmuservice.listarTodos());
       
-      // Procesar cada municipio para obtener sus coordenadas
-      for (const municipio of municipios) {  // Cambiar forEach por for...of para usar await
+      for (const municipio of municipios) { 
         if (municipio.geom) {
           try {
             const geojson = JSON.parse(municipio.geom);
             if (geojson.type === 'MultiPolygon') {
-              // Calcular centroide de forma asíncrona
               const centroid = await this.metodos.calculateCentroid(geojson);
               if (centroid) {
-                // Agregar temporalmente lat/lng al objeto
                 (municipio as any).lng = centroid[0];
                 (municipio as any).lat = centroid[1];
               }
             }
           } catch (error) {
-            console.error(`Error al analizar geometría para municipio:`, error);
           }
         }
       }
-      
-      // Guardar los datos en una variable global del componente
       (this as any).municipiosData = municipios;
-      
-      // Configurar la búsqueda reactiva
       this.searchControl.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -893,24 +838,18 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           this.isSearching = false;
         },
         error: (error) => {
-          console.error('Error al filtrar municipios:', error);
           this.isSearching = false;
         }
       });
     } catch (error) {
-      console.error('Error al inicializar búsqueda:', error);
     }
   }
 
-  // Método asíncrono para filtrar municipios
   async filterMunicipios(term: string): Promise<LimitesMunicipales[]> {
     term = term.toLowerCase().trim();
-
     try {
-      // Usar la variable donde guardamos los municipios
       const municipios = (this as any).municipiosData || [];
 
-      // Filtrar localmente
       const filtered = municipios.filter((municipio: LimitesMunicipales) => 
         municipio.mun.toLowerCase().includes(term) ||
         (municipio.dep && municipio.dep.toLowerCase().includes(term)) ||
@@ -919,20 +858,16 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
       return filtered;
     } catch (error) {
-      console.error('Error al filtrar municipios:', error);
       return [];
     }
   }
 
   async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
     this.filteredMunicipios = [];
-  
     try {
-      // Verificar si tenemos coordenadas
       let lat = (municipio as any).lat;
       let lng = (municipio as any).lng;
   
-      // Si no tenemos coordenadas, calcularlas
       if (!lat || !lng) {
         if (municipio.geom) {
           const geojson = JSON.parse(municipio.geom);
@@ -943,63 +878,45 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           }
         }
       }
-  
-      // Resaltar el municipio en el mapa
       await this.highlightMunicipio(municipio);
-  
-      // Eliminar marcador anterior si existe
       if (this.searchMarker) {
         this.map.removeLayer(this.searchMarker);
         this.searchMarker = null;
       }
   
-      // Solo hacer zoom a las coordenadas sin agregar marcador ni popup
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
     } catch (error) {
-      console.error('Error al seleccionar municipio:', error);
     }
   }
 
   async highlightMunicipio(municipio: LimitesMunicipales): Promise<void> {
     try {
-      // Crear o limpiar la capa de resaltado
       if (!this.limitesMunicipalesHighlight) {
         this.limitesMunicipalesHighlight = L.layerGroup().addTo(this.map);
       } else {
         this.limitesMunicipalesHighlight.clearLayers();
       }
-      
-      // Parsear la geometría
       const geojson = JSON.parse(municipio.geom);
       
-      // Estilo para el municipio resaltado
       const highlightStyle = {
         color: '#0e0e0d',
         weight: 3,
         opacity: 1,
-        fillColor: 'transparent', // Agregado para asegurar transparencia
-        fillOpacity: 0 // Establece la opacidad de relleno a 0
+        fillColor: 'transparent', 
+        fillOpacity: 0 
       };
-      
-      // Crear y agregar la capa GeoJSON con interactividad
       const layer = L.geoJSON(geojson, {
         style: highlightStyle,
         onEachFeature: (feature, layer) => {
           layer.on('click', (e) => {
-            // Usar el punto de clic del evento para llamar a consultarInformacionFeature
             this.consultarInformacionFeature(e);
           });
         }
       }).addTo(this.limitesMunicipalesHighlight);
-      
-      // Ajustar el mapa a los límites del municipio
       this.map.fitBounds(layer.getBounds());
     } catch (error) {
-      console.error('Error al resaltar municipio:', error);
-      
-      // Si hay error, intentar solo hacer zoom a las coordenadas
       const lat = (municipio as any).lat;
       const lng = (municipio as any).lng;
       
@@ -1010,24 +927,15 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
 
   clearSearch(): void {
-    // Limpiar el control de búsqueda
     this.searchControl.setValue('');
-    
-    // Limpiar los municipios filtrados
     this.filteredMunicipios = [];
-    
-    // Limpiar el resaltado de municipios en el mapa
     if (this.limitesMunicipalesHighlight) {
       this.limitesMunicipalesHighlight.clearLayers();
     }
-    
-    // Eliminar marcador de búsqueda si existe
     if (this.searchMarker) {
       this.map.removeLayer(this.searchMarker);
       this.searchMarker = null;
     }
-    
-    // Volver a la vista inicial del mapa
     this.map.setView([-16.54529, -64.7400], 6);
   }
 }

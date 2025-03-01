@@ -20,12 +20,12 @@ export class Metodos {
   async CargarCuencas(
     maping: L.Map,
     cuencasService: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
     let poligonoSeleccionado: L.Path | null = null;
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       cuencasService.listarTodos().subscribe({
@@ -50,12 +50,12 @@ export class Metodos {
                       mouseup: (e) => {
                         const layer = e.target as L.Path;
 
-                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        
                         if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
                           poligonoSeleccionado.setStyle(estiloPoligono);
                         }
 
-                        // 🔹 Pintar el nuevo polígono seleccionado
+                        
                         layer.setStyle({
                           weight: 3,
                           fillOpacity: 0.2,
@@ -75,11 +75,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -88,11 +88,11 @@ export class Metodos {
   async Cargarmercados(
     maping: L.Map,
     mercadoservices: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const markerCluster = L.markerClusterGroup();
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       mercadoservices.listarTodos().subscribe({
@@ -123,11 +123,11 @@ export class Metodos {
           });
 
           maping.addLayer(markerCluster);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false);
           resolve(markerCluster);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false);
           reject(err);
         }
       });
@@ -137,10 +137,10 @@ export class Metodos {
   async CargarCapitalesDepartamentales(
     map: L.Map,
     capitalesDepartamentalesService: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void  // <-- Hacer el argumento opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true);
 
     return new Promise<L.Layer>((resolve, reject) => {
       capitalesDepartamentalesService.listarTodos().subscribe({
@@ -176,11 +176,11 @@ export class Metodos {
           });
 
           map.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -189,12 +189,12 @@ export class Metodos {
   async CargarLimitesDepartamentales(
     maping: L.Map,
     limitesdepservice: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
     let poligonoSeleccionado: L.Path | null = null;
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       limitesdepservice.listarTodos().subscribe({
@@ -221,12 +221,12 @@ export class Metodos {
                       mouseup: (e) => {
                         const layer = e.target as L.Path;
 
-                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        
                         if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
                           poligonoSeleccionado.setStyle(estiloPoligono);
                         }
 
-                        // 🔹 Pintar el nuevo polígono seleccionado
+                        
                         layer.setStyle({
                           weight: 3,
                           fillOpacity: 0.2,
@@ -246,11 +246,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -259,12 +259,12 @@ export class Metodos {
   async CargarLimitesMunicipales(
     maping: L.Map,
     limitesmuservice: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
     let poligonoSeleccionado: L.Path | null = null;
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       limitesmuservice.listarTodos().subscribe({
@@ -291,12 +291,12 @@ export class Metodos {
                       mouseup: (e) => {
                         const layer = e.target as L.Path;
 
-                        // 🔹 Despintar el polígono seleccionado anteriormente si existe
+                        
                         if (poligonoSeleccionado && poligonoSeleccionado !== layer) {
                           poligonoSeleccionado.setStyle(estiloPoligono);
                         }
 
-                        // 🔹 Pintar el nuevo polígono seleccionado
+                        
                         layer.setStyle({
                           weight: 3,
                           fillOpacity: 0.2,
@@ -316,11 +316,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -329,11 +329,11 @@ export class Metodos {
   async CargarProveedorAlevines(
     maping: L.Map,
     proveedoralevinesservice: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       proveedoralevinesservice.listarTodos().subscribe({
@@ -360,11 +360,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -373,11 +373,11 @@ export class Metodos {
   async CargarProveedorAlimentos(
     maping: L.Map,
     proveedoralimentoservice: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       proveedoralimentoservice.listarTodos().subscribe({
@@ -404,11 +404,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });
@@ -418,11 +418,11 @@ export class Metodos {
   async CargarProveedoresAsistenciaTecnica(
     maping: L.Map,
     proveedorasistenciatecnicaservice: any,
-    setMapLoadingCursor?: (isLoading: boolean) => void // <-- Spinner opcional
+    setMapLoadingCursor?: (isLoading: boolean) => void 
   ): Promise<L.Layer> {
     const layerGroup = L.layerGroup();
 
-    if (setMapLoadingCursor) setMapLoadingCursor(true); // 🌀 Spinner ON
+    if (setMapLoadingCursor) setMapLoadingCursor(true); 
 
     return new Promise<L.Layer>((resolve, reject) => {
       proveedorasistenciatecnicaservice.listarTodos().subscribe({
@@ -463,11 +463,11 @@ export class Metodos {
           });
 
           maping.addLayer(layerGroup);
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ✅ Spinner OFF
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           resolve(layerGroup);
         },
         error: (err: Error) => {
-          if (setMapLoadingCursor) setMapLoadingCursor(false); // ❌ Spinner OFF en caso de error
+          if (setMapLoadingCursor) setMapLoadingCursor(false); 
           reject(err);
         }
       });

@@ -75,15 +75,12 @@ export class LoginComponent {
             } else if (userRole === 'VISITANTE') {
                 this.router.navigate(['/map-public']);
             } else {
-                console.warn('⚠️ Rol desconocido, redirigiendo a login');
                 this.router.navigate(['/login']);
             }
         } else {
-            console.error('❌ El servidor no devolvió un token JWT');
             await this.mostrarError('El servidor no devolvió un token JWT');
         }
     } catch (error) {
-        console.error('❌ Error en la petición:', error);
         await this.mostrarError('Credenciales incorrectas o error en el servidor.');
     } finally {
         this.isLoading = false;

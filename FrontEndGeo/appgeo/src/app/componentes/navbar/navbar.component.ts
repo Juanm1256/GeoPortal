@@ -16,7 +16,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   usuario: any = null;
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
-  userRole: string | null = null; // ✅ Variable para el rol del usuario
+  userRole: string | null = null; 
 
   @Output() sidebarToggle = new EventEmitter<void>();
 
@@ -33,7 +33,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.userRole = this.authService.getUserRole(); // ✅ Obtener el rol del usuario
+    this.userRole = this.authService.getUserRole();
   }
   obtenerDatosDesdeToken(): void {
     const token = this.authService.getToken();
@@ -41,10 +41,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       try {
         this.usuario = jwtDecode(token);
       } catch (error) {
-        console.error('❌ Error al decodificar el token:', error);
       }
-    } else {
-      console.warn('⚠️ No hay token disponible.');
     }
   }
   toggleTheme(event: Event) {

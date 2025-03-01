@@ -34,7 +34,7 @@ export class RolesComponent implements OnInit, OnDestroy {
   pagesizee: any;
   search = '';
   criterio = 'nombrerol';
-  themeSubscription!: Subscription;  // ✅ Solo esta suscripción
+  themeSubscription!: Subscription;
 
   constructor(
     public themeService: ThemeService, 
@@ -58,7 +58,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       this.listaRol = data;
       this.pagesizee = this.listaRol.length;
     } catch (error) {
-      console.error('Error al obtener los roles:', error);
     } finally {
       this.isLoading = false;
     }
@@ -68,7 +67,6 @@ export class RolesComponent implements OnInit, OnDestroy {
     try {
       await this.cargarRoles();
   
-      // ✅ Suscripción al tema
       this.themeSubscription = this.themeService.isDarkMode$.subscribe(
         (isDark) => this.isDarkMode = isDark
       );
@@ -82,9 +80,8 @@ export class RolesComponent implements OnInit, OnDestroy {
         this.form.addControl('permisos', this.fb.array([]));
       }
   
-      // Transformar todos los campos del formulario a mayúsculas excepto los que especifiques
       Object.keys(this.form.controls).forEach((field) => {
-        if (field !== 'nombreEspecial') {  // Agrega aquí los campos que no quieres que se conviertan en mayúsculas
+        if (field !== 'nombreEspecial') {
           this.form.get(field)?.valueChanges.subscribe(value => {
             if (value && typeof value === 'string' && value !== value.toUpperCase()) {
               this.form.get(field)?.setValue(value.toUpperCase(), { emitEvent: false });
@@ -94,7 +91,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       });
   
     } catch (error) {
-      console.error('Error en la inicialización:', error);
     }
   }
   
@@ -109,7 +105,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       this.listaRol = data;
       this.pagesizee = this.listaRol.length;
     } catch (error) {
-      console.error('Error al obtener los roles:', error);
     }
   }
 
@@ -118,7 +113,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       const data = await firstValueFrom(this.rolservice.ListarPermiso());
       this.permisosList = data;
     } catch (error) {
-      console.error('Error al obtener los permisos:', error);
     }
   }
 
@@ -149,7 +143,6 @@ export class RolesComponent implements OnInit, OnDestroy {
           html: error.error.errors[Object.keys(error.error.errors)[0]]
         });
       } else {
-        console.error('Error al guardar:', error);
       }
     }
   }
@@ -162,7 +155,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       this.id = undefined;
       this.form.patchValue({ nombre: "" });
     } catch (error) {
-      console.error('Error al abrir el modal:', error);
     }
   }
 
@@ -185,7 +177,6 @@ export class RolesComponent implements OnInit, OnDestroy {
         });
       }
     } catch (error) {
-      console.error('Error al seleccionar rol:', error);
     }
   }
 
@@ -209,7 +200,6 @@ export class RolesComponent implements OnInit, OnDestroy {
         this.form.reset();
       }
     } catch (error) {
-      console.error('Error al modificar el rol:', error);
     }
   }
 
@@ -234,10 +224,10 @@ export class RolesComponent implements OnInit, OnDestroy {
     if (control && control.invalid && (control.dirty || control.touched)) {
       const errors = control.errors;
       if (errors) {
-        const errorKey = Object.keys(errors)[0]; // Obtener la primera clave de error
-        const mensajes = this.lista.mensajes[controlName]; // Obtener los mensajes correspondientes
+        const errorKey = Object.keys(errors)[0]; 
+        const mensajes = this.lista.mensajes[controlName];
         if (mensajes) {
-          const mensaje = mensajes.find((msg) => msg.type === errorKey); // Buscar el mensaje que coincida con la clave de error
+          const mensaje = mensajes.find((msg) => msg.type === errorKey);
           return mensaje ? mensaje.message : null;
         }
       }
@@ -248,7 +238,6 @@ export class RolesComponent implements OnInit, OnDestroy {
     this.search = '';
   }
   ngOnDestroy() {
-    // ✅ Solo cancelamos la suscripción si existe
     if (this.themeSubscription) {
       this.themeSubscription.unsubscribe();
     }

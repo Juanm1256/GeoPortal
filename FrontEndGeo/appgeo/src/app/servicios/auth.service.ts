@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import {jwtDecode} from 'jwt-decode'; // ✅ Asegúrate de instalarlo: `npm install jwt-decode`
+import {jwtDecode} from 'jwt-decode';
 import { Login } from '../interfaces/login';
 import { tap } from 'rxjs/operators';
 import { LoginResponse } from '../interfaces/login-response';
@@ -18,26 +18,21 @@ export class AuthService {
     private router: Router
   ) {}
 
-  // ✅ Método para iniciar sesión
   login(credentials: Login): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/Login`, credentials).pipe(
       tap(response => {
-        //console.log('🔍 Respuesta del backend:', response);
         this.saveToken(response.Token);
       })
     );
   }
 
-  // ✅ Método para cerrar sesión
   logout(): void {
-    //console.warn('🔴 Cerrando sesión...');
     localStorage.removeItem('Token');
     localStorage.removeItem('userRole'); 
     localStorage.removeItem('permissions');
-    this.router.navigate(['/login']); // ✅ Redirigir al login
+    this.router.navigate(['/login']); 
   }
 
-  // ✅ Guardar token y datos en localStorage
   saveToken(token: string | null): void {
     if (!token || token === 'undefined') return;
 
@@ -46,7 +41,7 @@ export class AuthService {
       const payload: any = jwtDecode(token);
 
       if (payload.Rol) {
-        localStorage.setItem('userRole', payload.Rol); // ✅ Guardar rol del usuario
+        localStorage.setItem('userRole', payload.Rol);
       }
 
       if (payload.Permiso) {
@@ -59,43 +54,35 @@ export class AuthService {
 
       console.log("Este es el token para las pruebas de estres"+token);
     } catch (error) {
-      //console.error('❌ Error al decodificar el token:', error);
     }
   }
 
-  // ✅ Obtener el token del localStorage
   getToken(): string | null {
   const token = localStorage.getItem('Token');
   return token && token !== 'undefined' ? token : null;
 }
 
-  // ✅ Obtener el rol del usuario
   getUserRole(): string | null {
     return localStorage.getItem('userRole');
   }
 
-  // ✅ Obtener permisos del usuario
   getPermissions(): string[] {
     const permisos = localStorage.getItem('permissions');
     return permisos ? JSON.parse(permisos) : [];
   }
 
-  // ✅ Obtener la fecha de expiración del token
   getTokenExpiration(): number | null {
     const token = this.getToken();
     if (!token) return null;
 
     try {
       const payload: any = jwtDecode(token);
-      //console.log('🔍 Expiración del token:', new Date(payload.exp * 1000));
-      return payload.exp * 1000; // Devuelve la fecha de expiración en milisegundos
+      return payload.exp * 1000;
     } catch (error) {
-      //console.error('❌ Error al decodificar el token:', error);
       return null;
     }
   }
 
-  // ✅ Verificar si el token ha expirado
   isTokenExpired(): boolean {
     const exp = this.getTokenExpiration();
     if (!exp) return true;
