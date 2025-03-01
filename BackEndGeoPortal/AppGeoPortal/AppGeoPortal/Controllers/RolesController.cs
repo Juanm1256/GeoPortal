@@ -19,7 +19,7 @@ namespace AppGeoPortal.Controllers
             _roles = roles;
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarTodos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Roles>>> ListarTodos()
@@ -35,7 +35,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarPermisos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Permisos>>> ListarPermisos()

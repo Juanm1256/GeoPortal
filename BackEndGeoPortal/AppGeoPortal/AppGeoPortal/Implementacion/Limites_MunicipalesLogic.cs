@@ -14,46 +14,20 @@ namespace AppGeoPortal.Implementacion
         }
         public async Task<List<Lim_Mun>> ListarTodos()
         {
-            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
-            if (isInMemory)
+            if (context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
             {
                 return await context.Lim_Muns
                     .AsNoTracking()
                     .ToListAsync();
             }
-            var connection = context.Database.GetDbConnection();
-            await connection.OpenAsync();
 
-            var query = @"SELECT gid, dep, prov, mun, cod_dep, cod_prov, cod_mun, shape_leng, shape_area, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom FROM capas.limites_municipales";
-
-            var lista = new List<Lim_Mun>();
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = query;
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        lista.Add(new Lim_Mun
-                        {
-                            gid = reader.GetInt32(0),
-                            dep = reader.GetString(1),
-                            prov = reader.GetString(2),
-                            mun = reader.GetString(3),
-                            cod_dep = reader.GetString(4),
-                            cod_prov = reader.GetString(5),
-                            cod_mun = reader.GetString(6),
-                            shape_leng = reader.GetDecimal(7),
-                            shape_area = reader.GetDecimal(8),
-                            geom = reader.GetString(9),
-                        });
-                    }
-                }
-            }
-
-            return lista;
+            return await context.Lim_Muns
+                .FromSqlRaw(@"SELECT gid, dep, prov, mun, cod_dep, cod_prov, cod_mun, 
+                             shape_leng, shape_area, 
+                             ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom 
+                      FROM capas.limites_municipales")
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

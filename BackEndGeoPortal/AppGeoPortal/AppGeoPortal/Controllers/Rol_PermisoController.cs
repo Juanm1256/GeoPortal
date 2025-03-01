@@ -19,7 +19,7 @@ namespace AppGeoPortal.Controllers
             _roles = roles;
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarTodos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Rol_Permiso>>> ListarTodos()
@@ -35,7 +35,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarActivos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Rol_Permiso>>> ListarActivos()
@@ -51,7 +51,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpPost("Insertar")]
         [PermisoRequerido("Agregar")]
         public async Task<ActionResult> Insertar([FromBody] Rol_PermisoDTO roles)
@@ -73,7 +73,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpPut("Modificar/{nombrerol}")]
         [PermisoRequerido("Modificar")]
         public async Task<ActionResult> Modificar([FromBody] Rol_PermisoDTO roles, string nombrerol)

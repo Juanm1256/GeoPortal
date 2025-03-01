@@ -279,14 +279,14 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   
       // Mapeo de valores a nombres descriptivos
       const textureNameMap: { [key: number]: string } = {
-        0: 'Arcilloso',
-        1: 'Arenoso',
-        3: 'Limoso',
-        4: 'Franco',
-        6: 'Franco Arcilloso',
-        7: 'Franco Arenoso',
+        0: 'No dato',
+        1: 'Arcilloso',
+        3: 'Arcillo arenoso',
+        4: 'Franco Arcilloso',
+        6: 'Franco Arcillo Arenoso',
+        7: 'Franco',
         8: 'Franco Limoso',
-        9: 'Arcillo Arenoso'
+        9: 'Franco Arenoso'
       };
   
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
@@ -481,6 +481,24 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
           break;
         case 'Textura_suelo_200':
           layer = await this.metodos.cargarTexturasuelo200(this.map);
+          break;
+        case 'Cobertura_uso_suelo':
+          layer = await this.metodos.cargarCobertura_uso_suelo(this.map);
+          break;
+        case 'Textura':
+          layer = await this.metodos.cargarTextura(this.map);
+          break;
+        case 'Precipitacion':
+          layer = await this.metodos.cargarPrecipitacion(this.map);
+          break;
+        case 'Temperaturamedia':
+          layer = await this.metodos.cargarTemperaturamedia(this.map);
+          break;
+        case 'estanques':
+          layer = await this.metodos.cargarestanques(this.map);
+          break;
+        case 'Pendiente':
+          layer = await this.metodos.cargarPendientes(this.map);
           break;
         default:
           throw new Error(`Capa no reconocida: ${layerName}`);

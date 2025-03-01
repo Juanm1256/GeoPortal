@@ -17,7 +17,8 @@ namespace AppGeoPortal.Controllers
         {
             _departamentoService = departamentoService;
         }
-        [Authorize]
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("informacion")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<DepartamentoInfoDTO>> ObtenerInformacionDepartamento(

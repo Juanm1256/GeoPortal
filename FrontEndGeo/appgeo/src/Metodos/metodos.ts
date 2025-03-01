@@ -623,11 +623,93 @@ export class Metodos {
     return Texturasuelo200;
   }
 
+  async cargarCobertura_uso_suelo(maping: L.Map): Promise<L.Layer> {
+    const Fragmentos_gruesos_suelo = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+      layers: 'capas_rastergeo:Cobertura_uso_suelo',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Fragmentos_gruesos_suelo);
+    return Fragmentos_gruesos_suelo;
+  }
+
+  async cargarTextura(maping: L.Map): Promise<L.Layer> {
+    const Textura = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+      layers: 'capas_rastergeo:textura',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Textura);
+    return Textura;
+  }
+
+  async cargarPrecipitacion(maping: L.Map): Promise<L.Layer> {
+    const Precipitacion = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+      layers: 'capas_rastergeo:Precipitacion',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Precipitacion);
+    return Precipitacion;
+  }
+  async cargarPendientes(maping: L.Map): Promise<L.Layer> {
+    const Pendientes = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+      layers: 'capas_rastergeo:Pendiente',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.5,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Pendientes);
+    return Pendientes;
+  }
+  
+  async cargarTemperaturamedia(maping: L.Map): Promise<L.Layer> {
+    const Temperaturamedia = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
+      layers: 'capas_rastergeo:T_med_final',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Temperaturamedia);
+    return Temperaturamedia;
+  }
+
+  async cargarestanques(maping: L.Map): Promise<L.Layer> {
+    const Temperaturamedia = L.tileLayer.wms("http://localhost:8085/geoserver/capas_geo/wms?", {
+      layers: 'capas_geo:estanques_15000',
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      opacity: 0.8,
+      crossOrigin: true,
+    });
+
+    maping.addLayer(Temperaturamedia);
+    return Temperaturamedia;
+  }
+
   async calculateCentroid(geojson: any): Promise<[number, number] | null> {
     try {
       if (geojson.type === 'MultiPolygon') {
-        // Por simplicidad, usar el primer polígono
-        const coordinates = geojson.coordinates[0][0]; // Primer polígono, anillo exterior
+        const coordinates = geojson.coordinates[0][0];
         
         let sumX = 0;
         let sumY = 0;

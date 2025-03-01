@@ -14,44 +14,27 @@ namespace AppGeoPortal.Implementacion
         }
         public async Task<List<Mercados>> ListarTodos()
         {
-            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
-            if (isInMemory)
+            if (context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
             {
                 return await context.Mercados
                     .AsNoTracking()
                     .ToListAsync();
             }
-            var connection = context.Database.GetDbConnection();
-            await connection.OpenAsync();
 
-            var query = @"SELECT gid, ogc_fid, departamen, provincia, municipio, ciudad, nombre, ST_AsGeoJSON(geom) AS geom FROM capas.mercados_project";
-
-            var lista = new List<Mercados>();
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = query;
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        lista.Add(new Mercados
-                        {
-                            gid = reader.GetInt32(0),
-                            ogc_fid = reader.GetDouble(1),
-                            departamen = reader.GetString(2),
-                            provincia = reader.GetString(3),
-                            municipio = reader.GetString(4),
-                            ciudad = reader.GetString(5),
-                            nombre = reader.GetString(6),
-                            geom = reader.GetString(7),
-                        });
-                    }
-                }
-            }
-
-            return lista;
+            return await context.Mercados
+                .FromSqlRaw(@"
+            SELECT 
+                gid, 
+                ogc_fid, 
+                departamen, 
+                provincia, 
+                municipio, 
+                ciudad, 
+                nombre, 
+                ST_AsGeoJSON(geom) AS geom 
+            FROM capas.mercados_project")
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

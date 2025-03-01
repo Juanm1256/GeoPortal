@@ -19,7 +19,7 @@ namespace AppGeoPortal.Controllers
             _textura = textura;
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelocero")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelocero()
@@ -35,7 +35,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelodiez")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelodiez()
@@ -51,7 +51,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelotreinta")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelotreinta()
@@ -66,8 +66,8 @@ namespace AppGeoPortal.Controllers
                 return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
             }
         }
-        
-        [Authorize]
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelosesenta")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelosesenta()
@@ -82,8 +82,8 @@ namespace AppGeoPortal.Controllers
                 return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
             }
         }
-        
-        [Authorize]
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelocien")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelocien()
@@ -98,8 +98,8 @@ namespace AppGeoPortal.Controllers
                 return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
             }
         }
-        
-        [Authorize]
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTexturasuelodoscientos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<TexturaDTO>>> ListarTexturasuelodoscientos()

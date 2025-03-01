@@ -9,10 +9,10 @@ namespace AppGeoPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProveedorAlevinesController : ControllerBase
+    public class EstanquesController : ControllerBase
     {
-        private readonly IProveedorAContrato contexto;
-        public ProveedorAlevinesController(IProveedorAContrato contexto)
+        private readonly IEstanquesContrato contexto;
+        public EstanquesController(IEstanquesContrato contexto)
         {
             this.contexto = contexto;
         }
@@ -20,11 +20,11 @@ namespace AppGeoPortal.Controllers
         [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTodos")]
         [PermisoRequerido("Ver")]
-        public async Task<ActionResult<List<Proveedor_A>>> ListarTodos()
+        public async Task<ActionResult<List<Estanques>>> ListarTodos()
         {
             try
             {
-                var listar = await contexto.ListarTodos();
+                var listar = await contexto.ListarTodosPaginados();
                 return Ok(listar);
             }
             catch (Exception ex)

@@ -25,5 +25,6 @@ namespace AppGeoPortal.Contexto
         public virtual DbSet<Textura> Texturas { get; set; }
         public virtual DbSet<DepartamentoInfoDTO> DepartamentoInfoDTOs { get; set; }
         public virtual DbSet<RegistroSolicitudes> RegistroSolicitudes { get; set; }
+        public virtual DbSet<Estanques> Estanques { get; set; }
     }
 }
