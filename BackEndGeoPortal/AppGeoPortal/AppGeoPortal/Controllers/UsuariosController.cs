@@ -18,7 +18,7 @@ namespace AppGeoPortal.Controllers
             _usuario = usuario;
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarTodos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Usuarios>>> ListarTodos()
@@ -34,7 +34,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ListarActivos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Usuarios>>> ListarActivos()
@@ -50,7 +50,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpPost("Insertar")]
         [PermisoRequerido("Agregar")]
         public async Task<ActionResult> Insertar([FromBody] Usuarios usuarios)
@@ -72,7 +72,7 @@ namespace AppGeoPortal.Controllers
                 return StatusCode(500, $"Error al insertar el usuario: {ex.Message}");
             }
         }
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpPut("Modificar/{id:int}")]
         [PermisoRequerido("Modificar")]
         public async Task<ActionResult> Modificar([FromBody] Usuarios usuarios, int id)
@@ -94,7 +94,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpDelete("Eliminar")]
         [PermisoRequerido("Eliminar")]
         public async Task<ActionResult> Eliminar(int id)
@@ -116,7 +116,7 @@ namespace AppGeoPortal.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR")]
         [HttpGet("ObtenerId")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<Usuarios>> ObtenerId(int id)

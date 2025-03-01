@@ -17,7 +17,7 @@ namespace AppGeoPortal.Controllers
             this.contexto = contexto;
         }
 
-        [Authorize]
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
         [HttpGet("ListarTodos")]
         [PermisoRequerido("Ver")]
         public async Task<ActionResult<List<Cap_Dep>>> ListarTodos()

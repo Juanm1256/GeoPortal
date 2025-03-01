@@ -83,6 +83,7 @@ namespace AppGeoPortal
             services.AddScoped<ILim_MunContrato, Limites_MunicipalesLogic>();
             services.AddScoped<IMercadoContrato, MercadosLogic>();
             services.AddScoped<IProveedorAContrato, Proveedor_AlevinesLogic>();
+            services.AddScoped<IEstanquesContrato, EstanquesLogic>();
             services.AddScoped<IProveedorAliContrato, Proveedor_AlimentosLogic>();
             services.AddScoped<IProveedorAsisTecContrato, Proveedor_AsistTecLogic>();
             services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
@@ -111,7 +112,8 @@ namespace AppGeoPortal
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
+                    RoleClaimType = "Rol"
                 };
             });
 
@@ -138,7 +140,6 @@ namespace AppGeoPortal
             app.UseAuthorization();
 
             app.UseMiddleware<RegistroLimitMiddleware>();
-
             app.UseMiddleware<PermisosMiddleware>(); 
 
             app.UseEndpoints(endpoints =>

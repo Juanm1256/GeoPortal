@@ -18,43 +18,20 @@ namespace AppGeoPortal.Implementacion
 
         public async Task<List<Cuencas>> ListarTodos()
         {
-            // Si está en memoria, usa EF Core
-            var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
-            if (isInMemory)
+            // Si estás en base de datos en memoria, usa consulta normal
+            if (context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
             {
                 return await context.Cuencas
                     .AsNoTracking()
                     .ToListAsync();
             }
 
-            // Si es una base de datos relacional, usa consulta SQL nativa
-            var connection = context.Database.GetDbConnection();
-            await connection.OpenAsync();
-
-            var query = @"SELECT gid, sup_km2, cuenca, ST_AsGeoJSON(geom) AS geom FROM capas.cuencas";
-
-            var lista = new List<Cuencas>();
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = query;
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        lista.Add(new Cuencas
-                        {
-                            gid = reader.GetInt32(0),
-                            sup_km2 = reader.GetDouble(1),
-                            cuenca = reader.GetString(2),
-                            geom = reader.GetString(3)
-                        });
-                    }
-                }
-            }
-
-            return lista;
+            // Para bases de datos reales, usa consulta SQL
+            return await context.Cuencas
+                .FromSqlRaw("SELECT gid, sup_km2, cuenca, ST_AsGeoJSON(geom) AS geom FROM capas.cuencas")
+                .AsNoTracking()
+                .ToListAsync();
         }
+
     }
 }
