@@ -18,10 +18,11 @@ import { Metodos } from '../../../Metodos/metodos';
 import * as bootstrap from 'bootstrap';
 import Chart from 'chart.js/auto';
 import { ThemeService } from '../../servicios/theme.service';
-import { debounceTime, distinctUntilChanged, firstValueFrom, Observable, Subscription, switchMap } from 'rxjs';
-import { Texturas } from '../../interfaces/texturas';
+import { debounceTime, distinctUntilChanged, firstValueFrom, Observable, of, Subscription, switchMap } from 'rxjs';
 import { TexturasService } from '../../servicios/maps/texturas.service';
+import { Texturas } from '../../interfaces/texturas';
 import { DepartamentoinfoService } from '../../servicios/maps/departamentoinfo.service';
+import { DepartamentoInforDTO } from '../../interfaces/departamento-infor-dto';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { LimitesMunicipales } from '../../interfaces/limites-municipales';
 
@@ -173,7 +174,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
   private async initMap(): Promise<void> {
     try {
-      this.map = L.map('map-private', {
+      this.map = L.map('map-public', {
         center: [-16.54529, -64.7400],
         zoom: 6,
         zoomControl: false
@@ -623,7 +624,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
 
   async captureMap(): Promise<void> {
-    const mapElement = document.getElementById('map-private');
+    const mapElement = document.getElementById('map-public');
     if (!mapElement) {
       return;
     }

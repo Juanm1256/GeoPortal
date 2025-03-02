@@ -1,8 +1,8 @@
 <!-- Contenedor del mapa -->
-<div id="map-private" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}" >
+<div id="map-public" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}" >
 
   <!-- NUEVO: Buscador de municipios -->
-  <div class="map-search-container">
+  <div class="map-search-container" >
     <div class="search-box" [ngClass]="{'expanded': filteredMunicipios.length > 0}">
       <div class="search-input-wrapper">
         
@@ -181,7 +181,7 @@
      [style.display]="showModal ? 'block' : 'none'"
      tabindex="-1"
      aria-labelledby="datosModalLabel"
-     aria-hidden="true"
+     aria-hidden="true"     
      (click)="cerrarModal()"
      (mouseover)="disableMapInteractions()" 
      (mouseleave)="enableMapInteractions()">
