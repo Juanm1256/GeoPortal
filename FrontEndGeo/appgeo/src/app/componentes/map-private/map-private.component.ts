@@ -31,12 +31,14 @@ import { LimitesMunicipales } from '../../interfaces/limites-municipales';
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit, OnDestroy {
-
+  busquedaActiva = false; 
+  isLoading = false;
   searchControl = new FormControl();
   filteredMunicipios: LimitesMunicipales[] = [];
   isSearching = false;
   private searchMarker: L.Marker | null = null;
   private limitesMunicipalesHighlight: L.LayerGroup | null = null;
+  
 
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
@@ -721,33 +723,40 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
   }
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
-    const searchContainer = document.querySelector('.map-search-container');
-    if (searchContainer && searchContainer.contains(event.originalEvent.target as Node)) {
-      return;
+    const latlng = event.latlng;
+  
+    // Verifica si hay una capa activa o si la búsqueda sigue activa
+    const capaActiva = Object.keys(this.activeLayers).some(layer => this.activeLayers[layer]);
+  
+    if (!capaActiva && !this.busquedaActiva) {
+      return; // No muestra el modal si no hay capas activas ni búsqueda reciente
     }
   
-    const latlng = event.latlng;
-    
-    const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
-    const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
+    this.isLoading = true; // Activa el spinner
+    this.modalInfo = []; // Limpia la información anterior
+    this.showModal = true; // Muestra el modal inmediatamente
   
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
+          this.isLoading = false; // Oculta el spinner
+  
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
             this.mostrarModalInformacion(departamentoInfo);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
+            // Si no hay datos, muestra el mensaje "Área sin información"
+            this.modalInfo = [];
           }
         },
-        error: (error) => {
+        error: () => {
+          this.isLoading = false;
+          this.modalInfo = [];
         }
       });
   }
-
-
-
+  
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
 
@@ -776,20 +785,23 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
   }
 
   mostrarModalInformacion(propiedades: any) {
-    this.modalInfo = [
-      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
-      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
-      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-      { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
-      { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-      { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
-    ];
-
+    this.modalInfo = propiedades && Object.keys(propiedades).length > 0
+      ? [
+          { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+          { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+          { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+          { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
+          { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
+          { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
+          { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
+          { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+          { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
+        ]
+      : [];
+  
     this.showModal = true;
   }
+  
 
   
 
@@ -859,7 +871,8 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
   }
 
   async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
-    this.filteredMunicipios = [];
+    this.filteredMunicipios = []; // Limpia los resultados de la búsqueda
+    this.showModal = false; // Cierra el modal al seleccionar un municipio
   
     try {
       let lat = (municipio as any).lat;
@@ -876,7 +889,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
         }
       }
   
-      await this.highlightMunicipio(municipio);
+      await this.highlightMunicipio(municipio); // Resalta el municipio en el mapa
   
       if (this.searchMarker) {
         this.map.removeLayer(this.searchMarker);
@@ -886,10 +899,13 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
+  
+      // Activa la "capa simulada" después de la búsqueda
+      this.busquedaActiva = true;
     } catch (error) {
+      console.error("Error al seleccionar municipio:", error);
     }
   }
-
   async highlightMunicipio(municipio: LimitesMunicipales): Promise<void> {
     try {
       if (!this.limitesMunicipalesHighlight) {
@@ -933,6 +949,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     this.searchControl.setValue('');
     
     this.filteredMunicipios = [];
+    this.busquedaActiva = false; // Desactiva la búsqueda activa al limpiar
     
     if (this.limitesMunicipalesHighlight) {
       this.limitesMunicipalesHighlight.clearLayers();
@@ -942,7 +959,9 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
       this.map.removeLayer(this.searchMarker);
       this.searchMarker = null;
     }
-    
+  
+    this.showModal = false; // Cierra el modal cuando se borra la búsqueda
     this.map.setView([-16.54529, -64.7400], 6);
   }
+  
 }

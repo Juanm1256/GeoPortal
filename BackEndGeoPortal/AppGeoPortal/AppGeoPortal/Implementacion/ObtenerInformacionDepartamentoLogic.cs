@@ -350,8 +350,6 @@ SELECT * FROM consulta_principal", longitud, latitud)
             }
 
             return resultado;
-
-            return resultado;
         }
     }
 }

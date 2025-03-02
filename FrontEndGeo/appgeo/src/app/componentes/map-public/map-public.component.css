@@ -6,56 +6,45 @@
 .loading-cursor {
   cursor: wait !important;
 }
+/* Contenedor del spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+}
+
+/* Mensaje cuando no hay datos */
+.no-data-message {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #666;
+}
+
 /* Modal draggable */
 .draggable {
   z-index: 1050;
-  position: absolute; /* Evita que el modal bloquee interacciones */
+  position: fixed;
   top: 100px;
   left: 10%;
-  width: 550px;  /* Ancho del modal */
+  width: 550px;  /* Ancho máximo del modal */
   max-height: 600px; /* Altura máxima del modal */
-  overflow: hidden; /* Oculta desbordamientos */
+  overflow: hidden; /* Oculta el desbordamiento fuera del modal */
   border-radius: 10px; /* Bordes redondeados */
   cursor: grab;
-  box-sizing: border-box;
-  background: white; /* Asegura que el fondo sea visible */
 }
 
 .draggable:active {
   cursor: grabbing;
 }
 
-/* Elimina márgenes y rellenos invisibles */
-.modal {
-  padding: 0 !important; /* Elimina relleno automático */
-  margin: 0 !important; /* Elimina márgenes extra */
-  pointer-events: none; /* Evita bloqueos invisibles */
-  background: transparent !important; /* Elimina fondo oscuro */
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Asegura que el modal no tenga margen invisible */
-.modal-dialog {
-  margin: 0 !important; /* Elimina margen automático */
-  pointer-events: none; /* Evita bloqueos fuera del modal */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Solo el contenido del modal debe ser interactivo */
-.modal-content {
-  pointer-events: auto; /* Permite la interacción dentro del modal */
-  width: 100%;
-  max-width: 550px;
-  max-height: 600px;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
 /* Contenido desplazable dentro del modal */
+.modal-content {
+  max-height: 100%; /* Asegura que el contenido no desborde el modal */
+  overflow: hidden;
+}
+
 .modal-body {
   max-height: 300px; /* Limita la altura del cuerpo para el scroll */
   overflow-y: auto; /* Desplazamiento vertical */
@@ -76,14 +65,13 @@
   text-align: left;
 }
 
-/* Footer del modal */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   padding: 10px 15px;
+  
   border-top: 1px solid #dee2e6;
 }
-
 /* ============================= */
 /*          MODO CLARO           */
 /* ============================= */
