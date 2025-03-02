@@ -11,5 +11,8 @@ namespace AppGeoPortal.Contrato
         public Task<List<TexturaDTO>> ListarTexturasuelosesenta();
         public Task<List<TexturaDTO>> ListarTexturasuelocien();
         public Task<List<TexturaDTO>> ListarTexturasuelodoscientos();
+        public Task<List<ModGeneralDTO>> ListarModGen();
+        public Task<List<ModGeneralDTO>> ListarTexturas();
+        public Task<List<ModGeneralDTO>> Listarcategoria_uso();
     }
 }

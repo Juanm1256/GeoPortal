@@ -115,5 +115,52 @@ namespace AppGeoPortal.Controllers
             }
         }
 
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
+        [HttpGet("ListarModGeneral")]
+        [PermisoRequerido("Ver")]
+        public async Task<ActionResult<List<ModGeneralDTO>>> ListarModGeneral()
+        {
+            try
+            {
+                var listar = await _textura.ListarModGen();
+                return Ok(listar);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
+        [HttpGet("ListarTexturas")]
+        [PermisoRequerido("Ver")]
+        public async Task<ActionResult<List<ModGeneralDTO>>> ListarTexturas()
+        {
+            try
+            {
+                var listar = await _textura.ListarTexturas();
+                return Ok(listar);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "ADMINISTRADOR, VISITANTE")]
+        [HttpGet("ListarCategoria_uso_suelo")]
+        [PermisoRequerido("Ver")]
+        public async Task<ActionResult<List<ModGeneralDTO>>> ListarCategoria_uso_suelo()
+        {
+            try
+            {
+                var listar = await _textura.Listarcategoria_uso();
+                return Ok(listar);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los datos: {ex.Message}");
+            }
+        }
     }
 }
