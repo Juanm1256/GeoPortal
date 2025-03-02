@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, of, throwError } from 'rxjs';
 import { Texturas } from '../../interfaces/texturas';
+import { modgeneral } from '../../interfaces/modgeneral';
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +22,25 @@ export class TexturasService {
       catchError(this.handleError)
     );
   }
-
+  
+  private getModGen(endpoint: string): Observable<modgeneral[]> {
+    return this.http.get<modgeneral[]>(`${this.API}/Texturas/${endpoint}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+  Listarmodgeneral(): Observable<modgeneral[]> {
+    return this.getModGen('ListarModGeneral');
+  }
+  ListarTexturas(): Observable<modgeneral[]> {
+    return this.getModGen('ListarTexturas');
+  }
+  ListarCoberturaSuelo(): Observable<modgeneral[]> {
+    return this.getModGen('ListarCategoria_uso_suelo');
+  }
   ListarTexturasuelocero(): Observable<Texturas[]> {
     return this.getTexturas('ListarTexturasuelocero');
   }
-
+ 
   ListarTexturasuelodiez(): Observable<Texturas[]> {
     return this.getTexturas('ListarTexturasuelodiez');
   }

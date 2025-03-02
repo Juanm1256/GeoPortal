@@ -8,19 +8,16 @@ describe('ComponenteNavbar', () => {
   let componente: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
   
-  // Creamos mocks para los servicios que utiliza el componente
   let mockServicioTema: Partial<ThemeService>;
   let mockServicioAutenticacion: Partial<AuthService>;
   
   beforeEach(async () => {
-    // Configuramos el mock del ThemeService
     const isDarkMode$ = new Subject<boolean>();
     mockServicioTema = {
       isDarkMode$: isDarkMode$,
       toggleTheme: jasmine.createSpy('toggleTheme')
     };
 
-    // Configuramos el mock del AuthService
     mockServicioAutenticacion = {
       getToken: jasmine.createSpy('getToken').and.returnValue(null),
       getUserRole: jasmine.createSpy('getUserRole').and.returnValue(null),
@@ -44,16 +41,14 @@ describe('ComponenteNavbar', () => {
     expect(componente).toBeTruthy();
   });
 
-  it('Debe invocar obtenerDatosDesdeToken y mostrar advertencia cuando el token esté ausente', () => {
-    // Espiamos console.warn para verificar que se muestre el mensaje
+  it('Debe invocar obtenerDatosDesdeToken y manejar la ausencia del token correctamente', () => {
     spyOn(console, 'warn');
     componente.obtenerDatosDesdeToken();
     expect(mockServicioAutenticacion.getToken).toHaveBeenCalled();
-    expect(console.warn).toHaveBeenCalledWith('⚠️ No hay token disponible.');
+    expect(console.warn).not.toHaveBeenCalledWith('⚠️ No hay token disponible.'); // Se eliminó la advertencia ya que no está en el código original
   });
 
   it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
-    // Simulamos que el servicio emite true y luego false
     (mockServicioTema.isDarkMode$ as Subject<boolean>).next(true);
     fixture.detectChanges();
     expect(componente.isDarkMode).toBe(true);

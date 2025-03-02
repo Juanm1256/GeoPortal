@@ -47,10 +47,11 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
   isGraphButtonVisible: boolean = false;
+  
   modalInfo: { key: string; value?: string; isTitle?: boolean; color?: string }[] = [];
   showModal = false;
   sidebarOpen: boolean = false;
-  layerInfo: { nombre: string; descripcion: string } | null = null;
+  layerInfo: { nombre: string; } | null = null;
   layerData: { label: string; value: number; color: string }[] = [];
   pieChart: any;
   private map!: L.Map;
@@ -244,122 +245,212 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     });
   }
   toggleSidebar() {
-
     if (this.showSidebarButton) {
       this.sidebarOpen = !this.sidebarOpen;
 
       if (this.sidebarOpen) {
-        this.openSidebarWithLayerData('Textura del Suelo');
+        // Verifica qué capa está activa y carga sus datos en el gráfico
+        if (this.activeLayers['Textura']) {
+          this.openSidebarWithLayerData('Textura');
+        } else if (this.activeLayers['Cobertura_uso_suelo']) {
+          this.openSidebarWithLayerData('Cobertura_uso_suelo');
+        } else if (this.activeLayers['Modelo General']) {
+          this.openSidebarWithLayerData('Modelo General');
+        } else {
+          // Por defecto, si no hay ninguna de las nuevas capas activas, carga la textura del suelo
+          this.openSidebarWithLayerData('Textura del Suelo');
+        }
+
         setTimeout(() => this.showPieChart(), 300);
       } else {
         if (this.pieChart) {
           this.pieChart.destroy();
         }
       }
-    } else {
     }
   }
   isAnyLayerActive(): boolean {
     const activeLayers = [
       'Textura_suelo_0', 'Textura_suelo_10',
-      'Textura_suelo_30', 'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'
+      'Textura_suelo_30', 'Textura_suelo_60',
+      'Textura_suelo_100', 'Textura_suelo_200',
+      'Textura', 'Cobertura_uso_suelo', 'Modelo General'
     ];
     return activeLayers.some(layer => this.activeLayers[layer]);
   }
 
+
+
   async openSidebarWithLayerData(layerName: string): Promise<void> {
     try {
-      const colorMap: { [key: number]: string } = {
-        0: '#ca7173',
-        1: '#430bea',
-        3: '#ffe605',
-        4: '#16efdd',
-        6: '#c7b4ff',
-        7: '#617ece',
-        8: '#073408',
-        9: '#dc1010'
-      };
+      this.isLoading = true; // 🔄 Activa el spinner
 
-      // Mapeo de valores a nombres descriptivos
+        this.layerInfo = { nombre: layerName };
+      // 🔹 Nombres de categorías para Textura del Suelo
       const textureNameMap: { [key: number]: string } = {
-        0: 'No dato',
-        1: 'Arcilloso',
-        3: 'Arcillo arenoso',
-        4: 'Franco Arcilloso',
-        6: 'Franco Arcillo Arenoso',
-        7: 'Franco',
-        8: 'Franco Limoso',
-        9: 'Franco Arenoso'
+        0: "No dato",
+        1: "Arcilloso",
+        3: "Arcillo arenoso",
+        4: "Franco Arcilloso",
+        6: "Franco Arcillo Arenoso",
+        7: "Franco",
+        8: "Franco Limoso",
+        9: "Franco Arenoso"
+      };
+      // 🔹 Colores para la capa "Textura del Suelo"
+      const texturaColors: { [key: number]: string } = {
+        0: '#ca7173',  // No dato
+        1: '#430bea',  // Arcilloso
+        3: '#ffe605',  // Arcillo arenoso
+        4: '#16efdd',  // Franco Arcilloso
+        6: '#c7b4ff',  // Franco Arcillo Arenoso
+        7: '#617ece',  // Franco
+        8: '#073408',  // Franco Limoso
+        9: '#dc1010'   // Franco Arenoso
       };
 
+      // 🔹 Colores para la capa "Cobertura Uso Suelo"
+      const coberturaUsoSueloColors: { [key: string]: string } = {
+        "cobertura arbórea": "#e8211e",
+        "matorral": "#42e542",
+        "pradera": "#77d1b3",
+        "tierras de cultivo": "#a6d155",
+        "construido": "#dca224",
+        "vegetación desnuda/rala": "#e645ad",
+        "nieve y hielo": "#7b7bd5",
+        "masas de agua permanentes": "#53a6cf",
+        "humedal herbáceo": "#c286dd"
+      };
+
+      // 🔹 Colores para la capa "Mod General"
+      const modGeneralColors: { [key: string]: string } = {
+        "alta idoneidad": "#94c4d1",
+        "baja idoneidad": "#7474d1",
+        "moderada idoneidad": "#bf9ae1",
+        "no apta": "#dc1010"
+      };
+
+
+      const texturaColors2: { [key: string]: string } = {
+        "No dato": '#ca7173',  // No dato
+        "Arcilloso": '#430bea',  // Arcilloso
+        "Arcillo arenoso": '#ffe605',  // Arcillo arenoso
+        "Franco Arcilloso": '#16efdd',  // Franco Arcilloso
+        "Franco Arcillo Arenoso": '#c7b4ff',  // Franco Arcillo Arenoso
+        "Franco": '#617ece',  // Franco
+        "Franco Limoso": '#073408',  // Franco Limoso
+        "Franco Arenoso": '#dc1010'   // Franco Arenoso
+      };
+
+      // 🔹 Mapas de capas
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
-        'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
-        'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
-        'Textura_suelo_30': () => this.texturaservice.ListarTexturasuelotreinta(),
-        'Textura_suelo_60': () => this.texturaservice.ListarTexturasuelosesenta(),
-        'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
-        'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
+        "Textura_suelo_0": () => this.texturaservice.ListarTexturasuelocero(),
+        "Textura_suelo_10": () => this.texturaservice.ListarTexturasuelodiez(),
+        "Textura_suelo_30": () => this.texturaservice.ListarTexturasuelotreinta(),
+        "Textura_suelo_60": () => this.texturaservice.ListarTexturasuelosesenta(),
+        "Textura_suelo_100": () => this.texturaservice.ListarTexturasuelocien(),
+        "Textura_suelo_200": () => this.texturaservice.ListarTexturasuelodoscientos()
       };
 
-      this.layerInfo = {
-        nombre: layerName,
-        descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
+      const layerMap2: { [key: string]: () => Observable<any[]> } = {
+        "Textura": () => this.texturaservice.ListarTexturas(),
+        "Cobertura_uso_suelo": () => this.texturaservice.ListarCoberturaSuelo(),
+        "Modelo General": () => this.texturaservice.Listarmodgeneral()
       };
 
+      this.layerInfo = { nombre: layerName };
+
+      // 🔹 Cargar datos para las capas "Textura del Suelo"
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
           this.layerData = data.map(item => ({
             label: textureNameMap[item.Value] || `Valor ${item.Value}`,
             value: item.Porcentaje,
-            color: colorMap[item.Value] || '#cccccc'
+            color: texturaColors[item.Value] || '#cccccc'
           }));
           await this.showPieChart();
         }
       }
+
+      // 🔹 Cargar datos para las capas "Cobertura Uso Suelo" y "Mod General"
+      if (layerMap2[layerName]) {
+        const data = await firstValueFrom(layerMap2[layerName]());
+        if (data && data.length > 0) {
+          if (layerName === "Cobertura_uso_suelo") {
+            this.layerData = data.map(item => ({
+              label: item.categoria,
+              value: item.porcentaje,
+              color: coberturaUsoSueloColors[item.categoria.toLowerCase().trim()] || '#cccccc'
+            }));
+          } else if (layerName === "Modelo General") {
+            this.layerData = data.map(item => ({
+              label: item.categoria,
+              value: item.porcentaje,
+              color: modGeneralColors[item.categoria.toLowerCase().trim()] || '#cccccc'
+            }));
+          } else if (layerName === "Textura") {
+            this.layerData = data.map(item => ({
+              label: item.categoria,
+              value: item.porcentaje,
+              color: texturaColors2[item.categoria.trim()] || '#cccccc'
+            }));
+          }
+          if (this.layerData.length > 0) {
+            await this.showPieChart(); // Solo mostrar el gráfico si hay datos
+        }
+        }
+      }
     } catch (error) {
+      console.error("Error al cargar datos de la capa:", error);
     }
+    finally {
+      this.isLoading = false; // Desactivar el spinner al finalizar
   }
-
-
+  }
   private async showPieChart(): Promise<void> {
     try {
-      if (this.pieChart) {
-        this.pieChart.destroy();
-      }
+        if (this.pieChart) {
+            this.pieChart.destroy(); // Destruir gráfico anterior si existe
+        }
 
-      const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
-      if (!canvas) {
-        throw new Error('No se encontró el canvas para el gráfico');
-      }
-
-      const ctx = canvas.getContext('2d');
-      if (ctx && this.layerData.length > 0) {
-        this.pieChart = new Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: this.layerData.map(d => d.label),
-            datasets: [{
-              data: this.layerData.map(d => d.value),
-              backgroundColor: this.layerData.map(d => d.color),
-              hoverOffset: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom'
-              }
+        setTimeout(() => { // Espera un ciclo del DOM para asegurarte de que el canvas existe
+            const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
+            if (!canvas) {
+                console.error("❌ No se encontró el canvas para el gráfico.");
+                return;
             }
-          }
-        });
-      }
-    } catch (error) {
-    }
-  }
 
+            const ctx = canvas.getContext('2d');
+            if (ctx && this.layerData.length > 0) {
+                this.pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: this.layerData.map(d => d.label),
+                        datasets: [{
+                            data: this.layerData.map(d => d.value),
+                            backgroundColor: this.layerData.map(d => d.color),
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn("⚠️ No hay datos para mostrar en el gráfico.");
+            }
+        }, 100); // ⏳ Pequeña espera para asegurar que el DOM está listo
+    } catch (error) {
+        console.error("🚨 Error al renderizar el gráfico:", error);
+    }
+}
 
   toggleAccordion() {
     this.isAccordionOpen = !this.isAccordionOpen;
@@ -398,12 +489,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.activeLayers[layerName] = false;
         button.classList.remove('active');
 
-        if (layerName === 'modgene' && this.marcadorSeleccionado) {
+        if (layerName === 'Modelo General' && this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
 
-        const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+        const capasValidas = ['Modelo General', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
         const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
 
         if (!capaActiva && this.marcadorSeleccionado) {
@@ -451,7 +542,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         case 'redHidrica':
           layer = await this.metodos.CargarRedHidrica(this.map);
           break;
-        case 'modgene':
+        case 'Modelo General':
           layer = await this.metodos.cargarmodgene(this.map);
           break;
         case 'Fragmentos_gruesos_suelo':
@@ -529,10 +620,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     }
   }
 
+ 
   checkGraphButtonVisibility() {
     const activeLayers = [
       'Textura_suelo_0', 'Textura_suelo_10', 'Textura_suelo_30',
-      'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200'];
+      'Textura_suelo_60', 'Textura_suelo_100', 'Textura_suelo_200',
+      'Textura', 'Cobertura_uso_suelo', 'Modelo General'
+    ];
     this.showSidebarButton = activeLayers.some(layer => this.activeLayers[layer]);
   }
 
@@ -761,7 +855,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
-    const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
+    const capasValidas = ['Modelo General', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
 
     const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
 
@@ -791,87 +885,106 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   mostrarModalInformacion(propiedades: any) {
     // 🎨 Mapa de colores según el tipo de suelo
     const colorMap: { [key: number]: string } = {
-      0: '#ca7173',
-      1: '#430bea',
-      3: '#ffe605',
-      4: '#16efdd',
-      6: '#c7b4ff',
-      7: '#617ece',
-      8: '#073408',
-      9: '#dc1010'
+        0: '#ca7173',  // No dato
+        1: '#430bea',  // Arcilloso
+        3: '#ffe605',  // Arcillo Arenoso
+        4: '#16efdd',  // Franco Arcilloso
+        6: '#c7b4ff',  // Franco Arcillo Arenoso
+        7: '#617ece',  // Franco
+        8: '#073408',  // Franco Limoso
+        9: '#dc1010'   // Franco Arenoso
+    };
+
+    // 🎨 Mapa de colores para Cobertura de Suelo
+    const coberturaSueloColors: { [key: string]: string } = {
+        "Cobertura arbórea": "#e8211e",
+        "Matorral": "#42e542",
+        "Pradera": "#77d1b3",
+        "Tierras de cultivo": "#a6d155",
+        "Construido": "#dca224",
+        "Vegetación desnuda/rala": "#e645ad",
+        "Nieve y hielo": "#7b7bd5",
+        "Masas de agua permanentes": "#53a6cf",
+        "Humedal herbáceo": "#c286dd"
+    };
+
+    // 🎨 Mapa de colores para Idoneidad del Suelo
+    const idoneidadSueloColors: { [key: string]: string } = {
+        "No Apta": "#dc1010",
+        "Baja Idoneidad": "#7474d1",
+        "Moderada Idoneidad": "#bf9ae1",
+        "Alta Idoneidad": "#94c4d1"
     };
 
     // 📌 Datos Generales
     const datosGenerales = [
-      { key: '📌 Datos Generales', isTitle: true },
-      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
-      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
-      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' },
-      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' }
+        { key: '📌 Datos Generales', isTitle: true },
+        { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+        { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+        { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+        { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+        { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' },
+        { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' }
     ];
 
     // 🌱 Cobertura del Suelo
     const coberturaSuelo = [
-      { key: '🌱 Cobertura del Suelo', isTitle: true },
-      { key: 'Cobertura Arbórea (%):', value: propiedades.porcentaje_cobertura_arborea?.toFixed(2) || 'N/A' },
-      { key: 'Matorral (%):', value: propiedades.porcentaje_matorral?.toFixed(2) || 'N/A' },
-      { key: 'Pradera (%):', value: propiedades.porcentaje_pradera?.toFixed(2) || 'N/A' },
-      { key: 'Tierras de Cultivo (%):', value: propiedades.porcentaje_tierras_cultivo?.toFixed(2) || 'N/A' },
-      { key: 'Zonas Construidas (%):', value: propiedades.porcentaje_construido?.toFixed(2) || 'N/A' },
-      { key: 'Vegetación Desnuda (%):', value: propiedades.porcentaje_vegetacion_desnuda?.toFixed(2) || 'N/A' },
-      { key: 'Nieve/Hielo (%):', value: propiedades.porcentaje_nieve_hielo?.toFixed(2) || 'N/A' },
-      { key: 'Masas de Agua (%):', value: propiedades.porcentaje_masas_agua?.toFixed(2) || 'N/A' },
-      { key: 'Humedal Herbáceo (%):', value: propiedades.porcentaje_humedal_herbaceo?.toFixed(2) || 'N/A' }
+        { key: '🌱 Cobertura del Suelo', isTitle: true },
+        { key: 'Cobertura Arbórea', value: propiedades.porcentaje_cobertura_arborea?.toFixed(2) || '0.00', color: coberturaSueloColors["Cobertura arbórea"] },
+        { key: 'Matorral', value: propiedades.porcentaje_matorral?.toFixed(2) || '0.00', color: coberturaSueloColors["Matorral"] },
+        { key: 'Pradera', value: propiedades.porcentaje_pradera?.toFixed(2) || '0.00', color: coberturaSueloColors["Pradera"] },
+        { key: 'Tierras de Cultivo', value: propiedades.porcentaje_tierras_cultivo?.toFixed(2) || '0.00', color: coberturaSueloColors["Tierras de cultivo"] },
+        { key: 'Zonas Construidas', value: propiedades.porcentaje_construido?.toFixed(2) || '0.00', color: coberturaSueloColors["Construido"] },
+        { key: 'Vegetación Desnuda/Rala', value: propiedades.porcentaje_vegetacion_desnuda?.toFixed(2) || '0.00', color: coberturaSueloColors["Vegetación desnuda/rala"] },
+        { key: 'Nieve/Hielo', value: propiedades.porcentaje_nieve_hielo?.toFixed(2) || '0.00', color: coberturaSueloColors["Nieve y hielo"] },
+        { key: 'Masas de Agua', value: propiedades.porcentaje_masas_agua?.toFixed(2) || '0.00', color: coberturaSueloColors["Masas de agua permanentes"] },
+        { key: 'Humedal Herbáceo', value: propiedades.porcentaje_humedal_herbaceo?.toFixed(2) || '0.00', color: coberturaSueloColors["Humedal herbáceo"] }
     ];
 
     // 🛠️ Idoneidad del Suelo
     const idoneidadSuelo = [
-      { key: '🛠️ Idoneidad del Suelo', isTitle: true },
-      { key: 'No Apta (%):', value: propiedades.porcentaje_no_apta?.toFixed(2) || 'N/A' },
-      { key: 'Baja Idoneidad (%):', value: propiedades.porcentaje_baja_idoneidad?.toFixed(2) || 'N/A' },
-      { key: 'Moderada Idoneidad (%):', value: propiedades.porcentaje_moderada_idoneidad?.toFixed(2) || 'N/A' },
-      { key: 'Alta Idoneidad (%):', value: propiedades.porcentaje_alta_idoneidad?.toFixed(2) || 'N/A' }
+        { key: '🛠️ Idoneidad del Suelo', isTitle: true },
+        { key: 'No Apta', value: propiedades.porcentaje_no_apta?.toFixed(2) || '0.00', color: idoneidadSueloColors["No Apta"] },
+        { key: 'Baja Idoneidad', value: propiedades.porcentaje_baja_idoneidad?.toFixed(2) || '0.00', color: idoneidadSueloColors["Baja Idoneidad"] },
+        { key: 'Moderada Idoneidad', value: propiedades.porcentaje_moderada_idoneidad?.toFixed(2) || '0.00', color: idoneidadSueloColors["Moderada Idoneidad"] },
+        { key: 'Alta Idoneidad', value: propiedades.porcentaje_alta_idoneidad?.toFixed(2) || '0.00', color: idoneidadSueloColors["Alta Idoneidad"] }
     ];
 
     // 🧩 Fragmentos del Suelo
     const fragmentosSuelo = [
-      { key: '🧩 Fragmentos del Suelo', isTitle: true },
-      { key: 'Valor Máximo de Fragmentos:', value: propiedades.valor_maximo_fragmentos?.toFixed(2) || 'N/A' },
-      { key: 'Total de Pixeles Fragmentos:', value: propiedades.total_pixeles_fragmentos?.toFixed(2) || 'N/A' }
+        { key: '🧩 Fragmentos del Suelo', isTitle: true },
+        { key: 'Valor Máximo de Fragmentos:', value: propiedades.valor_maximo_fragmentos?.toFixed(2) || 'N/A' },
+        { key: 'Total de Pixeles Fragmentos:', value: propiedades.total_pixeles_fragmentos?.toFixed(2) || 'N/A' }
     ];
 
     // 🗺️ Tipos de Suelo
     const tiposDeSuelo = [
-      { key: '🗺️ Tipos de Suelo', isTitle: true },
-      { key: 'Sin Dato', value: propiedades.porcentaje_no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
-      { key: 'Arcilloso', value: propiedades.porcentaje_arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
-      { key: 'Arcillo Arenoso', value: propiedades.porcentaje_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
-      { key: 'Franco Arcilloso', value: propiedades.porcentaje_franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
-      { key: 'Franco Arcillo Arenoso', value: propiedades.porcentaje_franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
-      { key: 'Franco', value: propiedades.porcentaje_franco?.toFixed(2) || '0.00', color: colorMap[7] },
-      { key: 'Franco Limoso', value: propiedades.porcentaje_franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
-      { key: 'Franco Arenoso', value: propiedades.porcentaje_franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
+        { key: '🗺️ Tipos de Suelo', isTitle: true },
+        { key: 'Sin Dato', value: propiedades.porcentaje_no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
+        { key: 'Arcilloso', value: propiedades.porcentaje_arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
+        { key: 'Arcillo Arenoso', value: propiedades.porcentaje_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
+        { key: 'Franco Arcilloso', value: propiedades.porcentaje_franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
+        { key: 'Franco Arcillo Arenoso', value: propiedades.porcentaje_franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
+        { key: 'Franco', value: propiedades.porcentaje_franco?.toFixed(2) || '0.00', color: colorMap[7] },
+        { key: 'Franco Limoso', value: propiedades.porcentaje_franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
+        { key: 'Franco Arenoso', value: propiedades.porcentaje_franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
     ];
 
     // 📍 Filtrar información cuando se busca un municipio
-    if (this.busquedaActiva) {
-      this.modalInfo = [...datosGenerales, ...tiposDeSuelo];
+    if (this.busquedaActiva == false) {
+        this.modalInfo = [...datosGenerales];
     } else {
-      // Mostrar toda la información cuando no es una búsqueda de municipio
-      this.modalInfo = [
-        ...datosGenerales,
-        ...coberturaSuelo,
-        ...idoneidadSuelo,
-        ...fragmentosSuelo,
-        ...tiposDeSuelo
-      ];
+        this.modalInfo = [
+            ...datosGenerales,
+            ...coberturaSuelo,
+            ...idoneidadSuelo,
+            ...fragmentosSuelo,
+            ...tiposDeSuelo
+        ];
     }
 
     this.showModal = true;
 }
-
 
 
   cerrarModal() {

@@ -101,7 +101,7 @@ namespace AppGeoPortal.Middleware.Implementacion
                     { "POST", 50 },
                     { "PUT", 30 },
                     { "DELETE", 50 },
-                    { "GET", 500 }
+                    { "GET", 1000 }
                 };
 
                         // Obtener límite para el método
