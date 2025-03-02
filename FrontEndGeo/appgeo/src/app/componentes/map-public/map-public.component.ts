@@ -33,12 +33,13 @@ import { LimitesMunicipales } from '../../interfaces/limites-municipales';
   styleUrl: './map-public.component.css'
 })
 export class MapPublicComponent implements OnInit, OnDestroy {
-  //search
-    searchControl = new FormControl();
-    filteredMunicipios: LimitesMunicipales[] = [];
-    isSearching = false;
-    private searchMarker: L.Marker | null = null;
-    private limitesMunicipalesHighlight: L.LayerGroup | null = null;
+  busquedaActiva = false;
+  isLoading = false;
+  searchControl = new FormControl();
+  filteredMunicipios: LimitesMunicipales[] = [];
+  isSearching = false;
+  private searchMarker: L.Marker | null = null;
+  private limitesMunicipalesHighlight: L.LayerGroup | null = null;
 
 
   userRole: string | null = null;
@@ -126,12 +127,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
   public disableMapInteractions(): void {
     if (this.map) {
-      this.map.dragging.disable(); 
-      this.map.scrollWheelZoom.disable(); 
-      this.map.doubleClickZoom.disable(); 
-      this.map.boxZoom.disable(); 
-      this.map.keyboard.disable(); 
-      this.map.off('click'); 
+      this.map.dragging.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      this.map.off('click');
     }
   }
 
@@ -278,7 +279,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         8: '#073408',
         9: '#dc1010'
       };
-  
+
       // Mapeo de valores a nombres descriptivos
       const textureNameMap: { [key: number]: string } = {
         0: 'No dato',
@@ -290,7 +291,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         8: 'Franco Limoso',
         9: 'Franco Arenoso'
       };
-  
+
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
         'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
         'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
@@ -299,12 +300,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
         'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
       };
-  
+
       this.layerInfo = {
         nombre: layerName,
         descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
       };
-  
+
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
@@ -477,7 +478,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         case 'Textura_suelo_200':
           layer = await this.metodos.cargarTexturasuelo200(this.map);
           break;
-          case 'Cobertura_uso_suelo':
+        case 'Cobertura_uso_suelo':
           layer = await this.metodos.cargarCobertura_uso_suelo(this.map);
           break;
         case 'Textura':
@@ -487,12 +488,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           layer = await this.metodos.cargarPrecipitacion(this.map);
           break;
         case 'Temperaturamedia':
-        layer = await this.metodos.cargarTemperaturamedia(this.map);
-        break;
+          layer = await this.metodos.cargarTemperaturamedia(this.map);
+          break;
         case 'estanques':
           layer = await this.metodos.cargarestanques(this.map);
           break;
-          case 'Pendiente':
+        case 'Pendiente':
           layer = await this.metodos.cargarPendientes(this.map);
           break;
         default:
@@ -503,11 +504,11 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
       if (layer instanceof L.TileLayer || layer instanceof L.TileLayer.WMS) {
-        layer.on('loading', () => this.setMapLoadingCursor(true));  
-        layer.on('load', () => this.setMapLoadingCursor(false));   
+        layer.on('loading', () => this.setMapLoadingCursor(true));
+        layer.on('load', () => this.setMapLoadingCursor(false));
         layer.on('tileerror', () => this.setMapLoadingCursor(false));
       } else {
-        this.setMapLoadingCursor(false); 
+        this.setMapLoadingCursor(false);
       }
       return layer;
     } catch (error) {
@@ -724,31 +725,39 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
-    const searchContainer = document.querySelector('.map-search-container');
-    if (searchContainer && searchContainer.contains(event.originalEvent.target as Node)) {
-      return;
+    const latlng = event.latlng;
+  
+    // Verifica si hay una capa activa o si la búsqueda sigue activa
+    const capaActiva = Object.keys(this.activeLayers).some(layer => this.activeLayers[layer]);
+  
+    if (!capaActiva && !this.busquedaActiva) {
+      return; // No muestra el modal si no hay capas activas ni búsqueda reciente
     }
   
-    const latlng = event.latlng;
-    
-    const capasConModal = ['modgene','cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
-    const capaActiva = capasConModal.find(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
+    this.isLoading = true; // Activa el spinner
+    this.modalInfo = []; // Limpia la información anterior
+    this.showModal = true; // Muestra el modal inmediatamente
   
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
+          this.isLoading = false; // Oculta el spinner
+  
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
             this.mostrarModalInformacion(departamentoInfo);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
+            // Si no hay datos, muestra el mensaje "Área sin información"
+            this.modalInfo = [];
           }
         },
-        error: (error) => {
+        error: () => {
+          this.isLoading = false;
+          this.modalInfo = [];
         }
       });
   }
-
 
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
@@ -781,20 +790,24 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
 
   mostrarModalInformacion(propiedades: any) {
-    this.modalInfo = [
-      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
-      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
-      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-      { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
-      { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-      { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
-    ];
-
+    this.modalInfo = propiedades && Object.keys(propiedades).length > 0
+      ? [
+          { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+          { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+          { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+          { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
+          { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
+          { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
+          { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
+          { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+          { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
+        ]
+      : [];
+  
     this.showModal = true;
   }
+  
+
 
   cerrarModal() {
     this.showModal = false;
@@ -804,8 +817,8 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   async initSearch(): Promise<void> {
     try {
       const municipios = await firstValueFrom(this.limitesmuservice.listarTodos());
-      
-      for (const municipio of municipios) { 
+
+      for (const municipio of municipios) {
         if (municipio.geom) {
           try {
             const geojson = JSON.parse(municipio.geom);
@@ -851,7 +864,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     try {
       const municipios = (this as any).municipiosData || [];
 
-      const filtered = municipios.filter((municipio: LimitesMunicipales) => 
+      const filtered = municipios.filter((municipio: LimitesMunicipales) =>
         municipio.mun.toLowerCase().includes(term) ||
         (municipio.dep && municipio.dep.toLowerCase().includes(term)) ||
         (municipio.prov && municipio.prov.toLowerCase().includes(term))
@@ -864,7 +877,9 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   }
 
   async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
-    this.filteredMunicipios = [];
+    this.filteredMunicipios = []; // Limpia los resultados de la búsqueda
+    this.showModal = false; // Cierra el modal al seleccionar un municipio
+  
     try {
       let lat = (municipio as any).lat;
       let lng = (municipio as any).lng;
@@ -879,7 +894,9 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           }
         }
       }
-      await this.highlightMunicipio(municipio);
+  
+      await this.highlightMunicipio(municipio); // Resalta el municipio en el mapa
+  
       if (this.searchMarker) {
         this.map.removeLayer(this.searchMarker);
         this.searchMarker = null;
@@ -888,10 +905,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
+  
+      // Activa la "capa simulada" después de la búsqueda
+      this.busquedaActiva = true;
     } catch (error) {
+      console.error("Error al seleccionar municipio:", error);
     }
   }
-
   async highlightMunicipio(municipio: LimitesMunicipales): Promise<void> {
     try {
       if (!this.limitesMunicipalesHighlight) {
@@ -900,13 +920,13 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.limitesMunicipalesHighlight.clearLayers();
       }
       const geojson = JSON.parse(municipio.geom);
-      
+
       const highlightStyle = {
         color: '#0e0e0d',
         weight: 3,
         opacity: 1,
-        fillColor: 'transparent', 
-        fillOpacity: 0 
+        fillColor: 'transparent',
+        fillOpacity: 0
       };
       const layer = L.geoJSON(geojson, {
         style: highlightStyle,
@@ -920,7 +940,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } catch (error) {
       const lat = (municipio as any).lat;
       const lng = (municipio as any).lng;
-      
+
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
@@ -929,14 +949,20 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
   clearSearch(): void {
     this.searchControl.setValue('');
+    
     this.filteredMunicipios = [];
+    this.busquedaActiva = false; // Desactiva la búsqueda activa al limpiar
+    
     if (this.limitesMunicipalesHighlight) {
       this.limitesMunicipalesHighlight.clearLayers();
     }
+    
     if (this.searchMarker) {
       this.map.removeLayer(this.searchMarker);
       this.searchMarker = null;
     }
+  
+    this.showModal = false; // Cierra el modal cuando se borra la búsqueda
     this.map.setView([-16.54529, -64.7400], 6);
   }
 }

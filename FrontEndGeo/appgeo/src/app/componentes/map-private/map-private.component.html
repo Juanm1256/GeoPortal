@@ -1,19 +1,11 @@
 <!-- Contenedor del mapa -->
 <div id="map-private" style="width: 100%; height: 100%;" [ngClass]="{'dark-theme': isDarkMode}">
-   <!-- NUEVO: Buscador de municipios -->
-  <div class="map-search-container">
+  <!-- NUEVO: Buscador de municipios -->
+  <div class="map-search-container" (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
     <div class="search-box" [ngClass]="{'expanded': filteredMunicipios.length > 0}">
       <div class="search-input-wrapper">
-        
-        <input 
-          type="text" 
-          [formControl]="searchControl" 
-          placeholder="Buscar municipio..." 
-          class="search-input"
-          autocomplete="off">
-        <div class="search-icon">
-          <i class="bi bi-search"></i>
-        </div>
+        <input type="text" [formControl]="searchControl" placeholder="Buscar municipio..." class="search-input">
+        <div class="search-icon"><i class="bi bi-search"></i></div>
         <div *ngIf="searchControl.value" class="clear-search-icon" (click)="clearSearch()">
           <i class="bi bi-x-circle-fill"></i>
         </div>
@@ -23,26 +15,23 @@
           </div>
         </div>
       </div>
-      
       <div class="search-results" *ngIf="filteredMunicipios.length > 0">
         <ul>
-          <li *ngFor="let municipio of filteredMunicipios" 
-              (click)="selectMunicipio(municipio)"
-              (mousedown)="$event.preventDefault()">
+          <li *ngFor="let municipio of filteredMunicipios" (click)="selectMunicipio(municipio)"
+            (mousedown)="$event.preventDefault()">
             <div class="municipality-item">
               <strong>{{ municipio.mun }}</strong>
-              <div class="municipality-details">
-                {{ municipio.prov }}, {{ municipio.dep }}
-              </div>
+              <div class="municipality-details">{{ municipio.prov }}, {{ municipio.dep }}</div>
             </div>
           </li>
         </ul>
       </div>
     </div>
   </div>
+
   <!-- Panel lateral de herramientas -->
   <div class="toolbar" [class.showLayers]="isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}"
-  (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
+    (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
     <!-- Botón para alternar capas -->
     <button class="tool-btn" (click)="toggleLayers()" title="Capas">
       <i class="bi bi-stack"></i>
@@ -50,7 +39,7 @@
 
     <!-- Botones normales (desaparecen cuando se activa capas) -->
     <div class="tools" *ngIf="!isLayersOpen" [ngClass]="{'dark-theme': isDarkMode}"
-    (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
+      (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
       <button class="tool-btn" (click)="mapZoomIn()" title="Zoom +">
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -160,26 +149,27 @@
   </div>
 </div>
 
-<!-- Modal de información (Movible) -->
-<div class="modal fade draggable"
-     id="datosModal"
-     [class.show]="showModal"
-     [style.display]="showModal ? 'block' : 'none'"
-     tabindex="-1"
-     aria-labelledby="datosModalLabel"
-     aria-hidden="true"
-     (click)="cerrarModal()"
-     (mouseover)="disableMapInteractions()" 
-     (mouseleave)="enableMapInteractions()">
+<div class="modal fade draggable" id="datosModal" [class.show]="showModal"
+  [style.display]="showModal ? 'block' : 'none'" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true"
+  (click)="cerrarModal()" (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
 
   <div class="modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content">
       <div class="modal-header" id="modalHeader">
-        <h5 class="modal-title" id="datosModalLabel">Información de Departamento</h5>
+        <h5 class="modal-title">Información de Departamento</h5>
         <button type="button" class="btn-close" (click)="cerrarModal()"></button>
       </div>
+
       <div class="modal-body">
-        <table class="table" *ngIf="modalInfo && modalInfo.length > 0; else sinDatos">
+        <!-- Spinner de carga -->
+        <div *ngIf="isLoading" class="spinner-container">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- Datos -->
+        <table class="table" *ngIf="!isLoading && modalInfo.length > 0; else sinDatos">
           <tbody>
             <tr *ngFor="let dato of modalInfo">
               <th>{{ dato.key }}</th>
@@ -187,10 +177,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Mensaje "Área sin información" solo cuando no hay datos y ya terminó de cargar -->
         <ng-template #sinDatos>
-          <p>No hay información disponible para esta ubicación.</p>
+          <p class="no-data-message" *ngIf="!isLoading">Área sin información.</p>
         </ng-template>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
       </div>
@@ -201,7 +194,7 @@
 
 <!-- Panel lateral derecho para gráficos de torta -->
 <div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}"
-(mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
+  (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
   <div class="sidebar-header">
     <h5>Gráfico de Textura del Suelo</h5>
     <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">
