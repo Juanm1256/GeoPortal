@@ -99,7 +99,7 @@
       <button class="layer-btn" (click)="toggleLayer('redHidrica', $event)" data-layer="redHidrica">
         <i class="bi bi-water"></i> <span>Red Hídrica</span>
       </button>
-      <button class="layer-btn" (click)="toggleLayer('modgene', $event)" data-layer="modgene">
+      <button class="layer-btn" (click)="toggleLayer('Modelo General', $event)" data-layer="Modelo General">
         <i class="bi bi-layers"></i> <span>Mod General Ajustado</span>
       </button>
       <button class="layer-btn" (click)="toggleLayer('Fragmentos_gruesos_suelo', $event)"
@@ -155,7 +155,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header" id="modalHeader">
-        <h5 class="modal-title">Información de Departamento</h5>
+        <h5 class="modal-title">Información</h5>
         <button type="button" class="btn-close" (click)="cerrarModal()"></button>
       </div>
 
@@ -201,7 +201,7 @@
 <div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}"
   (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
   <div class="sidebar-header">
-    <h5>Gráfico de Textura del Suelo</h5>
+    <h5>Gráfico General</h5>
     <button class="btn-close" (click)="toggleSidebar()" title="Cerrar Panel">
       <i class="bi bi-x"></i>
     </button>
@@ -211,13 +211,21 @@
     <!-- Datos generales -->
     <div *ngIf="layerInfo">
       <p><strong>Nombre de la Capa:</strong> {{ layerInfo.nombre }}</p>
-      <p><strong>Descripción:</strong> {{ layerInfo.descripcion }}</p>
+      
     </div>
 
     <div class="chart-container">
-      <canvas id="pieChart"></canvas>
+      <!-- Spinner de carga -->
+      <div class="spinner-container" *ngIf="isLoading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    
+      <!-- Canvas del gráfico (se oculta en lugar de eliminarse) -->
+      <canvas id="pieChart" [hidden]="isLoading"></canvas>
     </div>
-
+    
     <!-- Leyenda de datos -->
     <div class="chart-legend" *ngIf="layerData.length > 0">
       <div *ngFor="let item of layerData" class="legend-item">
@@ -229,7 +237,7 @@
 </div>
 
 <!-- Botón para mostrar u ocultar el panel lateral (visible solo si las capas están activas) -->
-<button *ngIf="showSidebarButton" id="toggle-sidebar-btn" class="toggle-sidebar-btn" (click)="toggleSidebar()"
+<button *ngIf="isAnyLayerActive()" id="toggle-sidebar-btn" class="toggle-sidebar-btn" (click)="toggleSidebar()"
   [ngClass]="{'dark-theme': isDarkMode}">
   📊 Gráficos
 </button>

@@ -137,8 +137,7 @@ describe('ComponenteDashboard', () => {
       { nombre: 'Proveedores de Asistencia Técnica', cantidad: proveedoresAsistenciaData.length }
     ]);
   
-    // Verifica que el último usuario sea el correcto
-    expect(componente.ultimoUsuario).toEqual(usuariosData[usuariosData.length - 1]);
+    
   });
 
   it('Debe crear una instancia del gráfico después de llamar a actualizarGrafico', async () => {

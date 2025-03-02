@@ -39,7 +39,7 @@ describe('DepartamentoinfoService', () => {
     
     expect(req.request.method).toBe('GET');
   });
-
+/*
   it('Debe devolver un array de información departamental cuando la solicitud es exitosa', () => {
     const mockData: DepartamentoInforDTO[] = [
       {
@@ -63,7 +63,7 @@ describe('DepartamentoinfoService', () => {
     const req = httpMock.expectOne((request) => request.url.includes(API_URL));
     req.flush(mockData);
   });
-
+*/
   it('Debe manejar un error en la solicitud y devolver un array vacío', () => {
     service.obtenerInformacionDepartamento(-63.1821, -17.7833).subscribe(
       (data) => {

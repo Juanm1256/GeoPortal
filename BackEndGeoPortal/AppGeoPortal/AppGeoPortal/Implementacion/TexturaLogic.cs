@@ -327,47 +327,47 @@ namespace AppGeoPortal.Implementacion
                 .ToListAsync();
             return resultado;
         }
-        
         public async Task<List<ModGeneralDTO>> Listarcategoria_uso()
         {
             var resultado = await context.Mod_General
                 .FromSqlRaw(@"
-                    WITH valores_raster AS (
-                        SELECT 
-                            (ST_ValueCount(rast, 1)).value AS valor,
-                            (ST_ValueCount(rast, 1)).count AS num_pixeles
-                        FROM capas_rastergeo.cobertura_uso_suelo
-                    ),
-                    totales AS (
-                        SELECT 
-                            SUM(num_pixeles) AS total_pixeles
-                        FROM valores_raster
-                    ),
-                    distribucion_raster AS (
-                        SELECT 
-                            CASE 
-                                WHEN valor = 10 THEN 'Cobertura arbórea'
-                                WHEN valor = 20 THEN 'Matorral'
-                                WHEN valor = 30 THEN 'Pradera'
-                                WHEN valor = 40 THEN 'Tierras de cultivo'
-                                WHEN valor = 50 THEN 'Construido'
-                                WHEN valor = 60 THEN 'Vegetación desnuda/rala'
-                                WHEN valor = 70 THEN 'Nieve y hielo'
-                                WHEN valor = 80 THEN 'Masas de agua permanentes'
-                                WHEN valor = 90 THEN 'Humedal herbáceo'
-                                ELSE 'Sin clasificación'
-                            END AS categoria,
-                            valor,
-                            SUM(num_pixeles) AS num_pixeles,
-                            ROUND(SUM(num_pixeles) * 100.0 / (SELECT total_pixeles FROM totales), 2) AS porcentaje
-                        FROM valores_raster
-                        GROUP BY valor
-                    )
-                    SELECT 
-                        categoria,
-                        porcentaje
-                    FROM distribucion_raster
-                    ORDER BY valor")
+    WITH valores_raster AS (
+        SELECT 
+            (ST_ValueCount(rast, 1)).value AS valor,
+            (ST_ValueCount(rast, 1)).count AS num_pixeles
+        FROM capas_rastergeo.cobertura_uso_suelo
+    ),
+    totales AS (
+        SELECT 
+            SUM(num_pixeles) AS total_pixeles
+        FROM valores_raster
+        WHERE valor IN (10, 20, 30, 40, 50, 60, 70, 80, 90)
+    ),
+    distribucion_raster AS (
+        SELECT 
+            CASE 
+                WHEN valor = 10 THEN 'Cobertura arbórea'
+                WHEN valor = 20 THEN 'Matorral'
+                WHEN valor = 30 THEN 'Pradera'
+                WHEN valor = 40 THEN 'Tierras de cultivo'
+                WHEN valor = 50 THEN 'Construido'
+                WHEN valor = 60 THEN 'Vegetación desnuda/rala'
+                WHEN valor = 70 THEN 'Nieve y hielo'
+                WHEN valor = 80 THEN 'Masas de agua permanentes'
+                WHEN valor = 90 THEN 'Humedal herbáceo'
+            END AS categoria,
+            valor,
+            SUM(num_pixeles) AS num_pixeles,
+            ROUND(SUM(num_pixeles) * 100.0 / (SELECT total_pixeles FROM totales), 2) AS porcentaje
+        FROM valores_raster
+        WHERE valor IN (10, 20, 30, 40, 50, 60, 70, 80, 90)
+        GROUP BY valor
+    )
+    SELECT 
+        categoria,
+        porcentaje
+    FROM distribucion_raster
+    ORDER BY valor")
                 .Select(r => new ModGeneralDTO
                 {
                     categoria = r.categoria,
