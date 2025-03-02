@@ -25,14 +25,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
-  isLoading = true; // Estado de carga
+  isLoading = true;
   totalUsuarios = 0;
   totalRoles = 0;
   totalCapas = 0;
   cantidadPorCapa: { nombre: string; cantidad: number }[] = [];
   usuarios: any[] = [];
   roles: any[] = [];
-  ultimoUsuario: any;
   private chartInstance: Chart | null = null;
 
   constructor(
@@ -58,7 +57,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       );
 
       await this.cargarDatos();
-      // Removemos la actualización del gráfico de aquí
     } catch (error) {
       console.error('Error en la inicialización:', error);
       this.isLoading = false;
@@ -67,7 +65,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   async ngAfterViewInit(): Promise<void> {
     try {
-      // Esperamos a que los datos estén cargados y el canvas esté disponible
       await new Promise(resolve => setTimeout(resolve, 100));
       await this.actualizarGrafico();
     } catch (error) {
@@ -140,13 +137,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.usuarios = usuarios;
     this.roles = roles;
-    this.ultimoUsuario = usuarios[usuarios.length - 1];
   }
 
 
   private async actualizarGrafico(): Promise<void> {
     if (!this.chartCanvas?.nativeElement) {
-      //console.warn('Canvas no disponible todavía, reintentando...');
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.actualizarGrafico();
     }
@@ -181,7 +176,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
       });
     } catch (error) {
-      //console.error('Error al actualizar el gráfico:', error);
     }
   }
 }

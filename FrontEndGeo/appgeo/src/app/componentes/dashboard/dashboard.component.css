@@ -1,26 +1,37 @@
-/* 🌞 Modo Claro - Estilos de la tabla */
 .data-layer table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white; /* Fondo blanco */
-  color: black; /* Texto negro */
+  background-color: white;
+  color: black;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-cards {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .card {
   background: #2C5384;
   color: white;
   padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 155px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card-icon {
+  font-size: 30px;
+  margin-bottom: 10px;
 }
 
 .data-layer th, 
@@ -43,10 +54,9 @@
   background-color: #e3e3e3;
 }
 
-/* 🌙 Modo Oscuro - Estilos de la tabla */
 .dashboard-container.dark-theme .data-layer table {
-  background-color: #222; /* Fondo oscuro */
-  color: white; /* Texto blanco */
+  background-color: #222;
+  color: white;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
@@ -54,36 +64,34 @@
 
 .dashboard-container.dark-theme .data-layer th,
 .dashboard-container.dark-theme .data-layer td {
-  border-bottom: 1px solid #444; /* Bordes más definidos */
+  border-bottom: 1px solid #444;
   padding: 12px;
   text-align: left;
 }
 
 .dashboard-container.dark-theme .data-layer th {
-  background-color: #2C5384; /* Azul oscuro similar al modo claro */
+  background-color: #2C5384;
   color: white;
 }
 
 .dashboard-container.dark-theme .data-layer tr:nth-child(even) {
-  background-color: #2b2b2b; /* Gris oscuro */
+  background-color: #2b2b2b;
 }
 
 .dashboard-container.dark-theme .data-layer tr:hover {
-  background-color: #333; /* Resaltar fila al pasar el mouse */
+  background-color: #333;
 }
 
-/* 🌙 Estilos para los cards */
 .dashboard-container.dark-theme .card {
-  background: #2C5384; /* Azul oscuro uniforme */
+  background: #2C5384;
   color: white;
   border: 1px solid #555;
 }
 
-/* 🌙 Estilos para el gráfico */
 .dashboard-container.dark-theme .chart-container {
   background-color: #1a1a1a;
 }
-/* 🌞 Modo Claro - Spinner */
+
 .spinner-container {
   display: flex;
   flex-direction: column;
@@ -92,15 +100,13 @@
   height: 100vh;
   text-align: center;
   font-size: 18px;
-  color: black; /* Texto negro para el modo claro */
+  color: black;
 }
 
-/* 🌙 Modo Oscuro - Spinner */
 .spinner-container.dark-theme {
-  color: white; /* Texto blanco para el modo oscuro */
+  color: white;
 }
 
-/* Animación del spinner */
 .spinner {
   border: 5px solid rgba(255, 255, 255, 0.3);
   border-top: 5px solid #2C5384;

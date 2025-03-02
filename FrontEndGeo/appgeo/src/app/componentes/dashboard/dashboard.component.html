@@ -1,29 +1,22 @@
-<!-- Spinner de carga -->
 <div class="spinner-container" *ngIf="isLoading" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="spinner"></div>
   <p>Cargando datos...</p>
 </div>
-<!-- Contenido del dashboard, se muestra solo cuando isLoading es false -->
 <div class="dashboard-container" *ngIf="!isLoading" [ngClass]="{'dark-theme': isDarkMode}">
-  
+
   <div class="dashboard-cards">
     <div class="card">
+      <div class="card-icon"><i class="bi bi-people"></i></div>
       <h3>Usuarios</h3>
-      <p>Total: {{ totalUsuarios }}</p>
+      <p>{{ totalUsuarios }}</p>
     </div>
     <div class="card">
+      <div class="card-icon"><i class="bi bi-person-badge"></i></div>
       <h3>Roles</h3>
-      <p>Total: {{ totalRoles }}</p>
-    </div>
-    <div class="card">
-      <h3>Capas</h3>
-      <p>Total: {{ totalCapas }}</p>
+      <p>{{ totalRoles }}</p>
     </div>
   </div>
-
-  <!-- Tabla de capas activas -->
   <div class="data-layer">
-    <h3>Datos por Capa</h3>
     <table>
       <thead>
         <tr>
@@ -39,15 +32,7 @@
       </tbody>
     </table>
   </div>
-  <!-- Grafico de tortas-->
   <div class="chart-container">
     <canvas #chartCanvas></canvas>
   </div>
-
-  <!-- Últimos cambios -->
-  <div class="latest-updates">
-    <h3>Últimos cambios</h3>
-    <p>Último usuario registrado: {{ ultimoUsuario?.nombre }}</p>
-  </div>
-
 </div>

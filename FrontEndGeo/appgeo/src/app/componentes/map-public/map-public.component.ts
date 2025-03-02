@@ -47,7 +47,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
   isGraphButtonVisible: boolean = false;
-  modalInfo: { key: string; value: string }[] = [];
+  modalInfo: { key: string; value?: string; isTitle?: boolean; color?: string }[] = [];
   showModal = false;
   sidebarOpen: boolean = false;
   layerInfo: { nombre: string; descripcion: string } | null = null;
@@ -788,25 +788,90 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
       .addTo(this.map)
   }
-
   mostrarModalInformacion(propiedades: any) {
-    this.modalInfo = propiedades && Object.keys(propiedades).length > 0
-      ? [
-          { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
-          { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
-          { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-          { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-          { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
-          { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-          { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-          { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-          { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
-        ]
-      : [];
-  
+    // 🎨 Mapa de colores según el tipo de suelo
+    const colorMap: { [key: number]: string } = {
+      0: '#ca7173',
+      1: '#430bea',
+      3: '#ffe605',
+      4: '#16efdd',
+      6: '#c7b4ff',
+      7: '#617ece',
+      8: '#073408',
+      9: '#dc1010'
+    };
+
+    // 📌 Datos Generales
+    const datosGenerales = [
+      { key: '📌 Datos Generales', isTitle: true },
+      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' },
+      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' }
+    ];
+
+    // 🌱 Cobertura del Suelo
+    const coberturaSuelo = [
+      { key: '🌱 Cobertura del Suelo', isTitle: true },
+      { key: 'Cobertura Arbórea (%):', value: propiedades.porcentaje_cobertura_arborea?.toFixed(2) || 'N/A' },
+      { key: 'Matorral (%):', value: propiedades.porcentaje_matorral?.toFixed(2) || 'N/A' },
+      { key: 'Pradera (%):', value: propiedades.porcentaje_pradera?.toFixed(2) || 'N/A' },
+      { key: 'Tierras de Cultivo (%):', value: propiedades.porcentaje_tierras_cultivo?.toFixed(2) || 'N/A' },
+      { key: 'Zonas Construidas (%):', value: propiedades.porcentaje_construido?.toFixed(2) || 'N/A' },
+      { key: 'Vegetación Desnuda (%):', value: propiedades.porcentaje_vegetacion_desnuda?.toFixed(2) || 'N/A' },
+      { key: 'Nieve/Hielo (%):', value: propiedades.porcentaje_nieve_hielo?.toFixed(2) || 'N/A' },
+      { key: 'Masas de Agua (%):', value: propiedades.porcentaje_masas_agua?.toFixed(2) || 'N/A' },
+      { key: 'Humedal Herbáceo (%):', value: propiedades.porcentaje_humedal_herbaceo?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🛠️ Idoneidad del Suelo
+    const idoneidadSuelo = [
+      { key: '🛠️ Idoneidad del Suelo', isTitle: true },
+      { key: 'No Apta (%):', value: propiedades.porcentaje_no_apta?.toFixed(2) || 'N/A' },
+      { key: 'Baja Idoneidad (%):', value: propiedades.porcentaje_baja_idoneidad?.toFixed(2) || 'N/A' },
+      { key: 'Moderada Idoneidad (%):', value: propiedades.porcentaje_moderada_idoneidad?.toFixed(2) || 'N/A' },
+      { key: 'Alta Idoneidad (%):', value: propiedades.porcentaje_alta_idoneidad?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🧩 Fragmentos del Suelo
+    const fragmentosSuelo = [
+      { key: '🧩 Fragmentos del Suelo', isTitle: true },
+      { key: 'Valor Máximo de Fragmentos:', value: propiedades.valor_maximo_fragmentos?.toFixed(2) || 'N/A' },
+      { key: 'Total de Pixeles Fragmentos:', value: propiedades.total_pixeles_fragmentos?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🗺️ Tipos de Suelo
+    const tiposDeSuelo = [
+      { key: '🗺️ Tipos de Suelo', isTitle: true },
+      { key: 'Sin Dato', value: propiedades.porcentaje_no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
+      { key: 'Arcilloso', value: propiedades.porcentaje_arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
+      { key: 'Arcillo Arenoso', value: propiedades.porcentaje_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
+      { key: 'Franco Arcilloso', value: propiedades.porcentaje_franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
+      { key: 'Franco Arcillo Arenoso', value: propiedades.porcentaje_franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
+      { key: 'Franco', value: propiedades.porcentaje_franco?.toFixed(2) || '0.00', color: colorMap[7] },
+      { key: 'Franco Limoso', value: propiedades.porcentaje_franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
+      { key: 'Franco Arenoso', value: propiedades.porcentaje_franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
+    ];
+
+    // 📍 Filtrar información cuando se busca un municipio
+    if (this.busquedaActiva) {
+      this.modalInfo = [...datosGenerales, ...tiposDeSuelo];
+    } else {
+      // Mostrar toda la información cuando no es una búsqueda de municipio
+      this.modalInfo = [
+        ...datosGenerales,
+        ...coberturaSuelo,
+        ...idoneidadSuelo,
+        ...fragmentosSuelo,
+        ...tiposDeSuelo
+      ];
+    }
+
     this.showModal = true;
-  }
-  
+}
+
 
 
   cerrarModal() {

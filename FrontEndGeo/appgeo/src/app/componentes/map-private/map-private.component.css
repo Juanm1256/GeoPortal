@@ -1,4 +1,21 @@
+.section-title {
+  background-color: #2C5384;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 8px;
+}
 
+
+/* 🔹 Estilo para el cuadro de color */
+.color-box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
 /* 🌀 Spinner de Carga para el Mapa */
 .loading-cursor {
   cursor: wait !important;
@@ -18,16 +35,17 @@
   font-weight: bold;
   color: #666;
 }
-/* Modal draggable */
+/* 📌 Modal más alto y desplazable */
 .draggable {
   z-index: 1050;
   position: fixed;
-  top: 100px;
+  top: 50px;
   left: 10%;
-  width: 550px;  /* Ancho máximo del modal */
-  max-height: 600px; /* Altura máxima del modal */
-  overflow: hidden; /* Oculta el desbordamiento fuera del modal */
-  border-radius: 10px; /* Bordes redondeados */
+  width: 550px; /* Ancho del modal */
+  max-height: 85vh; /* Usa hasta el 85% de la altura de la pantalla */
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
   cursor: grab;
 }
 
@@ -35,39 +53,68 @@
   cursor: grabbing;
 }
 
-/* Contenido desplazable dentro del modal */
+/* 📌 Contenido del modal debe ser flexible */
 .modal-content {
-  max-height: 100%; /* Asegura que el contenido no desborde el modal */
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  max-height: 85vh; /* Asegura que no se corte */
   overflow: hidden;
 }
 
+/* 📌 Asegurar que el cuerpo del modal sea desplazable */
 .modal-body {
-  max-height: 300px; /* Limita la altura del cuerpo para el scroll */
-  overflow-y: auto; /* Desplazamiento vertical */
+  flex-grow: 1;
+  max-height: 65vh; /* Usa hasta el 70% de la altura de la pantalla */
+  overflow-y: auto; /* Permite desplazamiento */
   padding: 15px;
-  border-top: 1px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6;
+  border-top: 1px solid #090909;
 }
 
-/* Tabla dentro del modal */
+/* 📌 Tabla dentro del modal */
 .modal-body table {
   width: 100%;
   border-collapse: collapse;
 }
 
+/* 📌 Celdas de la tabla */
 .modal-body th, .modal-body td {
   padding: 8px 10px;
   border-bottom: 1px solid #ddd;
   text-align: left;
+  vertical-align: top; /* ✅ Asegura que los textos alineen desde arriba */
+  word-wrap: break-word; /* ✅ Permite que los textos largos se ajusten */
+  white-space: normal; /* ✅ Evita que el texto se salga de la celda */
+}
+/* 📌 Ajuste específico para los ríos (columnas con texto largo) */
+.modal-body td.long-text {
+  max-width: 300px; /* ✅ Establece un ancho máximo */
+  word-wrap: break-word; /* ✅ Permite que el texto largo se divida en varias líneas */
+  white-space: normal; /* ✅ Permite el ajuste automático del texto */
+  text-align: justify; /* ✅ Justifica el texto para mejor legibilidad */
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 10px 15px;
-  
-  border-top: 1px solid #dee2e6;
+/* 📌 Estilo para los títulos de sección */
+.section-title {
+  background-color: #f8f9fa;
+  font-weight: bold;
 }
+
+/* 📌 Asegurar que el header se mantenga */
+.modal-header {
+  flex-shrink: 0;
+}
+
+/* 📌 Caja de color para los valores con colores */
+.color-box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 3px;
+}
+
+
 /* ============================= */
 /*          MODO CLARO           */
 /* ============================= */
