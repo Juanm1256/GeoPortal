@@ -8,6 +8,6 @@ namespace AppGeoPortal.Modelos
     {
         [Key]
         public int idpermiso { get; set; }
-        public string nombre { get; set; }
+        public string? nombre { get; set; }
     }
 }

@@ -9,11 +9,11 @@ namespace AppGeoPortal.Modelos.Maps
         [Key]
         public int gid { get; set; }
         public double ogc_fid { get; set; }
-        public string departamen { get; set; }
-        public string provincia { get; set; }
-        public string municipio { get; set; }
-        public string ciudad { get; set; }
-        public string nombre { get; set; }
-        public string geom { get; set; }
+        public string? departamen { get; set; }
+        public string? provincia { get; set; }
+        public string? municipio { get; set; }
+        public string? ciudad { get; set; }
+        public string? nombre { get; set; }
+        public string? geom { get; set; }
     }
 }

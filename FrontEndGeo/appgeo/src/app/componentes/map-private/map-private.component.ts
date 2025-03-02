@@ -959,14 +959,14 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
     // 🗺️ Tipos de Suelo
     const tiposDeSuelo = [
         { key: '🗺️ Tipos de Suelo', isTitle: true },
-        { key: 'Sin Dato', value: propiedades.porcentaje_no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
-        { key: 'Arcilloso', value: propiedades.porcentaje_arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
-        { key: 'Arcillo Arenoso', value: propiedades.porcentaje_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
-        { key: 'Franco Arcilloso', value: propiedades.porcentaje_franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
-        { key: 'Franco Arcillo Arenoso', value: propiedades.porcentaje_franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
-        { key: 'Franco', value: propiedades.porcentaje_franco?.toFixed(2) || '0.00', color: colorMap[7] },
-        { key: 'Franco Limoso', value: propiedades.porcentaje_franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
-        { key: 'Franco Arenoso', value: propiedades.porcentaje_franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
+        { key: 'Sin Dato', value: propiedades.no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
+        { key: 'Arcilloso', value: propiedades.arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
+        { key: 'Arcillo Arenoso', value: propiedades.arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
+        { key: 'Franco Arcilloso', value: propiedades.franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
+        { key: 'Franco Arcillo Arenoso', value: propiedades.franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
+        { key: 'Franco', value: propiedades.franco?.toFixed(2) || '0.00', color: colorMap[7] },
+        { key: 'Franco Limoso', value: propiedades.franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
+        { key: 'Franco Arenoso', value: propiedades.franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
     ];
 
     // 📍 Filtrar información cuando se busca un municipio

@@ -8,10 +8,10 @@ namespace AppGeoPortal.Modelos
     {
         [Key]
         public int idpersona { get; set; }
-        public string nombres { get; set; }
-        public string apellidos { get; set; }
-        public string ci { get; set; }
+        public string? nombres { get; set; }
+        public string? apellidos { get; set; }
+        public string? ci { get; set; }
         public DateTime fechareg { get; set; }
-        public string estado { get; set; }
+        public string? estado { get; set; }
     }
 }

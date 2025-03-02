@@ -9,7 +9,7 @@ namespace AppGeoPortal.Modelos.Maps
         [Key]
         public int gid { get; set; }
         public double oid_ { get; set; }
-        public string name { get; set; }
-        public string geom { get; set; }
+        public string? name { get; set; }
+        public string? geom { get; set; }
     }
 }

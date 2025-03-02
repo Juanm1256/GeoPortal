@@ -8,9 +8,9 @@ namespace AppGeoPortal.Modelos.Maps
     {
         [Key]
         public int gid {  get; set; }
-        public string name { get; set; }
+        public string? name { get; set; }
         public decimal long_x { get; set; }
         public decimal lat_y { get; set; }
-        public string geom { get; set; }
+        public string? geom { get; set; }
     }
 }

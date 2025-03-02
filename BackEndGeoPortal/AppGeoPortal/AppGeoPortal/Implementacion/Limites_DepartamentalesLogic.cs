@@ -27,6 +27,5 @@ namespace AppGeoPortal.Implementacion
                 .AsNoTracking()
                 .ToListAsync();
         }
-
     }
 }

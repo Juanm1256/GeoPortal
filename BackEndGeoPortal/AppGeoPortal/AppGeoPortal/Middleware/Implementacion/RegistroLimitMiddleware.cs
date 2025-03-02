@@ -26,7 +26,6 @@ namespace AppGeoPortal.Middleware.Implementacion
                 var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<RegistroLimitMiddleware>>();
 
-                // Método para obtener ID de usuario
                 int? ObtenerIdUsuario()
                 {
                     var usuarioClaim = context.User.FindFirst("idusuario");
@@ -35,51 +34,49 @@ namespace AppGeoPortal.Middleware.Implementacion
                         : (int?)null;
                 }
 
-                // Lista de métodos y rutas a controlar
                 var metodosControlados = new[]
                 {
-            new { Metodo = "GET", Rutas = new[]
-            {
-                "/api/Capitales_Departamentales/ListarTodos",
-                "/api/Cuencas/ListarTodos",
-                "/api/Departamento/ListarTodos",
-                "/api/Limites_Departamentales/ListarTodos",
-                "/api/Limites_Municipales/ListarTodos",
-                "/api/Mercados/ListarTodos",
-                "/api/ProveedorAlevines/ListarTodos",
-                "/api/ProveedorAlimentos/ListarTodos",
-                "/api/ProveedorAsistenciaTecnica/ListarTodos",
-                "/api/Rol_Permiso/ListarTodos",
-                "/api/Rol_Permiso/ListarActivos",
-                "/api/Roles/ListarTodos",
-                "/api/Roles/ListarPermisos",
-                "/api/Texturas/ListarTexturasuelocero",
-                "/api/Texturas/ListarTexturasuelodiez",
-                "/api/Texturas/ListarTexturasuelotreinta",
-                "/api/Texturas/ListarTexturasuelosesenta",
-                "/api/Texturas/ListarTexturasuelocien",
-                "/api/Texturas/ListarTexturasuelodoscientos",
-                "/api/Usuarios/ListarTodos",
-                "/api/Usuarios/ListarActivos",
-                "/api/Usuarios/ObtenerID"
-            }},
-            new { Metodo = "POST", Rutas = new[]
-            {
-                "/api/Usuarios/Insertar",
-                "/api/Rol_Permiso/Insertar"
-            }},
-            new { Metodo = "PUT", Rutas = new[]
-            {
-                "/api/Usuarios/Modificar/{id}",
-                "/api/Rol_Permiso/Modificar/{nombrerol}"
-            }},
-            new { Metodo = "DELETE", Rutas = new[]
-            {
-                "/api/Usuarios/Eliminar"
-            }}
-        };
+                    new { Metodo = "GET", Rutas = new[]
+                    {
+                        "/api/Capitales_Departamentales/ListarTodos",
+                        "/api/Cuencas/ListarTodos",
+                        "/api/Departamento/ListarTodos",
+                        "/api/Limites_Departamentales/ListarTodos",
+                        "/api/Limites_Municipales/ListarTodos",
+                        "/api/Mercados/ListarTodos",
+                        "/api/ProveedorAlevines/ListarTodos",
+                        "/api/ProveedorAlimentos/ListarTodos",
+                        "/api/ProveedorAsistenciaTecnica/ListarTodos",
+                        "/api/Rol_Permiso/ListarTodos",
+                        "/api/Rol_Permiso/ListarActivos",
+                        "/api/Roles/ListarTodos",
+                        "/api/Roles/ListarPermisos",
+                        "/api/Texturas/ListarTexturasuelocero",
+                        "/api/Texturas/ListarTexturasuelodiez",
+                        "/api/Texturas/ListarTexturasuelotreinta",
+                        "/api/Texturas/ListarTexturasuelosesenta",
+                        "/api/Texturas/ListarTexturasuelocien",
+                        "/api/Texturas/ListarTexturasuelodoscientos",
+                        "/api/Usuarios/ListarTodos",
+                        "/api/Usuarios/ListarActivos",
+                        "/api/Usuarios/ObtenerID"
+                    }},
+                    new { Metodo = "POST", Rutas = new[]
+                    {
+                        "/api/Usuarios/Insertar",
+                        "/api/Rol_Permiso/Insertar"
+                    }},
+                    new { Metodo = "PUT", Rutas = new[]
+                    {
+                        "/api/Usuarios/Modificar/{id}",
+                        "/api/Rol_Permiso/Modificar/{nombrerol}"
+                    }},
+                    new { Metodo = "DELETE", Rutas = new[]
+                    {
+                        "/api/Usuarios/Eliminar"
+                    }}
+                };
 
-                // Buscar si la ruta actual está en los métodos controlados
                 var metodoControlado = metodosControlados
                     .FirstOrDefault(m =>
                         m.Metodo == context.Request.Method &&
@@ -88,56 +85,53 @@ namespace AppGeoPortal.Middleware.Implementacion
                         )
                     );
 
-                // Si es un método controlado
                 if (metodoControlado != null)
                 {
                     var usuarioId = ObtenerIdUsuario();
 
                     if (usuarioId.HasValue)
                     {
-                        // Configuración de límites
-                        var limitesConfiguracion = new Dictionary<string, int>
-                {
-                    { "POST", 50 },
-                    { "PUT", 30 },
-                    { "DELETE", 50 },
-                    { "GET", 1000 }
-                };
+                        int limiteSolicitudes = configuration
+                            .GetSection($"RegistroSettings:LimitesPorMetodo:{metodoControlado.Metodo}")
+                            .Get<int>();
 
-                        // Obtener límite para el método
-                        int limiteDiario = limitesConfiguracion.ContainsKey(metodoControlado.Metodo)
-                            ? limitesConfiguracion[metodoControlado.Metodo]
-                            : 50;
+                        if (limiteSolicitudes == 0)
+                        {
+                            limiteSolicitudes = 50;
+                        }
 
-                        // Intentar con un rango de fecha más amplio
-                        var fechaHoyUTC = DateTime.UtcNow.Date;
-                        var fechaMañanaUTC = fechaHoyUTC.AddDays(1);
+                        TimeSpan periodoLimite;
+                        if (!TimeSpan.TryParse(
+                            configuration.GetValue<string>("RegistroSettings:PeriodoLimite"),
+                            out periodoLimite))
+                        {
+                            periodoLimite = TimeSpan.FromDays(1);
+                        }
+
+                        var fechaLimite = DateTime.UtcNow.Subtract(periodoLimite);
 
                         var solicitudesActuales = await dbContext.RegistroSolicitudes
                             .CountAsync(u => u.idusuario == usuarioId &&
-                                             u.fecha >= fechaHoyUTC &&
-                                             u.fecha < fechaMañanaUTC &&
-                                             u.metodo == context.Request.Method);
-                        // Logging detallado
-                        logger.LogWarning($"Usuario: {usuarioId.Value}, Método: {metodoControlado.Metodo}, " +
-                            $"Solicitudes Actuales: {solicitudesActuales}, Límite: {limiteDiario}, " +
-                            $"Ruta: {context.Request.Path}");
+                                            u.fecha >= fechaLimite &&
+                                            u.metodo == context.Request.Method);
 
-                        // Si ya se alcanzó el límite, bloquear
-                        if (solicitudesActuales >= limiteDiario)
+                        logger.LogWarning($"Usuario: {usuarioId.Value}, Método: {metodoControlado.Metodo}, " +
+                            $"Solicitudes Actuales: {solicitudesActuales}, Límite: {limiteSolicitudes}, " +
+                            $"Periodo: {periodoLimite}, Ruta: {context.Request.Path}");
+
+                        if (solicitudesActuales >= limiteSolicitudes)
                         {
-                            logger.LogWarning($"Usuario {usuarioId.Value} excedió el límite diario de {metodoControlado.Metodo}");
+                            logger.LogWarning($"Usuario {usuarioId.Value} excedió el límite de {metodoControlado.Metodo} en el periodo configurado");
 
                             context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                             await context.Response.WriteAsJsonAsync(new
                             {
-                                mensaje = $"Se ha excedido el límite diario de solicitudes {metodoControlado.Metodo}",
+                                mensaje = $"Se ha excedido el límite de solicitudes {metodoControlado.Metodo} en el periodo configurado",
                                 codigoError = "REQUEST_LIMIT_EXCEEDED"
                             });
                             return;
                         }
 
-                        // Si no excede el límite, registrar la solicitud
                         await RegistrarSolicitud(dbContext, usuarioId.Value, metodoControlado.Metodo, context.Request.Path);
                     }
                 }
@@ -147,21 +141,20 @@ namespace AppGeoPortal.Middleware.Implementacion
         }
 
         private async Task RegistrarSolicitud(
-    AppDbContext context,
-    int usuarioId,
-    string metodo,
-    PathString ruta)
+            AppDbContext context,
+            int usuarioId,
+            string metodo,
+            PathString ruta)
         {
             var registroSolicitud = new RegistroSolicitudes
             {
                 idusuario = usuarioId,
                 metodo = metodo,
-                ruta = ruta.Value, // Convertir PathString a string
-                fecha = DateTime.UtcNow // Usar UTC y solo la parte de la fecha
+                ruta = ruta.Value,
+                fecha = DateTime.UtcNow
             };
             context.RegistroSolicitudes.Add(registroSolicitud);
             await context.SaveChangesAsync();
         }
-
     }
 }

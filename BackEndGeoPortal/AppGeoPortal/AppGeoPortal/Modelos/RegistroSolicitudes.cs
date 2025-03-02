@@ -9,8 +9,8 @@ namespace AppGeoPortal.Modelos
         [Key]
         public int idregistro { get; set; }
         public int idusuario { get; set; }
-        public string metodo { get; set; }
+        public string? metodo { get; set; }
         public DateTime fecha { get; set; }
-        public string ruta { get; set; }
+        public string? ruta { get; set; }
     }
 }

@@ -28,12 +28,12 @@ export interface DepartamentoInforDTO {
   valorMaximoFragmentos: number;
   totalPixelesFragmentos: number;
 
-  porcentajeNoDato: number;
-  porcentajeArcilloso: number;
-  porcentajeArcilloArenoso: number;
-  porcentajeFrancoArcilloso: number;
-  porcentajeFrancoArcilloArenoso: number;
-  porcentajeFranco: number;
-  porcentajeFrancoLimoso: number;
-  porcentajeFrancoArenoso: number;
+  NoDato: number;
+  Arcilloso: number;
+  ArcilloArenoso: number;
+  FrancoArcilloso: number;
+  FrancoArcilloArenoso: number;
+  Franco: number;
+  FrancoLimoso: number;
+  FrancoArenoso: number;
 }

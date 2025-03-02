@@ -17,12 +17,10 @@ namespace AppGeoPortal.Implementacion
 
         public async Task<List<TexturaDTO>> ListarTexturasuelocero()
         {
-            // Verificar si estamos usando InMemoryDatabase
             var isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
 
             if (isInMemory)
             {
-                // Si la BD es InMemory, simplemente devolvemos los datos almacenados
                 return await context.Texturas
                     .Select(t => new TexturaDTO
                     {
