@@ -504,7 +504,7 @@ export class Metodos {
 
   async cargarmodgene(maping: L.Map): Promise<L.Layer> {
     const modgene = L.tileLayer.wms("http://localhost:8085/geoserver/capas_rastergeo/wms?", {
-      layers: 'capas_rastergeo:Mod_general_ajustado',
+      layers: 'capas_rastergeo:Modelo_general_ajustado',
       format: 'image/png',
       transparent: true,
       version: '1.1.1',
