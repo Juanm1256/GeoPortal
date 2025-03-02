@@ -150,6 +150,10 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       };
     };
   }
+  cerrarModal() {
+    this.showModal = false;
+    this.modalInfo = [];
+  }
   private async initMap(): Promise<void> {
     try {
       this.map = L.map('map-private', {
@@ -787,10 +791,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     this.showModal = true;
   }
 
-  cerrarModal() {
-    this.showModal = false;
-    this.modalInfo = [];
-  }
+  
 
   async initSearch(): Promise<void> {
     try {
