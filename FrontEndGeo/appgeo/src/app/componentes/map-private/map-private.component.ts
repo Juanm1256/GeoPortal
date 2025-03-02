@@ -31,20 +31,20 @@ import { LimitesMunicipales } from '../../interfaces/limites-municipales';
   styleUrl: './map-private.component.css'
 })
 export class MapPrivateComponent implements OnInit, OnDestroy {
-  busquedaActiva = false; 
+  busquedaActiva = false;
   isLoading = false;
   searchControl = new FormControl();
   filteredMunicipios: LimitesMunicipales[] = [];
   isSearching = false;
   private searchMarker: L.Marker | null = null;
   private limitesMunicipalesHighlight: L.LayerGroup | null = null;
-  
+
 
   isDarkMode: boolean = false;
   themeSubscription!: Subscription;
   showSidebarButton: boolean = false;
   isGraphButtonVisible: boolean = false;
-  modalInfo: { key: string; value: string }[] = [];
+  modalInfo: { key: string; value?: string; isTitle?: boolean; color?: string }[] = [];
   showModal = false;
   sidebarOpen: boolean = false;
   layerInfo: { nombre: string; descripcion: string } | null = null;
@@ -106,12 +106,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   }
   public disableMapInteractions(): void {
     if (this.map) {
-      this.map.dragging.disable(); 
-      this.map.scrollWheelZoom.disable(); 
-      this.map.doubleClickZoom.disable(); 
-      this.map.boxZoom.disable(); 
-      this.map.keyboard.disable(); 
-      this.map.off('click'); 
+      this.map.dragging.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      this.map.off('click');
     }
   }
 
@@ -162,8 +162,8 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         center: [-16.54529, -64.7400],
         zoom: 6,
         zoomControl: false,
-        dragging: true,   
-        boxZoom: true,    
+        dragging: true,
+        boxZoom: true,
         doubleClickZoom: true,
         scrollWheelZoom: true,
         touchZoom: true
@@ -267,7 +267,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         8: '#073408',
         9: '#dc1010'
       };
-  
+
       const textureNameMap: { [key: number]: string } = {
         0: 'No dato',
         1: 'Arcilloso',
@@ -278,7 +278,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         8: 'Franco Limoso',
         9: 'Franco Arenoso'
       };
-  
+
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
         'Textura_suelo_0': () => this.texturaservice.ListarTexturasuelocero(),
         'Textura_suelo_10': () => this.texturaservice.ListarTexturasuelodiez(),
@@ -287,12 +287,12 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         'Textura_suelo_100': () => this.texturaservice.ListarTexturasuelocien(),
         'Textura_suelo_200': () => this.texturaservice.ListarTexturasuelodoscientos()
       };
-  
+
       this.layerInfo = {
         nombre: layerName,
         descripcion: `Gráfico de distribución de la textura del suelo para la capa ${layerName}`
       };
-  
+
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
@@ -355,10 +355,10 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
   toggleLayers() {
     this.isLayersOpen = !this.isLayersOpen;
     if (this.isLayersOpen) {
-        this.restoreLayerButtonStyles(); 
+      this.restoreLayerButtonStyles();
     }
-}
-async toggleLayer(layerName: string, event: any): Promise<void> {
+  }
+  async toggleLayer(layerName: string, event: any): Promise<void> {
     const button = event.target.closest('.layer-btn');
     this.sidebarOpen = false;
     if (this.pieChart) this.pieChart.destroy();
@@ -493,11 +493,11 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
         throw new Error(`No se pudo cargar la capa: ${layerName}`);
       }
       if (layer instanceof L.TileLayer || layer instanceof L.TileLayer.WMS) {
-        layer.on('loading', () => this.setMapLoadingCursor(true));  
-        layer.on('load', () => this.setMapLoadingCursor(false));    
+        layer.on('loading', () => this.setMapLoadingCursor(true));
+        layer.on('load', () => this.setMapLoadingCursor(false));
         layer.on('tileerror', () => this.setMapLoadingCursor(false));
       } else {
-        this.setMapLoadingCursor(false); 
+        this.setMapLoadingCursor(false);
       }
       return layer;
     } catch (error) {
@@ -656,9 +656,9 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     }).then((result) => {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
-  
+
         this.markerLayer.clearLayers();
-  
+
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
@@ -672,16 +672,16 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
         if (this.limitesMunicipalesHighlight) {
           this.limitesMunicipalesHighlight.clearLayers();
         }
-  
+
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
-  
+
         this.capas = {};
         this.activeLayers = {};
-  
+
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -689,19 +689,19 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
         });
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
-  
+
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
-  
+
         this.showSidebarButton = false;
         this.sidebarOpen = false;
-  
+
         if (this.pieChart) {
           this.pieChart.destroy();
           this.pieChart = null;
         }
-  
+
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",
@@ -724,23 +724,23 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
 
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
     const latlng = event.latlng;
-  
+
     // Verifica si hay una capa activa o si la búsqueda sigue activa
     const capaActiva = Object.keys(this.activeLayers).some(layer => this.activeLayers[layer]);
-  
+
     if (!capaActiva && !this.busquedaActiva) {
       return; // No muestra el modal si no hay capas activas ni búsqueda reciente
     }
-  
+
     this.isLoading = true; // Activa el spinner
     this.modalInfo = []; // Limpia la información anterior
     this.showModal = true; // Muestra el modal inmediatamente
-  
+
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
           this.isLoading = false; // Oculta el spinner
-  
+
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
             this.mostrarModalInformacion(departamentoInfo);
@@ -756,7 +756,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
         }
       });
   }
-  
+
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     const capasValidas = ['modgene', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
 
@@ -765,7 +765,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     if (!capaActiva) {
       if (this.marcadorSeleccionado) {
         this.map.removeLayer(this.marcadorSeleccionado);
-        this.marcadorSeleccionado = null; 
+        this.marcadorSeleccionado = null;
       }
       return;
     }
@@ -785,31 +785,99 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
   }
 
   mostrarModalInformacion(propiedades: any) {
-    this.modalInfo = propiedades && Object.keys(propiedades).length > 0
-      ? [
-          { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
-          { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
-          { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
-          { key: 'Mercados en Departamento (Total):', value: propiedades.NumeroMercados?.toString() || 'N/A' },
-          { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' },
-          { key: 'Municipios en Departamento (Total):', value: propiedades.NumeroMunicipios?.toString() || 'N/A' },
-          { key: 'Provincias en Departamento (Total):', value: propiedades.NumeroProvincias?.toString() || 'N/A' },
-          { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
-          { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' }
-        ]
-      : [];
-  
-    this.showModal = true;
-  }
-  
+    // 🎨 Mapa de colores según el tipo de suelo
+    const colorMap: { [key: number]: string } = {
+      0: '#ca7173',
+      1: '#430bea',
+      3: '#ffe605',
+      4: '#16efdd',
+      6: '#c7b4ff',
+      7: '#617ece',
+      8: '#073408',
+      9: '#dc1010'
+    };
 
-  
+    // 📌 Datos Generales
+    const datosGenerales = [
+      { key: '📌 Datos Generales', isTitle: true },
+      { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
+      { key: 'Provincia:', value: propiedades.ProvinciaPunto || 'N/A' },
+      { key: 'Municipio:', value: propiedades.MunicipioPunto || 'N/A' },
+      { key: 'Sub-Cuenca:', value: propiedades.CuencaPunto || 'N/A' },
+      { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' },
+      { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' }
+    ];
+
+    // 🌱 Cobertura del Suelo
+    const coberturaSuelo = [
+      { key: '🌱 Cobertura del Suelo', isTitle: true },
+      { key: 'Cobertura Arbórea (%):', value: propiedades.porcentaje_cobertura_arborea?.toFixed(2) || 'N/A' },
+      { key: 'Matorral (%):', value: propiedades.porcentaje_matorral?.toFixed(2) || 'N/A' },
+      { key: 'Pradera (%):', value: propiedades.porcentaje_pradera?.toFixed(2) || 'N/A' },
+      { key: 'Tierras de Cultivo (%):', value: propiedades.porcentaje_tierras_cultivo?.toFixed(2) || 'N/A' },
+      { key: 'Zonas Construidas (%):', value: propiedades.porcentaje_construido?.toFixed(2) || 'N/A' },
+      { key: 'Vegetación Desnuda (%):', value: propiedades.porcentaje_vegetacion_desnuda?.toFixed(2) || 'N/A' },
+      { key: 'Nieve/Hielo (%):', value: propiedades.porcentaje_nieve_hielo?.toFixed(2) || 'N/A' },
+      { key: 'Masas de Agua (%):', value: propiedades.porcentaje_masas_agua?.toFixed(2) || 'N/A' },
+      { key: 'Humedal Herbáceo (%):', value: propiedades.porcentaje_humedal_herbaceo?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🛠️ Idoneidad del Suelo
+    const idoneidadSuelo = [
+      { key: '🛠️ Idoneidad del Suelo', isTitle: true },
+      { key: 'No Apta (%):', value: propiedades.porcentaje_no_apta?.toFixed(2) || 'N/A' },
+      { key: 'Baja Idoneidad (%):', value: propiedades.porcentaje_baja_idoneidad?.toFixed(2) || 'N/A' },
+      { key: 'Moderada Idoneidad (%):', value: propiedades.porcentaje_moderada_idoneidad?.toFixed(2) || 'N/A' },
+      { key: 'Alta Idoneidad (%):', value: propiedades.porcentaje_alta_idoneidad?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🧩 Fragmentos del Suelo
+    const fragmentosSuelo = [
+      { key: '🧩 Fragmentos del Suelo', isTitle: true },
+      { key: 'Valor Máximo de Fragmentos:', value: propiedades.valor_maximo_fragmentos?.toFixed(2) || 'N/A' },
+      { key: 'Total de Pixeles Fragmentos:', value: propiedades.total_pixeles_fragmentos?.toFixed(2) || 'N/A' }
+    ];
+
+    // 🗺️ Tipos de Suelo
+    const tiposDeSuelo = [
+      { key: '🗺️ Tipos de Suelo', isTitle: true },
+      { key: 'Sin Dato', value: propiedades.porcentaje_no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
+      { key: 'Arcilloso', value: propiedades.porcentaje_arcilloso?.toFixed(2) || '0.00', color: colorMap[1] },
+      { key: 'Arcillo Arenoso', value: propiedades.porcentaje_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[3] },
+      { key: 'Franco Arcilloso', value: propiedades.porcentaje_franco_arcilloso?.toFixed(2) || '0.00', color: colorMap[4] },
+      { key: 'Franco Arcillo Arenoso', value: propiedades.porcentaje_franco_arcillo_arenoso?.toFixed(2) || '0.00', color: colorMap[6] },
+      { key: 'Franco', value: propiedades.porcentaje_franco?.toFixed(2) || '0.00', color: colorMap[7] },
+      { key: 'Franco Limoso', value: propiedades.porcentaje_franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
+      { key: 'Franco Arenoso', value: propiedades.porcentaje_franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
+    ];
+
+    // 📍 Filtrar información cuando se busca un municipio
+    if (this.busquedaActiva) {
+      this.modalInfo = [...datosGenerales, ...tiposDeSuelo];
+    } else {
+      // Mostrar toda la información cuando no es una búsqueda de municipio
+      this.modalInfo = [
+        ...datosGenerales,
+        ...coberturaSuelo,
+        ...idoneidadSuelo,
+        ...fragmentosSuelo,
+        ...tiposDeSuelo
+      ];
+    }
+
+    this.showModal = true;
+}
+
+
+
+
+
 
   async initSearch(): Promise<void> {
     try {
       const municipios = await firstValueFrom(this.limitesmuservice.listarTodos());
-      
-      for (const municipio of municipios) { 
+
+      for (const municipio of municipios) {
         if (municipio.geom) {
           try {
             const geojson = JSON.parse(municipio.geom);
@@ -824,9 +892,9 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
           }
         }
       }
-      
+
       (this as any).municipiosData = municipios;
-      
+
       this.searchControl.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -858,7 +926,7 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
     try {
       const municipios = (this as any).municipiosData || [];
 
-      const filtered = municipios.filter((municipio: LimitesMunicipales) => 
+      const filtered = municipios.filter((municipio: LimitesMunicipales) =>
         municipio.mun.toLowerCase().includes(term) ||
         (municipio.dep && municipio.dep.toLowerCase().includes(term)) ||
         (municipio.prov && municipio.prov.toLowerCase().includes(term))
@@ -873,11 +941,11 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
   async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
     this.filteredMunicipios = []; // Limpia los resultados de la búsqueda
     this.showModal = false; // Cierra el modal al seleccionar un municipio
-  
+
     try {
       let lat = (municipio as any).lat;
       let lng = (municipio as any).lng;
-  
+
       if (!lat || !lng) {
         if (municipio.geom) {
           const geojson = JSON.parse(municipio.geom);
@@ -888,18 +956,18 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
           }
         }
       }
-  
+
       await this.highlightMunicipio(municipio); // Resalta el municipio en el mapa
-  
+
       if (this.searchMarker) {
         this.map.removeLayer(this.searchMarker);
         this.searchMarker = null;
       }
-  
+
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
-  
+
       // Activa la "capa simulada" después de la búsqueda
       this.busquedaActiva = true;
     } catch (error) {
@@ -913,17 +981,17 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
       } else {
         this.limitesMunicipalesHighlight.clearLayers();
       }
-      
+
       const geojson = JSON.parse(municipio.geom);
-      
+
       const highlightStyle = {
         color: '#0e0e0d',
         weight: 3,
         opacity: 1,
         fillColor: 'transparent',
-        fillOpacity: 0 
+        fillOpacity: 0
       };
-      
+
       const layer = L.geoJSON(geojson, {
         style: highlightStyle,
         onEachFeature: (feature, layer) => {
@@ -932,13 +1000,13 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
           });
         }
       }).addTo(this.limitesMunicipalesHighlight);
-      
+
       this.map.fitBounds(layer.getBounds());
     } catch (error) {
-      
+
       const lat = (municipio as any).lat;
       const lng = (municipio as any).lng;
-      
+
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
@@ -947,21 +1015,21 @@ async toggleLayer(layerName: string, event: any): Promise<void> {
 
   clearSearch(): void {
     this.searchControl.setValue('');
-    
+
     this.filteredMunicipios = [];
     this.busquedaActiva = false; // Desactiva la búsqueda activa al limpiar
-    
+
     if (this.limitesMunicipalesHighlight) {
       this.limitesMunicipalesHighlight.clearLayers();
     }
-    
+
     if (this.searchMarker) {
       this.map.removeLayer(this.searchMarker);
       this.searchMarker = null;
     }
-  
+
     this.showModal = false; // Cierra el modal cuando se borra la búsqueda
     this.map.setView([-16.54529, -64.7400], 6);
   }
-  
+
 }

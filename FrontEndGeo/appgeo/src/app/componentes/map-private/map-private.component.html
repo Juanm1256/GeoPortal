@@ -148,12 +148,11 @@
     </div>
   </div>
 </div>
-
 <div class="modal fade draggable" id="datosModal" [class.show]="showModal"
-  [style.display]="showModal ? 'block' : 'none'" tabindex="-1" aria-labelledby="datosModalLabel" aria-hidden="true"
-  (click)="cerrarModal()" (mouseover)="disableMapInteractions()" (mouseleave)="enableMapInteractions()">
+  [style.display]="showModal ? 'block' : 'none'" tabindex="-1"
+  aria-labelledby="datosModalLabel" aria-hidden="true">
 
-  <div class="modal-dialog" (click)="$event.stopPropagation()">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header" id="modalHeader">
         <h5 class="modal-title">Información de Departamento</h5>
@@ -161,36 +160,42 @@
       </div>
 
       <div class="modal-body">
-        <!-- Spinner de carga -->
         <div *ngIf="isLoading" class="spinner-container">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Cargando...</span>
           </div>
         </div>
 
-        <!-- Datos -->
         <table class="table" *ngIf="!isLoading && modalInfo.length > 0; else sinDatos">
           <tbody>
-            <tr *ngFor="let dato of modalInfo">
-              <th>{{ dato.key }}</th>
-              <td>{{ dato.value }}</td>
+            <tr *ngFor="let dato of modalInfo" [ngClass]="{'section-title': dato.isTitle}">
+              
+              <!-- Si es un título de sección -->
+              <th *ngIf="dato.isTitle" colspan="2">
+                {{ dato.key }}
+              </th>
+        
+              <!-- Si es un dato normal -->
+              <ng-container *ngIf="!dato.isTitle">
+                <td class="table-key">{{ dato.key }}</td>
+                <td class="table-value" [ngClass]="{'long-text': dato.key === 'Ríos dentro del Municipio:'}">
+                  <span *ngIf="dato.color" class="color-box" [ngStyle]="{'background-color': dato.color}"></span>
+                  {{ dato.value }}
+                </td>
+              </ng-container>
+        
             </tr>
           </tbody>
         </table>
+        
 
-        <!-- Mensaje "Área sin información" solo cuando no hay datos y ya terminó de cargar -->
         <ng-template #sinDatos>
           <p class="no-data-message" *ngIf="!isLoading">Área sin información.</p>
         </ng-template>
       </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
-      </div>
     </div>
   </div>
 </div>
-
 
 <!-- Panel lateral derecho para gráficos de torta -->
 <div id="sidebar-right" class="sidebar-right" [class.open]="sidebarOpen" [ngClass]="{'dark-theme': isDarkMode}"

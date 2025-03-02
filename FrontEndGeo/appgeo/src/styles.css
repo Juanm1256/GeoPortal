@@ -1,3 +1,8 @@
+.modal-header {
+    color: white;
+    background-color: #2C5384 !important; /* Color normal */
+    
+}
 /* ===========================
    🌙 Modo Noche (Global)
    =========================== */
@@ -49,7 +54,7 @@
 }
 
 .dark-theme .table th {
-    background-color: #333 !important;
+    background-color: #4a4a4a !important;
     color: #fff !important;
 }
 
@@ -71,8 +76,11 @@
 }
 
 .dark-theme .modal-header {
+    background-color: #1e1e1e !important; /* Color oscuro en modo noche */
+    color: #ffffff !important;
     border-bottom: 1px solid #444 !important;
 }
+
 
 .dark-theme .modal-footer {
     border-top: 1px solid #444 !important;

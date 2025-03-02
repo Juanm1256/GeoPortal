@@ -51,8 +51,6 @@ export class AuthService {
           localStorage.setItem('permissions', JSON.stringify(payload.Permiso));
         }
       }
-
-      console.log("Este es el token para las pruebas de estres"+token);
     } catch (error) {
     }
   }
