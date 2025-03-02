@@ -9,11 +9,11 @@ namespace AppGeoPortal.Modelos
         [Key]
         public int idusuario { get; set; }
         public int? idpersona { get; set; }
-        public string username { get; set; }
-        public string password_hash { get; set; }
+        public string? username { get; set; }
+        public string? password_hash { get; set; }
         public int idrol { get; set; }
         public DateTime fechareg { get; set; }
-        public string estado { get; set; }
+        public string? estado { get; set; }
 
         [ForeignKey("idpersona")]
         public virtual Personas? IdPersonanav { get; set; }

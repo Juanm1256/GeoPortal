@@ -1,6 +1,6 @@
 export interface ProveedorAlimentos {
     gid:number;
     oid_:number
-    name: string;
+    name: string | null;
     geom: any;
 }

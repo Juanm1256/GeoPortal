@@ -8,7 +8,7 @@ namespace AppGeoPortal.Modelos.Maps
         [Key]
         public int rid { get; set; }
         [NotMapped]
-        public object rast { get; set; }
+        public object? rast { get; set; }
         public double? Value { get; set; }
         public int? Count { get; set; }
         public double? Porcentaje { get; set; }

@@ -33,8 +33,8 @@ namespace AppGeoPortal.Implementacion
                 fechareg = r.fechareg,
                 estado = r.estado,
                 permisos = r.RolPermisos
-                    .Where(rp => rp.estado == "Activo")  // Filtramos solo los permisos activos
-                    .Select(rp => rp.IdPermisonav.nombre) // Seleccionamos solo el nombre del permiso
+                    .Where(rp => rp.estado == "Activo") 
+                    .Select(rp => rp.IdPermisonav.nombre)
                     .ToList()
             }).ToList();
 

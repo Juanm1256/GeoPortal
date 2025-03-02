@@ -18,7 +18,6 @@ namespace AppGeoPortal.Implementacion
 
         public async Task<List<Cuencas>> ListarTodos()
         {
-            // Si estás en base de datos en memoria, usa consulta normal
             if (context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
             {
                 return await context.Cuencas
@@ -26,12 +25,10 @@ namespace AppGeoPortal.Implementacion
                     .ToListAsync();
             }
 
-            // Para bases de datos reales, usa consulta SQL
             return await context.Cuencas
                 .FromSqlRaw("SELECT gid, sup_km2, cuenca, ST_AsGeoJSON(geom) AS geom FROM capas.cuencas")
                 .AsNoTracking()
                 .ToListAsync();
         }
-
     }
 }

@@ -57,7 +57,6 @@ namespace AppGeoPortal.Controllers
         {
             try
             {
-                // Coloca el punto de interrupción aquí 👇
                 var insertar = await _usuario.Insertar(usuarios);
 
                 if (insertar)
@@ -65,7 +64,7 @@ namespace AppGeoPortal.Controllers
                     return CreatedAtAction(nameof(ListarTodos), new { id = usuarios.idusuario }, usuarios);
                 }
 
-                return BadRequest("Usuario ya existe o no se pudo insertar el usuario"); // 👈 Revisa si esta línea se ejecuta
+                return BadRequest("Usuario ya existe o no se pudo insertar el usuario");
             }
             catch (Exception ex)
             {

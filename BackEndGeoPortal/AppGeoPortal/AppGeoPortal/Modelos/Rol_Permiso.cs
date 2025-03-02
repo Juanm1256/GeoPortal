@@ -10,7 +10,7 @@ namespace AppGeoPortal.Modelos
         public int idrolpermiso { get; set; }
         public int idrol { get; set; }
         public int idpermiso { get; set; }
-        public string estado { get; set; }
+        public string? estado { get; set; }
 
         [ForeignKey("idrol")]
         public virtual Roles IdRolnav { get; set; }

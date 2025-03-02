@@ -8,8 +8,8 @@ namespace AppGeoPortal.Modelos.Maps
     {
         [Key]
         public int gid {get; set;}
-        public double sup_km2 {get; set;}
-        public string cuenca {get; set;}
-        public string geom { get; set;}
+        public double? sup_km2 {get; set;}
+        public string? cuenca {get; set;}
+        public string? geom { get; set;}
     }
 }

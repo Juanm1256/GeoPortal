@@ -9,8 +9,8 @@ namespace AppGeoPortal.Modelos.Maps
         [Key]
         public int gid { get; set; }
         public double objectid { get; set; }
-        public string cap_dep { get; set; }
-        public string cod_ine { get; set; }
-        public string geom { get; set; }
+        public string? cap_dep { get; set; }
+        public string? cod_ine { get; set; }
+        public string? geom { get; set; }
     }
 }

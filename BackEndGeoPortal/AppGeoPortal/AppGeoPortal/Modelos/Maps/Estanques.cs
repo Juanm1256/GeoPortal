@@ -11,8 +11,8 @@ namespace AppGeoPortal.Modelos.Maps
         public string? name { get; set; }
         public string? folderpath { get; set; }
         public string? popupinfo { get; set; }
-        public decimal shape_leng { get; set; }
-        public decimal shape_area { get; set; }
+        public decimal? shape_leng { get; set; }
+        public decimal? shape_area { get; set; }
         public string? geom { get; set; }
     }
 }

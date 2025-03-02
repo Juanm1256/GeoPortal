@@ -33,13 +33,14 @@ namespace AppGeoPortal.Modelos.DTO
         public double valor_maximo_fragmentos { get; set; } = 0;
         public double total_pixeles_fragmentos { get; set; } = 0;
 
-        public double porcentaje_no_dato { get; set; } = 0;
-        public double porcentaje_arcilloso { get; set; } = 0;
-        public double porcentaje_arcillo_arenoso { get; set; } = 0;
-        public double porcentaje_franco_arcilloso { get; set; } = 0;
-        public double porcentaje_franco_arcillo_arenoso { get; set; } = 0;
-        public double porcentaje_franco { get; set; } = 0;
-        public double porcentaje_franco_limoso { get; set; } = 0;
-        public double porcentaje_franco_arenoso { get; set; } = 0;
+        public double no_dato { get; set; }
+        public double arcilloso { get; set; }
+        public double arcillo_arenoso { get; set; }
+        public double franco_arcilloso { get; set; }
+        public double franco_arcillo_arenoso { get; set; }
+        public double franco { get; set; }
+        public double franco_limoso { get; set; }
+        public double franco_arenoso { get; set; }
+        public double total_textura { get; set; }
     }
 }

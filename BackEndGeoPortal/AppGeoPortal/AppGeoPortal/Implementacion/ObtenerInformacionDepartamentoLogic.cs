@@ -24,13 +24,13 @@ namespace AppGeoPortal.Implementacion
             var resultado = await context.DepartamentoInfoDTOs
                 .FromSqlRaw(@"
                     WITH punto AS (
-                        SELECT ST_SetSRID(ST_MakePoint({0}, {1}), 4326) AS geom
-                    ),
-                    ubicacion_actual AS (
+    SELECT ST_SetSRID(ST_MakePoint({0}, {1}), 4326) AS geom
+),
+ubicacion_actual AS (
     SELECT 
-        COALESCE(ld.dep, 'N/A') AS departamento,
-        COALESCE(lm.mun, 'N/A') AS municipio,
-        COALESCE(lm.prov, 'N/A') AS provincia,
+        COALESCE(CAST(ld.dep AS text), 'N/A') AS departamento,
+        COALESCE(CAST(lm.mun AS text), 'N/A') AS municipio,
+        COALESCE(CAST(lm.prov AS text), 'N/A') AS provincia,
         ST_Transform(lm.geom, 4326) AS geom_municipio
     FROM punto p
     LEFT JOIN capas.limites_departamentales ld ON ST_Contains(ST_Transform(ld.geom, 4326), p.geom) 
@@ -39,26 +39,46 @@ namespace AppGeoPortal.Implementacion
 ),
 info_geografica AS (
     SELECT 
-        ua.departamento AS Departamento,
-        ua.provincia AS ProvinciaPunto,
-        ua.municipio AS MunicipioPunto,
-        COALESCE((SELECT cuenca FROM capas.cuencas 
-                 WHERE ST_Contains(ST_Transform(geom, 4326), (SELECT geom FROM punto))
-                 LIMIT 1), 'N/A') AS CuencaPunto
-    FROM ubicacion_actual ua
+        (SELECT departamento FROM ubicacion_actual) AS Departamento,
+        (SELECT provincia FROM ubicacion_actual) AS ProvinciaPunto,
+        (SELECT municipio FROM ubicacion_actual) AS MunicipioPunto,
+        COALESCE((
+            SELECT cuenca::text 
+            FROM capas.cuencas 
+            WHERE ST_Contains(ST_Transform(geom, 4326), (SELECT geom FROM punto))
+            LIMIT 1
+        ), 'N/A') AS CuencaPunto
+),
+texturainfo AS (
+    SELECT 
+        ti.municipio,
+        ti.no_dato,
+        ti.arcilloso,
+        ti.arcillo_arenoso,
+        ti.franco_arcilloso,
+        ti.franco_arcillo_arenoso,
+        ti.franco,
+        ti.franco_limoso,
+        ti.franco_arenoso,
+        ti.total
+    FROM info.Texturainfo ti
+    CROSS JOIN ubicacion_actual ua
+    WHERE UPPER(ti.municipio) = UPPER(ua.municipio)
 ),
 rios_municipio AS (
-    SELECT COALESCE(STRING_AGG(DISTINCT rh.nom, ', '), 'N/A') AS NombreRios
+    SELECT COALESCE(STRING_AGG(DISTINCT rh.nom::text, ', '), 'N/A') AS NombreRios
     FROM capas_geo.red_hidrica rh
+    CROSS JOIN ubicacion_actual ua
     JOIN capas.limites_municipales lm ON 
         ST_Intersects(ST_Transform(rh.geom, 4326), ST_Transform(lm.geom, 4326))
-        AND lm.mun = (SELECT municipio FROM ubicacion_actual)
-        AND lm.dep = (SELECT departamento FROM ubicacion_actual)
+        AND lm.mun::text = ua.municipio
+        AND lm.dep::text = ua.departamento
 ),
 mercados_municipio AS (
     SELECT COUNT(*) AS CantidadMercados
     FROM capas.mercados_project mp
-    JOIN ubicacion_actual ua ON 
+    CROSS JOIN ubicacion_actual ua
+    WHERE 
         UPPER(mp.municipio) = UPPER(ua.municipio) AND
         UPPER(mp.departamen) = UPPER(ua.departamento)
 ),
@@ -98,18 +118,6 @@ valores_raster_fragmentos_gruesos AS (
     WHERE 
         ST_Intersects(rast, ua.geom_municipio)
 ),
-valores_raster_textura AS (
-    SELECT 
-        ua.departamento,
-        ua.municipio,
-        (ST_ValueCount(ST_Clip(rast, ua.geom_municipio, 1))).value AS valor,
-        (ST_ValueCount(ST_Clip(rast, ua.geom_municipio, 1))).count AS num_pixeles
-    FROM 
-        capas_rastergeo.textura raster,
-        ubicacion_actual ua
-    WHERE 
-        ST_Intersects(rast, ua.geom_municipio)
-),
 totales_raster_cobus AS (
     SELECT 
         departamento,
@@ -132,14 +140,6 @@ totales_raster_fragmentos_gruesos AS (
         municipio,
         SUM(num_pixeles) AS total_pixeles
     FROM valores_raster_fragmentos_gruesos
-    GROUP BY departamento, municipio
-),
-totales_raster_textura AS (
-    SELECT 
-        departamento,
-        municipio,
-        SUM(num_pixeles) AS total_pixeles
-    FROM valores_raster_textura
     GROUP BY departamento, municipio
 ),
 distribucion_raster_cobus AS (
@@ -200,42 +200,6 @@ distribucion_raster_fragmentos_gruesos AS (
     FROM valores_raster_fragmentos_gruesos
     GROUP BY departamento, municipio
 ),
-distribucion_raster_textura AS (
-    SELECT 
-        departamento,
-        municipio,
-        MAX(CASE WHEN valor = 0 THEN num_pixeles ELSE 0 END) AS pixeles_no_dato,
-        MAX(CASE WHEN valor = 1 THEN num_pixeles ELSE 0 END) AS pixeles_arcilloso,
-        MAX(CASE WHEN valor = 3 THEN num_pixeles ELSE 0 END) AS pixeles_arcillo_arenoso,
-        MAX(CASE WHEN valor = 4 THEN num_pixeles ELSE 0 END) AS pixeles_franco_arcilloso,
-        MAX(CASE WHEN valor = 6 THEN num_pixeles ELSE 0 END) AS pixeles_franco_arcillo_arenoso,
-        MAX(CASE WHEN valor = 7 THEN num_pixeles ELSE 0 END) AS pixeles_franco,
-        MAX(CASE WHEN valor = 8 THEN num_pixeles ELSE 0 END) AS pixeles_franco_limoso,
-        MAX(CASE WHEN valor = 9 THEN num_pixeles ELSE 0 END) AS pixeles_franco_arenoso,
-        
-        ROUND(MAX(CASE WHEN valor = 0 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_no_dato,
-        ROUND(MAX(CASE WHEN valor = 1 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_arcilloso,
-        ROUND(MAX(CASE WHEN valor = 3 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_arcillo_arenoso,
-        ROUND(MAX(CASE WHEN valor = 4 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_franco_arcilloso,
-        ROUND(MAX(CASE WHEN valor = 6 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_franco_arcillo_arenoso,
-        ROUND(MAX(CASE WHEN valor = 7 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_franco,
-        ROUND(MAX(CASE WHEN valor = 8 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_franco_limoso,
-        ROUND(MAX(CASE WHEN valor = 9 THEN num_pixeles ELSE 0 END) * 100.0 / total_pixeles, 2) AS porcentaje_franco_arenoso
-    FROM (
-        SELECT 
-            vrm.departamento,
-            vrm.municipio,
-            vrm.valor,
-            vrm.num_pixeles,
-            trm.total_pixeles
-        FROM valores_raster_textura vrm
-        JOIN totales_raster_textura trm ON 
-            vrm.departamento = trm.departamento AND 
-            vrm.municipio = trm.municipio
-    ) subquery
-    GROUP BY departamento, municipio, total_pixeles
-),
-
 consulta_principal AS (
     SELECT 
         ig.Departamento,
@@ -246,20 +210,22 @@ consulta_principal AS (
         COALESCE((
             SELECT COUNT(DISTINCT mp.nombre) 
             FROM capas.mercados_project mp 
-            WHERE UPPER(mp.departamen) = UPPER(ig.Departamento)
+            CROSS JOIN ubicacion_actual ua
+            WHERE UPPER(mp.departamen) = UPPER(ua.departamento)
         ), 0) AS NumeroMercados,
         COALESCE((SELECT CantidadMercados FROM mercados_municipio), 0) AS NumeroMercadosMunicipio,
         COALESCE((
-            SELECT COUNT(DISTINCT lm.prov) 
+            SELECT COUNT(DISTINCT lm.prov::text) 
             FROM capas.limites_municipales lm 
-            WHERE UPPER(lm.dep) = UPPER(ig.Departamento)
+            CROSS JOIN ubicacion_actual ua
+            WHERE UPPER(lm.dep::text) = UPPER(ua.departamento)
         ), 0) AS NumeroProvincias,
         COALESCE((
-            SELECT COUNT(DISTINCT lm.mun) 
+            SELECT COUNT(DISTINCT lm.mun::text) 
             FROM capas.limites_municipales lm 
-            WHERE UPPER(lm.dep) = UPPER(ig.Departamento)
+            CROSS JOIN ubicacion_actual ua
+            WHERE UPPER(lm.dep::text) = UPPER(ua.departamento)
         ), 0) AS NumeroMunicipios,
-        -- Columnas de Cobus con nombres exactos
         drcobus.porcentaje_cobertura_arborea,
         drcobus.porcentaje_matorral,
         drcobus.porcentaje_pradera,
@@ -269,23 +235,21 @@ consulta_principal AS (
         drcobus.porcentaje_nieve_hielo,
         drcobus.porcentaje_masas_agua,
         drcobus.porcentaje_humedal_herbaceo,
-        -- Columnas de Mod General
         drmod.porcentaje_no_apta,
         drmod.porcentaje_baja_idoneidad,
         drmod.porcentaje_moderada_idoneidad,
         drmod.porcentaje_alta_idoneidad,
-        -- Columnas de Fragmentos Gruesos
         drfrag.valor_maximo_fragmentos,
         drfrag.total_pixeles_fragmentos,
-        -- Columnas de Textura
-        drtex.porcentaje_no_dato,
-        drtex.porcentaje_arcilloso,
-        drtex.porcentaje_arcillo_arenoso,
-        drtex.porcentaje_franco_arcilloso,
-        drtex.porcentaje_franco_arcillo_arenoso,
-        drtex.porcentaje_franco,
-        drtex.porcentaje_franco_limoso,
-        drtex.porcentaje_franco_arenoso
+        txt.no_dato,
+        txt.arcilloso,
+        txt.arcillo_arenoso,
+        txt.franco_arcilloso,
+        txt.franco_arcillo_arenoso,
+        txt.franco,
+        txt.franco_limoso,
+        txt.franco_arenoso,
+        txt.total AS total_textura
     FROM 
         info_geografica ig
     CROSS JOIN 
@@ -302,10 +266,9 @@ consulta_principal AS (
         distribucion_raster_fragmentos_gruesos drfrag ON 
         drfrag.departamento = ig.Departamento AND 
         drfrag.municipio = ig.MunicipioPunto
-    JOIN 
-        distribucion_raster_textura drtex ON 
-        drtex.departamento = ig.Departamento AND 
-        drtex.municipio = ig.MunicipioPunto
+    LEFT JOIN 
+        texturainfo txt ON 
+        txt.municipio = ig.MunicipioPunto
 )
 SELECT * FROM consulta_principal", longitud, latitud)
                 .ToListAsync();
@@ -338,14 +301,14 @@ SELECT * FROM consulta_principal", longitud, latitud)
                     porcentaje_alta_idoneidad = 0.0,
                     valor_maximo_fragmentos = 0,
                     total_pixeles_fragmentos = 0,
-                    porcentaje_no_dato = 0.0,
-                    porcentaje_arcilloso = 0.0,
-                    porcentaje_arcillo_arenoso = 0.0,
-                    porcentaje_franco_arcilloso = 0.0,
-                    porcentaje_franco_arcillo_arenoso = 0.0,
-                    porcentaje_franco = 0.0,
-                    porcentaje_franco_limoso = 0.0,
-                    porcentaje_franco_arenoso = 0.0
+                    no_dato = 0.0,
+                    arcilloso = 0.0,
+                    arcillo_arenoso = 0.0,
+                    franco_arcilloso = 0.0,
+                    franco_arcillo_arenoso = 0.0,
+                    franco = 0.0,
+                    franco_limoso = 0.0,
+                    franco_arenoso = 0.0
                 });
             }
 
