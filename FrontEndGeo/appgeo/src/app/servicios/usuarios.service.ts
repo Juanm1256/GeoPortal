@@ -38,10 +38,8 @@ export class UsuariosService {
 }
   
   PutUsuario(id: number, usuario: Usuarios): Observable<Usuarios> {
-    console.log("Llamando a API con URL:", this.API + '/' + "Modificar" + '/' + id);
     return this.http.put<Usuarios>(`${this.API}/Modificar/${id}`, usuario).pipe(
       catchError(error => {
-        console.error("Error en la petición HTTP:", error);
         return of();
       })
     );
@@ -55,5 +53,4 @@ export class UsuariosService {
       })
     );
   }
-
 }

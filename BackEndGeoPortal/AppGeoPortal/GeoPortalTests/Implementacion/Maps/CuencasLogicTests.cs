@@ -25,7 +25,6 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _cuencasLogic = new CuencasLogic(_context);
 
-            // Insertar datos de prueba
             _context.Cuencas.AddRange(new List<Cuencas>
             {
                 new Cuencas { gid = 1, sup_km2 = 450.5, cuenca = "Cuenca A", geom = "GEOM_A" },
@@ -37,24 +36,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllCuencas()
         {
-            // Act
             var result = await _cuencasLogic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _context.Cuencas.RemoveRange(_context.Cuencas);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _cuencasLogic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

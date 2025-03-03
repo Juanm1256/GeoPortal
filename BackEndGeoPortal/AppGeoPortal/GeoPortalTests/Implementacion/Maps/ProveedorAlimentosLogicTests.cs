@@ -22,7 +22,6 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _logic = new Proveedor_AlimentosLogic(_context);
 
-            // Insertar datos de prueba
             _context.ProveedorAlimentos.RemoveRange(_context.ProveedorAlimentos);
             _context.ProveedorAlimentos.AddRange(new List<ProveedorAli>
             {
@@ -35,24 +34,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllProveedorAlimentos()
         {
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _context.ProveedorAlimentos.RemoveRange(_context.ProveedorAlimentos);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

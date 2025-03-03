@@ -24,7 +24,6 @@ namespace GeoPortalControllerTests
         [Fact]
         public async Task ListarTodos_ReturnsAllRolPermisos()
         {
-            // Arrange
             var rolesPermisos = new List<Rol_Permiso>
         {
             new Rol_Permiso { idrolpermiso = 1, idrol = 1, idpermiso = 1, estado = "Activo" },
@@ -33,10 +32,8 @@ namespace GeoPortalControllerTests
 
             _mockService.Setup(service => service.ListarTodos()).ReturnsAsync(rolesPermisos);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Rol_Permiso>>>(result);
             var returnValue = Assert.IsType<OkObjectResult>(actionResult.Result);
             var model = Assert.IsType<List<Rol_Permiso>>(returnValue.Value);
@@ -46,7 +43,6 @@ namespace GeoPortalControllerTests
         [Fact]
         public async Task ListarActivos_ReturnsOnlyActiveRolPermisos()
         {
-            // Arrange
             var rolesPermisos = new List<Rol_Permiso>
         {
             new Rol_Permiso { idrolpermiso = 1, idrol = 1, idpermiso = 1, estado = "Activo" }
@@ -54,10 +50,8 @@ namespace GeoPortalControllerTests
 
             _mockService.Setup(service => service.ListarActivos()).ReturnsAsync(rolesPermisos);
 
-            // Act
             var result = await _controller.ListarActivos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Rol_Permiso>>>(result);
             var returnValue = Assert.IsType<OkObjectResult>(actionResult.Result);
             var model = Assert.IsType<List<Rol_Permiso>>(returnValue.Value);
@@ -67,7 +61,6 @@ namespace GeoPortalControllerTests
         [Fact]
         public async Task Insertar_AddsNewRolPermiso()
         {
-            // Arrange
             var newRolPermiso = new Rol_PermisoDTO
             {
                 nombreRol = "Admin",
@@ -77,10 +70,8 @@ namespace GeoPortalControllerTests
 
             _mockService.Setup(service => service.Insertar(newRolPermiso)).ReturnsAsync(true);
 
-            // Act
             var result = await _controller.Insertar(newRolPermiso);
 
-            // Assert
             var actionResult = Assert.IsType<CreatedAtActionResult>(result);
             Assert.Equal(nameof(_controller.ListarTodos), actionResult.ActionName);
         }
@@ -88,7 +79,6 @@ namespace GeoPortalControllerTests
         [Fact]
         public async Task Modificar_UpdatesRolPermiso()
         {
-            // Arrange
             var rolPermisoUpdate = new Rol_PermisoDTO
             {
                 nombreRol = "User",
@@ -98,10 +88,8 @@ namespace GeoPortalControllerTests
 
             _mockService.Setup(service => service.Modificar(rolPermisoUpdate, "User")).ReturnsAsync(true);
 
-            // Act
             var result = await _controller.Modificar(rolPermisoUpdate, "User");
 
-            // Assert
             var actionResult = Assert.IsType<CreatedAtActionResult>(result);
             Assert.Equal(nameof(_controller.ListarTodos), actionResult.ActionName);
         }

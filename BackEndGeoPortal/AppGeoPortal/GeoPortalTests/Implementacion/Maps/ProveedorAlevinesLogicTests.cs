@@ -22,11 +22,9 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _logic = new Proveedor_AlevinesLogic(_context);
 
-            // 🛑 Eliminar datos previos antes de cada prueba
             _context.ProveedorAlevies.RemoveRange(_context.ProveedorAlevies);
             _context.SaveChanges();
 
-            // ✅ Insertar datos sin definir manualmente `gid`
             _context.ProveedorAlevies.AddRange(new List<Proveedor_A>
             {
                 new Proveedor_A { name = "Proveedor 1", x = 123.45m, y = 678.90m, geom = "POINT(123.45 678.90)" },
@@ -38,24 +36,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllProveedores()
         {
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // 🛑 Eliminar datos antes de la prueba
             _context.ProveedorAlevies.RemoveRange(_context.ProveedorAlevies);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

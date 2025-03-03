@@ -32,14 +32,13 @@ namespace GeoPortalTests.Middleware
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase("TestDb"));
 
-            // Mock de IConfiguration con un valor de configuración ficticio
             var configurationMock = new Mock<IConfiguration>();
             configurationMock.Setup(c => c["JwtConfig:Issuer"]).Returns("TestIssuer");
             configurationMock.Setup(c => c["JwtConfig:Audience"]).Returns("TestAudience");
             configurationMock.Setup(c => c["JwtConfig:Key"]).Returns("SuperSecretTestKey");
 
             services.AddSingleton<IConfiguration>(configurationMock.Object);
-            services.AddLogging(); // Para evitar errores de ILogger
+            services.AddLogging(); 
 
             _serviceProvider = services.BuildServiceProvider();
             _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
@@ -47,7 +46,7 @@ namespace GeoPortalTests.Middleware
             _httpContext = new DefaultHttpContext
             {
                 RequestServices = _serviceProvider,
-                Response = { Body = new MemoryStream() } // Para leer el response
+                Response = { Body = new MemoryStream() } 
             };
 
             _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]

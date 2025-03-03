@@ -26,7 +26,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOkResult_WithListOfCuencas()
         {
-            // Arrange
             var cuencasList = new List<Cuencas>
             {
                 new Cuencas { gid = 1, sup_km2 = 500.5, cuenca = "Cuenca 1", geom = "GEOM1" },
@@ -34,10 +33,8 @@ namespace GeoPortalTests.Controllers.Maps
             };
             _mockCuencasContrato.Setup(repo => repo.ListarTodos()).ReturnsAsync(cuencasList);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Cuencas>>>(result);
             var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
             var returnValue = Assert.IsType<List<Cuencas>>(okResult.Value);
@@ -47,13 +44,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_Returns500_WhenExceptionThrown()
         {
-            // Arrange
             _mockCuencasContrato.Setup(repo => repo.ListarTodos()).ThrowsAsync(new System.Exception("Database error"));
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Cuencas>>>(result);
             var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
             Assert.Equal(500, objectResult.StatusCode);

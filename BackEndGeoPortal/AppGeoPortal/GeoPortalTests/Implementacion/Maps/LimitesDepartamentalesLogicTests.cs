@@ -22,7 +22,6 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _logic = new Limites_DepartamentalesLogic(_context);
 
-            // Insertar datos de prueba en la base de datos en memoria
             _context.Lim_Deps.AddRange(new List<Lim_Dep>
             {
                 new Lim_Dep { gid = 1, dep = "Santa Cruz", cod_dep = "07", shape_leng = 123.45m, shape_area = 678.90m, geom = "{}" },
@@ -34,24 +33,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllLimites()
         {
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _context.Lim_Deps.RemoveRange(_context.Lim_Deps);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

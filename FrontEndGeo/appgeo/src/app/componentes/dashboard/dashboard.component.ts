@@ -58,7 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
       await this.cargarDatos();
     } catch (error) {
-      console.error('Error en la inicialización:', error);
+      // console.error('Error en la inicialización:', error);
       this.isLoading = false;
     }
   }
@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       await new Promise(resolve => setTimeout(resolve, 100));
       await this.actualizarGrafico();
     } catch (error) {
-      console.error('Error al inicializar la vista:', error);
+      // console.error('Error al inicializar la vista:', error);
     }
   }
 
@@ -113,7 +113,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         ]
       );
     } catch (error) {
-      console.error('Error al cargar los datos:', error);
+      // console.error('Error al cargar los datos:', error);
     } finally {
       this.isLoading = false;
     }
