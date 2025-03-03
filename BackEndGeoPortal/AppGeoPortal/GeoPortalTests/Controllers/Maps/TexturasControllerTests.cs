@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTexturasuelocero_ReturnsOkResult_WithData()
         {
-            // Arrange
             var mockData = new List<TexturaDTO>
             {
                 new TexturaDTO { Value = 1, Porcentaje = 25.3 },
@@ -31,10 +30,8 @@ namespace GeoPortalTests.Controllers.Maps
             };
             _mockTexturaContrato.Setup(repo => repo.ListarTexturasuelocero()).ReturnsAsync(mockData);
 
-            // Act
             var result = await _controller.ListarTexturasuelocero();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<TexturaDTO>>(okResult.Value);
             Assert.Equal(2, returnValue.Count);
@@ -43,13 +40,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTexturasuelocero_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _mockTexturaContrato.Setup(repo => repo.ListarTexturasuelocero()).ReturnsAsync(new List<TexturaDTO>());
 
-            // Act
             var result = await _controller.ListarTexturasuelocero();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<TexturaDTO>>(okResult.Value);
             Assert.Empty(returnValue);
@@ -58,13 +52,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTexturasuelocero_ReturnsInternalServerError_OnException()
         {
-            // Arrange
             _mockTexturaContrato.Setup(repo => repo.ListarTexturasuelocero()).ThrowsAsync(new System.Exception("Database Error"));
 
-            // Act
             var result = await _controller.ListarTexturasuelocero();
 
-            // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result.Result);
             Assert.Equal(500, statusCodeResult.StatusCode);
         }

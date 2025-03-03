@@ -27,9 +27,8 @@ namespace GeoPortalTests.Middleware
 
             _middleware = new PermisosMiddleware(_nextMock.Object, _loggerMock.Object);
             _httpContext = new DefaultHttpContext();
-            _httpContext.Response.Body = new MemoryStream(); // Para leer el response
+            _httpContext.Response.Body = new MemoryStream();
 
-            // Simular un endpoint protegido con metadatos de permiso
             var endpoint = new Endpoint(
                 (context) => Task.CompletedTask,
                 new EndpointMetadataCollection(new PermisoRequeridoAttribute("Ver")),
@@ -42,42 +41,35 @@ namespace GeoPortalTests.Middleware
         [Fact]
         public async Task Invoke_UnauthenticatedUser_DeniesRequest()
         {
-            // Arrange: Usuario no autenticado
             _httpContext.Request.Path = "/api/protegido";
-            _httpContext.User = new ClaimsPrincipal(); // Sin autenticación
+            _httpContext.User = new ClaimsPrincipal();
 
-            // Act
             await _middleware.Invoke(_httpContext);
 
-            // Assert
             Assert.Equal(StatusCodes.Status401Unauthorized, _httpContext.Response.StatusCode);
 
-            // Leer el mensaje de error
             _httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
             var reader = new StreamReader(_httpContext.Response.Body, Encoding.UTF8);
             var responseMessage = await reader.ReadToEndAsync();
 
             Assert.Equal("Usuario no autenticado.", responseMessage.Trim());
-            _nextMock.Verify(m => m(It.IsAny<HttpContext>()), Times.Never); // Asegurar que el middleware detuvo la ejecución
+            _nextMock.Verify(m => m(It.IsAny<HttpContext>()), Times.Never);
         }
 
         [Fact]
         public async Task Invoke_AuthenticatedUser_AllowsRequest()
         {
-            // Arrange: Usuario autenticado **con el permiso correcto**
             _httpContext.Request.Path = "/api/protegido";
             _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, "UsuarioPrueba"),
-                new Claim("Permiso", "Ver") // Agregado el permiso correcto
+                new Claim("Permiso", "Ver")
             }, "mock"));
 
-            // Act
             await _middleware.Invoke(_httpContext);
 
-            // Assert
             Assert.Equal(StatusCodes.Status200OK, _httpContext.Response.StatusCode);
-            _nextMock.Verify(m => m(It.IsAny<HttpContext>()), Times.Once); // Debe pasar la solicitud al siguiente middleware
+            _nextMock.Verify(m => m(It.IsAny<HttpContext>()), Times.Once);
         }
     }
 }

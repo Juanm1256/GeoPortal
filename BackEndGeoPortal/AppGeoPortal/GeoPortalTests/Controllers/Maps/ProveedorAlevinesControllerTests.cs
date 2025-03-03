@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOkResult_WithListOfProveedorA()
         {
-            // Arrange
             var proveedores = new List<Proveedor_A>
             {
                 new Proveedor_A { gid = 1, name = "Proveedor 1", x = 123.45m, y = 678.90m, geom = "POINT(123.45 678.90)" },
@@ -31,10 +30,8 @@ namespace GeoPortalTests.Controllers.Maps
             };
             _mockRepo.Setup(repo => repo.ListarTodos()).ReturnsAsync(proveedores);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Proveedor_A>>>(result);
             var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
             var returnValue = Assert.IsType<List<Proveedor_A>>(okResult.Value);
@@ -44,13 +41,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _mockRepo.Setup(repo => repo.ListarTodos()).ReturnsAsync(new List<Proveedor_A>());
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ActionResult<List<Proveedor_A>>>(result);
             var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
             var returnValue = Assert.IsType<List<Proveedor_A>>(okResult.Value);

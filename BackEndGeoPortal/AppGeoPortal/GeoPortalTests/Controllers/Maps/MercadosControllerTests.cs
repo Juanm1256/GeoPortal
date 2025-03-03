@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOk_WithMercadosList()
         {
-            // Arrange
             var mercados = new List<Mercados>
             {
                 new Mercados { gid = 1, nombre = "Mercado Central", municipio = "Municipio A" },
@@ -32,10 +31,8 @@ namespace GeoPortalTests.Controllers.Maps
 
             _mockService.Setup(service => service.ListarTodos()).ReturnsAsync(mercados);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedList = Assert.IsType<List<Mercados>>(actionResult.Value);
             Assert.Equal(2, returnedList.Count);
@@ -44,13 +41,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _mockService.Setup(service => service.ListarTodos()).ReturnsAsync(new List<Mercados>());
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedList = Assert.IsType<List<Mercados>>(actionResult.Value);
             Assert.Empty(returnedList);

@@ -379,7 +379,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         }
       }
     } catch (error) {
-      console.error("Error al cargar datos de la capa:", error);
+      // console.error("Error al cargar datos de la capa:", error);
     }
     finally {
       this.isLoading = false;
@@ -394,7 +394,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
         setTimeout(() => {
             const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
             if (!canvas) {
-                console.error("❌ No se encontró el canvas para el gráfico.");
+                // console.error("No se encontró el canvas para el gráfico.");
                 return;
             }
 
@@ -421,11 +421,11 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
                     }
                 });
             } else {
-                console.warn("⚠️ No hay datos para mostrar en el gráfico.");
+                // console.warn("No hay datos para mostrar en el gráfico.");
             }
         }, 100);
     } catch (error) {
-        console.error("🚨 Error al renderizar el gráfico:", error);
+        // console.error("Error al renderizar el gráfico:", error);
     }
 }
 
@@ -1036,7 +1036,7 @@ export class MapPrivateComponent implements OnInit, OnDestroy {
       }
       this.busquedaActiva = true;
     } catch (error) {
-      console.error("Error al seleccionar municipio:", error);
+      // console.error("Error al seleccionar municipio:", error);
     }
   }
   async highlightMunicipio(municipio: LimitesMunicipales): Promise<void> {

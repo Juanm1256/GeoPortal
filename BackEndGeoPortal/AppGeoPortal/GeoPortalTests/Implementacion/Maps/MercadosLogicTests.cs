@@ -22,11 +22,9 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _mercadosLogic = new MercadosLogic(_context);
 
-            // 🔹 Limpiar la base de datos en memoria antes de agregar nuevos registros
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
-            // Insertar datos de prueba con TODAS las propiedades requeridas
             _context.Mercados.AddRange(new List<Mercados>
             {
                 new Mercados { gid = 1, nombre = "Mercado Central", municipio = "Municipio A",
@@ -42,24 +40,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllMercados()
         {
-            // Act
             var result = await _mercadosLogic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _context.Mercados.RemoveRange(_context.Mercados);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _mercadosLogic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

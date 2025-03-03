@@ -22,7 +22,6 @@ namespace GeoPortalTests.Implementacion.Maps
             _context = new AppDbContext(options);
             _logic = new Proveedor_AsistTecLogic(_context);
 
-            // Insertar datos de prueba en la base de datos en memoria
             _context.ProveedorAsistenciaTecnica.RemoveRange(_context.ProveedorAsistenciaTecnica);
             _context.ProveedorAsistenciaTecnica.AddRange(new List<ProveedorAsisTec>
             {
@@ -35,24 +34,19 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTodos_ReturnsAllProveedores()
         {
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _context.ProveedorAsistenciaTecnica.RemoveRange(_context.ProveedorAsistenciaTecnica);
             await _context.SaveChangesAsync();
 
-            // Act
             var result = await _logic.ListarTodos();
 
-            // Assert
             Assert.Empty(result);
         }
     }

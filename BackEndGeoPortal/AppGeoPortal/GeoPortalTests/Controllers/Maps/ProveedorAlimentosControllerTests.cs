@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOkResult_WithListOfProveedorAlimentos()
         {
-            // Arrange
             var proveedores = new List<ProveedorAli>
             {
                 new ProveedorAli { gid = 1, oid_ = 1001, name = "Proveedor 1", geom = "GEOM_DATA" },
@@ -31,10 +30,8 @@ namespace GeoPortalTests.Controllers.Maps
             };
             _mockService.Setup(s => s.ListarTodos()).ReturnsAsync(proveedores);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedProveedores = Assert.IsType<List<ProveedorAli>>(okResult.Value);
             Assert.Equal(2, returnedProveedores.Count);
@@ -43,13 +40,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _mockService.Setup(s => s.ListarTodos()).ReturnsAsync(new List<ProveedorAli>());
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedProveedores = Assert.IsType<List<ProveedorAli>>(okResult.Value);
             Assert.Empty(returnedProveedores);

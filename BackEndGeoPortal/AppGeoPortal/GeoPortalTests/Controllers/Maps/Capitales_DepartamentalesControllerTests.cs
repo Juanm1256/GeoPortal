@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOkResult_WithListOfCapitales()
         {
-            // Arrange
             var capitales = new List<Cap_Dep>
             {
                 new Cap_Dep { gid = 1, objectid = 1001, cap_dep = "Capital 1", cod_ine = "001", geom = "{}" },
@@ -31,10 +30,8 @@ namespace GeoPortalTests.Controllers.Maps
             };
             _mockService.Setup(service => service.ListarTodos()).ReturnsAsync(capitales);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedList = Assert.IsType<List<Cap_Dep>>(okResult.Value);
             Assert.Equal(2, returnedList.Count);
@@ -43,13 +40,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_Returns500_WhenExceptionOccurs()
         {
-            // Arrange
             _mockService.Setup(service => service.ListarTodos()).ThrowsAsync(new System.Exception("Database error"));
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var objectResult = Assert.IsType<ObjectResult>(result.Result);
             Assert.Equal(500, objectResult.StatusCode);
             Assert.Contains("Error al obtener los datos", objectResult.Value.ToString());

@@ -26,7 +26,6 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTexturasuelocero_ReturnsList_WithData()
         {
-            // Arrange
             _context.Texturas.AddRange(new List<Textura>
             {
                 new Textura { Value = 1, Porcentaje = 30.5 },
@@ -35,10 +34,8 @@ namespace GeoPortalTests.Implementacion.Maps
             await _context.SaveChangesAsync();
 
 
-            // Act
             var result = await _texturaLogic.ListarTexturasuelocero();
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
@@ -46,10 +43,8 @@ namespace GeoPortalTests.Implementacion.Maps
         [Fact]
         public async Task ListarTexturasuelocero_ReturnsEmptyList_WhenNoData()
         {
-            // Act
             var result = await _texturaLogic.ListarTexturasuelocero();
 
-            // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
         }

@@ -23,7 +23,6 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsOk_WithData()
         {
-            // Arrange
             var limites = new List<Lim_Dep>
             {
                 new Lim_Dep { gid = 1, dep = "Santa Cruz", cod_dep = "07", shape_leng = 123.45m, shape_area = 678.90m, geom = "{}" },
@@ -32,10 +31,8 @@ namespace GeoPortalTests.Controllers.Maps
 
             _mockRepo.Setup(repo => repo.ListarTodos()).ReturnsAsync(limites);
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<Lim_Dep>>(actionResult.Value);
             Assert.Equal(2, returnValue.Count);
@@ -44,13 +41,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_ReturnsEmptyList_WhenNoData()
         {
-            // Arrange
             _mockRepo.Setup(repo => repo.ListarTodos()).ReturnsAsync(new List<Lim_Dep>());
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<Lim_Dep>>(actionResult.Value);
             Assert.Empty(returnValue);
@@ -59,13 +53,10 @@ namespace GeoPortalTests.Controllers.Maps
         [Fact]
         public async Task ListarTodos_Returns500_WhenExceptionOccurs()
         {
-            // Arrange
             _mockRepo.Setup(repo => repo.ListarTodos()).ThrowsAsync(new System.Exception("Database error"));
 
-            // Act
             var result = await _controller.ListarTodos();
 
-            // Assert
             var actionResult = Assert.IsType<ObjectResult>(result.Result);
             Assert.Equal(500, actionResult.StatusCode);
         }
