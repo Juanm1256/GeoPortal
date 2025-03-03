@@ -21,7 +21,7 @@ describe('AuthService', () => {
 
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
-    localStorage.clear(); // Limpiar almacenamiento antes de cada prueba
+    localStorage.clear();
   });
 
   afterEach(() => {

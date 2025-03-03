@@ -1,4 +1,3 @@
-/* Modo día */
 .sidebar {
   width: 300px;
   min-height: 100vh;
@@ -35,10 +34,11 @@
   height: auto;
   margin: 5px;
 }
+
 .sidebar a {
   color: #000;
 }
-/* Tooltip cuando el sidebar está contraído */
+
 .sidebar.collapsed a {
   position: relative;
   display: flex;
@@ -59,7 +59,7 @@
   white-space: nowrap;
   font-size: 12px;
 }
-/* Modo noche */
+
 .sidebar.dark {
   background-color: #1a1a1a !important;
   color: #ffffff !important;
@@ -81,14 +81,14 @@
 .sidebar.dark a {
   color: #ffffff;
 }
+
 .accordion-button::after {
-  display: none; /* Esto elimina la flecha del accordion butt */
+  display: none;
 }
 
-/* 🎨 Botón de Inicio - Modo Claro */
 .sidebar-header .btn-inicio {
-  background-color: #2C5384 !important; /* Azul oscuro */
-  color: white !important; /* Letras blancas */
+  background-color: #2C5384 !important;
+  color: white !important;
   width: 100%;
   font-size: 1rem;
   display: flex;
@@ -99,16 +99,12 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* 🎨 Icono del Botón */
 .sidebar-header .btn-inicio i {
   font-size: 1.2rem;
   margin-right: 8px;
 }
-/* 🎨 Estilo cuando el accordion está abierto */
+
 .accordion-button:not(.collapsed) {
-  background-color: #2C5384 !important; /* Azul más oscuro cuando está expandido */
+  background-color: #2C5384 !important;
   color: white !important;
 }
-
-
-

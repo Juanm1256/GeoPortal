@@ -10,7 +10,6 @@ describe('ComponenteSidebar', () => {
   let isDarkModeSubject: Subject<boolean>;
 
   beforeEach(async () => {
-    // Simulación del servicio ThemeService
     isDarkModeSubject = new Subject<boolean>();
     temaServicioStub = {
       isDarkMode$: isDarkModeSubject.asObservable(),

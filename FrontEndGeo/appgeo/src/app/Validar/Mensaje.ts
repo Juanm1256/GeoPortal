@@ -1,12 +1,10 @@
 export class Mensaje {
     public mensajes: { [key: string]: { type: string; message: string }[] } = {
-        // 🔹 Rol
         'nombre': [
             { type: 'required', message: 'El Nombre del rol es requerido.' },
             { type: 'maxlength', message: 'El Nombre debe tener menos de 25 caracteres.' },
             { type: 'pattern', message: 'El Nombre debe tener solo letras.' }
         ],
-        // 🔹 Usuario
         'username': [
             { type: 'required', message: 'El nombre de usuario es requerido.' },
             { type: 'maxlength', message: 'El nombre de usuario no puede tener más de 50 caracteres.' },

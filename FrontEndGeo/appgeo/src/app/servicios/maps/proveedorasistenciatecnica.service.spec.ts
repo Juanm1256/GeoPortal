@@ -19,7 +19,7 @@ describe('ProveedorasistenciatecnicaService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verifica que no haya solicitudes pendientes
+    httpMock.verify();
   });
 
   it('Debe crearse el servicio', () => {

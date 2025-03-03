@@ -39,31 +39,6 @@ describe('DepartamentoinfoService', () => {
     
     expect(req.request.method).toBe('GET');
   });
-/*
-  it('Debe devolver un array de información departamental cuando la solicitud es exitosa', () => {
-    const mockData: DepartamentoInforDTO[] = [
-      {
-        departamento: 'Santa Cruz',
-        provinciaPunto: 'Andrés Ibáñez',
-        municipioPunto: 'Santa Cruz de la Sierra',
-        cuencaPunto: 'Cuenca del Amazonas',
-        riosMunicipio: 'Río Piraí',
-        numeroMercados: 12,
-        numeroMercadosMunicipio: 5,
-        numeroProvincias: 15,
-        numeroMunicipios: 56
-      }
-    ];
-
-    service.obtenerInformacionDepartamento(-63.1821, -17.7833).subscribe((data) => {
-      expect(data.length).toBe(1);
-      expect(data).toEqual(mockData);
-    });
-
-    const req = httpMock.expectOne((request) => request.url.includes(API_URL));
-    req.flush(mockData);
-  });
-*/
   it('Debe manejar un error en la solicitud y devolver un array vacío', () => {
     service.obtenerInformacionDepartamento(-63.1821, -17.7833).subscribe(
       (data) => {

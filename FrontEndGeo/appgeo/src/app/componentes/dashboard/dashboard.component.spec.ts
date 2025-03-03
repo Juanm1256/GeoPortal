@@ -15,30 +15,27 @@ import { ProveedoralimentosService } from '../../servicios/maps/proveedoraliment
 import { ProveedorasistenciatecnicaService } from '../../servicios/maps/proveedorasistenciatecnica.service';
 import { ElementRef } from '@angular/core';
 
-// Datos de prueba para cada servicio
 const usuariosData = [{ nombre: 'Usuario1' }, { nombre: 'Usuario2' }];
 const rolesData = [{}, {}];
-const capitalesDepData = [{}, {}];       // 2 elementos
-const cuencasData = [{}];                // 1 elemento
-const limitesDepData = [{}];             // 1 elemento
-const limitesMunData = [{}];             // 1 elemento
-const mercadosData = [{}];               // 1 elemento
-const proveedoresAlevinesData = [{}];    // 1 elemento
-const proveedoresAlimentosData = [{}];   // 1 elemento
-const proveedoresAsistenciaData = [{}];  // 1 elemento
+const capitalesDepData = [{}, {}];
+const cuencasData = [{}];
+const limitesDepData = [{}];
+const limitesMunData = [{}];
+const mercadosData = [{}];
+const proveedoresAlevinesData = [{}];
+const proveedoresAlimentosData = [{}];
+const proveedoresAsistenciaData = [{}];
 
 describe('ComponenteDashboard', () => {
   let componente: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
 
-  // Simulación del ThemeService: se usa un Subject para simular isDarkMode$
   const isDarkModeSubject = new Subject<boolean>();
   const themeServiceStub = {
     isDarkMode$: isDarkModeSubject,
     toggleTheme: jasmine.createSpy('toggleTheme')
   };
 
-  // Simulación de los servicios que retornan observables con datos de prueba
   const usuariosServiceStub = {
     ListarTodos: jasmine.createSpy('ListarTodos').and.returnValue(of(usuariosData))
   };
@@ -103,29 +100,23 @@ describe('ComponenteDashboard', () => {
   });
 
   it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
-    // Emite true y verifica la actualización
     isDarkModeSubject.next(true);
     fixture.detectChanges();
     expect(componente.isDarkMode).toBeTrue();
 
-    // Emite false y verifica la actualización
     isDarkModeSubject.next(false);
     fixture.detectChanges();
     expect(componente.isDarkMode).toBeFalse();
   });
 
   it('Debe cargar los datos y actualizar los totales correctamente', async () => {
-    // Llamamos a cargarDatos y esperamos su finalización
     await componente.cargarDatos();
     fixture.detectChanges();
   
-    // Verificamos que se hayan actualizado las propiedades
     expect(componente.totalUsuarios).toEqual(usuariosData.length);
     expect(componente.totalRoles).toEqual(rolesData.length);
-    // totalCapas es el número de arrays enviados en el forkJoin (8)
     expect(componente.totalCapas).toEqual(8);
   
-    // Verificamos la data procesada en cantidadPorCapa
     expect(componente.cantidadPorCapa).toEqual([
       { nombre: 'Capitales Departamentales', cantidad: capitalesDepData.length },
       { nombre: 'Cuencas', cantidad: cuencasData.length },
@@ -136,16 +127,12 @@ describe('ComponenteDashboard', () => {
       { nombre: 'Proveedores de Alimentos', cantidad: proveedoresAlimentosData.length },
       { nombre: 'Proveedores de Asistencia Técnica', cantidad: proveedoresAsistenciaData.length }
     ]);
-  
-    
   });
 
   it('Debe crear una instancia del gráfico después de llamar a actualizarGrafico', async () => {
-    // Simular que el canvas existe:
     const canvasEl = document.createElement('canvas');
     componente.chartCanvas = { nativeElement: canvasEl } as ElementRef<HTMLCanvasElement>;
 
-    // Ejecutar la actualización del gráfico
     await (componente as any).actualizarGrafico();
     expect((componente as any).chartInstance).toBeTruthy();
   });

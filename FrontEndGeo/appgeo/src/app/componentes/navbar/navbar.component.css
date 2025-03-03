@@ -1,4 +1,3 @@
-/* 🌞 Estilos del navbar en modo claro (por defecto) */
 .navbar {
   background-color: #ffffff;
   color: black;
@@ -20,7 +19,6 @@
   color: rgb(0, 0, 0);
 }
 
-/* 🌙 Estilos para el navbar en modo noche */
 .navbar.dark-theme {
   background-color: #1a1a1a !important;
   border-bottom: 1px solid #333;
@@ -49,14 +47,12 @@
   color: #ffffff !important;
 }
 
-/* 🔹 Estilos adicionales para la navbar */
 .custom-navbar {
   background-color: #ffffff;
   border-bottom: 2px solid #2C5384;
   padding: 10px 20px;
 }
 
-/* 🔹 Botones de la navbar */
 .btn-outline-secondary {
   border-color: #2C5384;
   color: #ffffff;
@@ -66,6 +62,7 @@
   background-color: #2C5384;
   color: white;
 }
+
 .btn-outline-danger:hover {
   background-color: red;
   color: white;
@@ -75,23 +72,23 @@
   background-color: #ffffff;
   display: flex;
   align-items: center;
-  gap: 20px; /* Espaciado horizontal entre los logos */
+  gap: 20px;
 }
+
 .logo3 {
   height: 45px;
-  max-width: 150px; /* Tamaño máximo para evitar que se distorsionen */
-  object-fit: contain; /* Mantiene la proporción sin deformar */
-  padding: 5px; /* Espacio dentro del contenedor del logo */
+  max-width: 150px;
+  object-fit: contain;
+  padding: 5px;
 }
+
 .logo {
-
   height: 45px;
-  max-width: 120px; /* Tamaño máximo para evitar que se distorsionen */
-  object-fit: contain; /* Mantiene la proporción sin deformar */
-  padding: 5px; /* Espacio dentro del contenedor del logo */
+  max-width: 120px;
+  object-fit: contain;
+  padding: 5px;
 }
 
-/* 📱 Ajustes responsivos para reducir el espaciado en pantallas pequeñas */
 @media (max-width: 768px) {
   .logo-container {
     gap: 15px;
@@ -101,7 +98,7 @@
 @media (max-width: 480px) {
   .logo-container {
     gap: 10px;
-    flex-wrap: wrap; /* Permite que los logos bajen si no caben */
+    flex-wrap: wrap;
     justify-content: center;
   }
 
@@ -110,4 +107,3 @@
     max-width: 100px;
   }
 }
-

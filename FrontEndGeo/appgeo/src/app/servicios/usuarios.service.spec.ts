@@ -23,7 +23,7 @@ describe('Servicio de Usuarios', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verifica que no haya peticiones pendientes
+    httpMock.verify();
   });
 
   it('debería crearse correctamente', () => {
@@ -49,7 +49,7 @@ describe('Servicio de Usuarios', () => {
 
     const req = httpMock.expectOne(`${servicio['API']}/ListarActivos`);
     expect(req.request.method).toBe('GET');
-    req.flush([usuariosPrueba[0]]); // Solo retorna el usuario activo
+    req.flush([usuariosPrueba[0]]);
   });
 
   it('debería agregar un nuevo usuario', () => {
@@ -88,7 +88,7 @@ describe('Servicio de Usuarios', () => {
 
   it('debería manejar errores correctamente', () => {
     servicio.ListarTodos().subscribe(usuarios => {
-      expect(usuarios.length).toBe(0); // Debe retornar un array vacío en caso de error
+      expect(usuarios.length).toBe(0);
     });
 
     const req = httpMock.expectOne(`${servicio['API']}/ListarTodos`);

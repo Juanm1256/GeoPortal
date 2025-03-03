@@ -249,7 +249,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       this.sidebarOpen = !this.sidebarOpen;
 
       if (this.sidebarOpen) {
-        // Verifica qué capa está activa y carga sus datos en el gráfico
         if (this.activeLayers['Textura']) {
           this.openSidebarWithLayerData('Textura');
         } else if (this.activeLayers['Cobertura_uso_suelo']) {
@@ -257,7 +256,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         } else if (this.activeLayers['Modelo General']) {
           this.openSidebarWithLayerData('Modelo General');
         } else {
-          // Por defecto, si no hay ninguna de las nuevas capas activas, carga la textura del suelo
           this.openSidebarWithLayerData('Textura del Suelo');
         }
 
@@ -283,10 +281,9 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
   async openSidebarWithLayerData(layerName: string): Promise<void> {
     try {
-      this.isLoading = true; // 🔄 Activa el spinner
+      this.isLoading = true;
 
         this.layerInfo = { nombre: layerName };
-      // 🔹 Nombres de categorías para Textura del Suelo
       const textureNameMap: { [key: number]: string } = {
         0: "No dato",
         1: "Arcilloso",
@@ -297,19 +294,16 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         8: "Franco Limoso",
         9: "Franco Arenoso"
       };
-      // 🔹 Colores para la capa "Textura del Suelo"
       const texturaColors: { [key: number]: string } = {
-        0: '#ca7173',  // No dato
-        1: '#430bea',  // Arcilloso
-        3: '#ffe605',  // Arcillo arenoso
-        4: '#16efdd',  // Franco Arcilloso
-        6: '#c7b4ff',  // Franco Arcillo Arenoso
-        7: '#617ece',  // Franco
-        8: '#073408',  // Franco Limoso
-        9: '#dc1010'   // Franco Arenoso
+        0: '#ca7173', 
+        1: '#430bea',  
+        3: '#ffe605',  
+        4: '#16efdd', 
+        6: '#c7b4ff',  
+        7: '#617ece', 
+        8: '#073408', 
+        9: '#dc1010'  
       };
-
-      // 🔹 Colores para la capa "Cobertura Uso Suelo"
       const coberturaUsoSueloColors: { [key: string]: string } = {
         "cobertura arbórea": "#e8211e",
         "matorral": "#42e542",
@@ -321,28 +315,22 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         "masas de agua permanentes": "#53a6cf",
         "humedal herbáceo": "#c286dd"
       };
-
-      // 🔹 Colores para la capa "Mod General"
       const modGeneralColors: { [key: string]: string } = {
         "alta idoneidad": "#94c4d1",
         "baja idoneidad": "#7474d1",
         "moderada idoneidad": "#bf9ae1",
         "no apta": "#dc1010"
       };
-
-
       const texturaColors2: { [key: string]: string } = {
-        "No dato": '#ca7173',  // No dato
-        "Arcilloso": '#430bea',  // Arcilloso
-        "Arcillo arenoso": '#ffe605',  // Arcillo arenoso
-        "Franco Arcilloso": '#16efdd',  // Franco Arcilloso
-        "Franco Arcillo Arenoso": '#c7b4ff',  // Franco Arcillo Arenoso
-        "Franco": '#617ece',  // Franco
-        "Franco Limoso": '#073408',  // Franco Limoso
-        "Franco Arenoso": '#dc1010'   // Franco Arenoso
+        "No dato": '#ca7173',
+        "Arcilloso": '#430bea', 
+        "Arcillo arenoso": '#ffe605', 
+        "Franco Arcilloso": '#16efdd', 
+        "Franco Arcillo Arenoso": '#c7b4ff',
+        "Franco": '#617ece', 
+        "Franco Limoso": '#073408', 
+        "Franco Arenoso": '#dc1010' 
       };
-
-      // 🔹 Mapas de capas
       const layerMap: { [key: string]: () => Observable<Texturas[]> } = {
         "Textura_suelo_0": () => this.texturaservice.ListarTexturasuelocero(),
         "Textura_suelo_10": () => this.texturaservice.ListarTexturasuelodiez(),
@@ -351,16 +339,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         "Textura_suelo_100": () => this.texturaservice.ListarTexturasuelocien(),
         "Textura_suelo_200": () => this.texturaservice.ListarTexturasuelodoscientos()
       };
-
       const layerMap2: { [key: string]: () => Observable<any[]> } = {
         "Textura": () => this.texturaservice.ListarTexturas(),
         "Cobertura_uso_suelo": () => this.texturaservice.ListarCoberturaSuelo(),
         "Modelo General": () => this.texturaservice.Listarmodgeneral()
       };
-
       this.layerInfo = { nombre: layerName };
-
-      // 🔹 Cargar datos para las capas "Textura del Suelo"
       if (layerMap[layerName]) {
         const data = await firstValueFrom(layerMap[layerName]());
         if (data && data.length > 0) {
@@ -372,8 +356,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           await this.showPieChart();
         }
       }
-
-      // 🔹 Cargar datos para las capas "Cobertura Uso Suelo" y "Mod General"
       if (layerMap2[layerName]) {
         const data = await firstValueFrom(layerMap2[layerName]());
         if (data && data.length > 0) {
@@ -397,7 +379,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
             }));
           }
           if (this.layerData.length > 0) {
-            await this.showPieChart(); // Solo mostrar el gráfico si hay datos
+            await this.showPieChart();
         }
         }
       }
@@ -405,22 +387,20 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       console.error("Error al cargar datos de la capa:", error);
     }
     finally {
-      this.isLoading = false; // Desactivar el spinner al finalizar
+      this.isLoading = false; 
   }
   }
   private async showPieChart(): Promise<void> {
     try {
         if (this.pieChart) {
-            this.pieChart.destroy(); // Destruir gráfico anterior si existe
+            this.pieChart.destroy(); 
         }
-
-        setTimeout(() => { // Espera un ciclo del DOM para asegurarte de que el canvas existe
+        setTimeout(() => { 
             const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
             if (!canvas) {
                 console.error("❌ No se encontró el canvas para el gráfico.");
                 return;
             }
-
             const ctx = canvas.getContext('2d');
             if (ctx && this.layerData.length > 0) {
                 this.pieChart = new Chart(ctx, {
@@ -446,39 +426,32 @@ export class MapPublicComponent implements OnInit, OnDestroy {
             } else {
                 console.warn("⚠️ No hay datos para mostrar en el gráfico.");
             }
-        }, 100); // ⏳ Pequeña espera para asegurar que el DOM está listo
+        }, 100);
     } catch (error) {
         console.error("🚨 Error al renderizar el gráfico:", error);
     }
 }
-
   toggleAccordion() {
     this.isAccordionOpen = !this.isAccordionOpen;
   }
-
   toggleLayers() {
     this.isLayersOpen = !this.isLayersOpen;
   }
-
   async toggleLayer(layerName: string, event: any): Promise<void> {
     const button = event.target.closest('.layer-btn');
     this.sidebarOpen = false;
     if (this.pieChart) this.pieChart.destroy();
-
     try {
       if (!this.capas[layerName]) {
         const layer = await this.loadLayer(layerName);
         if (layer) {
           this.capas[layerName] = layer;
           this.map.addLayer(this.capas[layerName]);
-
           if (this.capas[layerName] instanceof L.TileLayer.WMS) {
             (this.capas[layerName] as L.TileLayer.WMS).bringToFront();
           }
-
           this.activeLayers[layerName] = true;
           button.classList.add('active');
-
           if (layerName.startsWith('Textura_suelo_')) {
             await this.openSidebarWithLayerData(layerName);
           }
@@ -488,21 +461,17 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         delete this.capas[layerName];
         this.activeLayers[layerName] = false;
         button.classList.remove('active');
-
         if (layerName === 'Modelo General' && this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
-
         const capasValidas = ['Modelo General', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
         const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
-
         if (!capaActiva && this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
       }
-
       this.checkGraphButtonVisibility();
     } catch (error) {
     }
@@ -619,8 +588,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } else {
     }
   }
-
- 
   checkGraphButtonVisibility() {
     const activeLayers = [
       'Textura_suelo_0', 'Textura_suelo_10', 'Textura_suelo_30',
@@ -629,7 +596,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     ];
     this.showSidebarButton = activeLayers.some(layer => this.activeLayers[layer]);
   }
-
   async getUserLocation(): Promise<void> {
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -641,40 +607,31 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   mapZoomIn() {
     this.map.zoomIn();
   }
-
   mapZoomOut() {
     this.map.zoomOut();
   }
-
   toggleBaseMap() {
     const baseLayers = Array.from(this.baseMapNames.values());
     let currentIndex = baseLayers.indexOf(this.baseMapNames.get(this.activeBaseLayer)!);
     const nextIndex = (currentIndex + 1) % baseLayers.length;
     const nextLayerName = baseLayers[nextIndex];
-
     this.map.removeLayer(this.activeBaseLayer);
     this.activeBaseLayer = this.baseMaps[nextLayerName];
     this.map.addLayer(this.activeBaseLayer);
   }
-
   addCustomMarker() {
     const center = this.map.getCenter();
     const { lat, lng } = center;
-
     const customIcon = L.icon({
       iconUrl: 'assets/leaflet/marker-icon-red.png',
-
       iconSize: [32, 40],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
     });
-
     const marker = L.marker([lat, lng], { draggable: true, icon: customIcon });
-
     const updatePopup = () => {
       const newLatLng = marker.getLatLng();
       marker.setPopupContent(`
@@ -687,7 +644,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           </div>
         `);
     };
-
     marker.bindPopup(`
         <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
           <p>Marcador en:</p>
@@ -697,13 +653,10 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           </button>
         </div>
       `);
-
     marker.on('dragend', updatePopup);
-
     marker.addTo(this.markerLayer);
     this.markerLayer.addTo(this.map);
     this.markers.push(marker);
-
     marker.on("popupopen", () => {
       const deleteBtn = document.querySelector(".delete-marker-btn") as HTMLButtonElement;
       if (deleteBtn) {
@@ -711,24 +664,19 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-
   removeMarker(marker: L.Marker) {
     this.map.removeLayer(marker);
     this.markers = this.markers.filter(m => m !== marker);
   }
-
   async captureMap(): Promise<void> {
     const mapElement = document.getElementById('map-public');
     if (!mapElement) {
       return;
     }
-
     try {
       const width = mapElement.scrollWidth;
       const height = mapElement.scrollHeight;
       const scaleFactor = Math.max(window.devicePixelRatio || 1, 1);
-
       const dataUrl = await domtoimage.toPng(mapElement, {
         quality: 1,
         bgcolor: '#fff',
@@ -739,7 +687,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           height: `${height * scaleFactor}px`
         }
       });
-
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = `mapa_${new Date().getTime()}.png`;
@@ -747,7 +694,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   resetMapView() {
     Swal.fire({
       title: "¿Restablecer el mapa?",
@@ -761,23 +707,18 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         this.map.setView([-16.54529, -64.7400], 6);
-
         this.markerLayer.clearLayers();
-
         if (this.marcadorSeleccionado) {
           this.map.removeLayer(this.marcadorSeleccionado);
           this.marcadorSeleccionado = null;
         }
-
         Object.keys(this.capas).forEach(layerName => {
           if (this.capas[layerName]) {
             this.map.removeLayer(this.capas[layerName]);
           }
         });
-
         this.capas = {};
         this.activeLayers = {};
-
         this.map.eachLayer(layer => {
           if (layer instanceof L.TileLayer) {
             this.map.removeLayer(layer);
@@ -785,19 +726,15 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         });
         this.activeBaseLayer = this.baseMaps["Mapa OSM"];
         this.map.addLayer(this.activeBaseLayer);
-
         document.querySelectorAll(".layer-btn").forEach(btn => {
           btn.classList.remove("active");
         });
-
         this.showSidebarButton = false;
         this.sidebarOpen = false;
-
         if (this.pieChart) {
           this.pieChart.destroy();
           this.pieChart = null;
         }
-
         Swal.fire(
           "Mapa Restablecido",
           "El mapa ha vuelto a su estado inicial.",
@@ -816,33 +753,24 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       });
     }, 100);
   }
-
-
   async consultarInformacionFeature(event: L.LeafletMouseEvent) {
     const latlng = event.latlng;
-  
-    // Verifica si hay una capa activa o si la búsqueda sigue activa
     const capaActiva = Object.keys(this.activeLayers).some(layer => this.activeLayers[layer]);
-  
     if (!capaActiva && !this.busquedaActiva) {
-      return; // No muestra el modal si no hay capas activas ni búsqueda reciente
+      return;
     }
-  
-    this.isLoading = true; // Activa el spinner
-    this.modalInfo = []; // Limpia la información anterior
-    this.showModal = true; // Muestra el modal inmediatamente
-  
+    this.isLoading = true;
+    this.modalInfo = [];
+    this.showModal = true;
     this.departamentoService.obtenerInformacionDepartamento(latlng.lng, latlng.lat)
       .subscribe({
         next: (data) => {
-          this.isLoading = false; // Oculta el spinner
-  
+          this.isLoading = false;
           if (data && data.length > 0) {
             const departamentoInfo = data[0];
             this.mostrarModalInformacion(departamentoInfo);
             this.agregarMarcador(latlng, departamentoInfo);
           } else {
-            // Si no hay datos, muestra el mensaje "Área sin información"
             this.modalInfo = [];
           }
         },
@@ -856,9 +784,7 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
   agregarMarcador(latlng: L.LatLng, propiedades: { [key: string]: any }) {
     const capasValidas = ['Modelo General', 'cuencas', 'limitesDepartamentales', 'limitesMunicipales', 'redCaminos', 'redHidrica'];
-
     const capaActiva = capasValidas.some(capa => this.capas[capa] && this.map.hasLayer(this.capas[capa]));
-
     if (!capaActiva) {
       if (this.marcadorSeleccionado) {
         this.map.removeLayer(this.marcadorSeleccionado);
@@ -866,36 +792,29 @@ export class MapPublicComponent implements OnInit, OnDestroy {
       }
       return;
     }
-
     const customIcon = L.icon({
       iconUrl: 'assets/leaflet/marker-icon-red.png',
       iconSize: [32, 40],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
     });
-
     if (this.marcadorSeleccionado) {
       this.map.removeLayer(this.marcadorSeleccionado);
     }
-
     this.marcadorSeleccionado = L.marker(latlng, { icon: customIcon })
-
       .addTo(this.map)
   }
   mostrarModalInformacion(propiedades: any) {
-    // 🎨 Mapa de colores según el tipo de suelo
     const colorMap: { [key: number]: string } = {
-        0: '#ca7173',  // No dato
-        1: '#430bea',  // Arcilloso
-        3: '#ffe605',  // Arcillo Arenoso
-        4: '#16efdd',  // Franco Arcilloso
-        6: '#c7b4ff',  // Franco Arcillo Arenoso
-        7: '#617ece',  // Franco
-        8: '#073408',  // Franco Limoso
-        9: '#dc1010'   // Franco Arenoso
+        0: '#ca7173',  
+        1: '#430bea',  
+        3: '#ffe605',  
+        4: '#16efdd',  
+        6: '#c7b4ff',  
+        7: '#617ece',  
+        8: '#073408',  
+        9: '#dc1010'   
     };
-
-    // 🎨 Mapa de colores para Cobertura de Suelo
     const coberturaSueloColors: { [key: string]: string } = {
         "Cobertura arbórea": "#e8211e",
         "Matorral": "#42e542",
@@ -907,16 +826,12 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         "Masas de agua permanentes": "#53a6cf",
         "Humedal herbáceo": "#c286dd"
     };
-
-    // 🎨 Mapa de colores para Idoneidad del Suelo
     const idoneidadSueloColors: { [key: string]: string } = {
         "No Apta": "#dc1010",
         "Baja Idoneidad": "#7474d1",
         "Moderada Idoneidad": "#bf9ae1",
         "Alta Idoneidad": "#94c4d1"
     };
-
-    // 📌 Datos Generales
     const datosGenerales = [
         { key: '📌 Datos Generales', isTitle: true },
         { key: 'Departamento:', value: propiedades.Departamento || 'N/A' },
@@ -926,8 +841,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         { key: 'Ríos dentro del Municipio:', value: propiedades.RiosMunicipio || 'N/A' },
         { key: 'Mercados en Municipio (Total):', value: propiedades.NumeroMercadosMunicipio?.toString() || 'N/A' }
     ];
-
-    // 🌱 Cobertura del Suelo
     const coberturaSuelo = [
         { key: '🌱 Cobertura del Suelo', isTitle: true },
         { key: 'Cobertura Arbórea', value: propiedades.porcentaje_cobertura_arborea?.toFixed(2) || '0.00', color: coberturaSueloColors["Cobertura arbórea"] },
@@ -940,8 +853,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         { key: 'Masas de Agua', value: propiedades.porcentaje_masas_agua?.toFixed(2) || '0.00', color: coberturaSueloColors["Masas de agua permanentes"] },
         { key: 'Humedal Herbáceo', value: propiedades.porcentaje_humedal_herbaceo?.toFixed(2) || '0.00', color: coberturaSueloColors["Humedal herbáceo"] }
     ];
-
-    // 🛠️ Idoneidad del Suelo
     const idoneidadSuelo = [
         { key: '🛠️ Idoneidad del Suelo', isTitle: true },
         { key: 'No Apta', value: propiedades.porcentaje_no_apta?.toFixed(2) || '0.00', color: idoneidadSueloColors["No Apta"] },
@@ -949,15 +860,11 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         { key: 'Moderada Idoneidad', value: propiedades.porcentaje_moderada_idoneidad?.toFixed(2) || '0.00', color: idoneidadSueloColors["Moderada Idoneidad"] },
         { key: 'Alta Idoneidad', value: propiedades.porcentaje_alta_idoneidad?.toFixed(2) || '0.00', color: idoneidadSueloColors["Alta Idoneidad"] }
     ];
-
-    // 🧩 Fragmentos del Suelo
     const fragmentosSuelo = [
         { key: '🧩 Fragmentos del Suelo', isTitle: true },
         { key: 'Valor Máximo de Fragmentos:', value: propiedades.valor_maximo_fragmentos?.toFixed(2) || 'N/A' },
         { key: 'Total de Pixeles Fragmentos:', value: propiedades.total_pixeles_fragmentos?.toFixed(2) || 'N/A' }
     ];
-
-    // 🗺️ Tipos de Suelo
     const tiposDeSuelo = [
         { key: '🗺️ Tipos de Suelo', isTitle: true },
         { key: 'Sin Dato', value: propiedades.no_dato?.toFixed(2) || '0.00', color: colorMap[0] },
@@ -969,8 +876,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         { key: 'Franco Limoso', value: propiedades.franco_limoso?.toFixed(2) || '0.00', color: colorMap[8] },
         { key: 'Franco Arenoso', value: propiedades.franco_arenoso?.toFixed(2) || '0.00', color: colorMap[9] }
     ];
-
-    // 📍 Filtrar información cuando se busca un municipio
     if (this.busquedaActiva == false) {
         this.modalInfo = [...datosGenerales];
     } else {
@@ -985,13 +890,10 @@ export class MapPublicComponent implements OnInit, OnDestroy {
 
     this.showModal = true;
 }
-
-
   cerrarModal() {
     this.showModal = false;
     this.modalInfo = [];
   }
-
   async initSearch(): Promise<void> {
     try {
       const municipios = await firstValueFrom(this.limitesmuservice.listarTodos());
@@ -1036,32 +938,26 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   async filterMunicipios(term: string): Promise<LimitesMunicipales[]> {
     term = term.toLowerCase().trim();
     try {
       const municipios = (this as any).municipiosData || [];
-
       const filtered = municipios.filter((municipio: LimitesMunicipales) =>
         municipio.mun.toLowerCase().includes(term) ||
         (municipio.dep && municipio.dep.toLowerCase().includes(term)) ||
         (municipio.prov && municipio.prov.toLowerCase().includes(term))
       );
-
       return filtered;
     } catch (error) {
       return [];
     }
   }
-
   async selectMunicipio(municipio: LimitesMunicipales): Promise<void> {
-    this.filteredMunicipios = []; // Limpia los resultados de la búsqueda
-    this.showModal = false; // Cierra el modal al seleccionar un municipio
-  
+    this.filteredMunicipios = [];
+    this.showModal = false;
     try {
       let lat = (municipio as any).lat;
       let lng = (municipio as any).lng;
-  
       if (!lat || !lng) {
         if (municipio.geom) {
           const geojson = JSON.parse(municipio.geom);
@@ -1072,19 +968,14 @@ export class MapPublicComponent implements OnInit, OnDestroy {
           }
         }
       }
-  
-      await this.highlightMunicipio(municipio); // Resalta el municipio en el mapa
-  
+      await this.highlightMunicipio(municipio);
       if (this.searchMarker) {
         this.map.removeLayer(this.searchMarker);
         this.searchMarker = null;
       }
-  
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
-  
-      // Activa la "capa simulada" después de la búsqueda
       this.busquedaActiva = true;
     } catch (error) {
       console.error("Error al seleccionar municipio:", error);
@@ -1098,7 +989,6 @@ export class MapPublicComponent implements OnInit, OnDestroy {
         this.limitesMunicipalesHighlight.clearLayers();
       }
       const geojson = JSON.parse(municipio.geom);
-
       const highlightStyle = {
         color: '#0e0e0d',
         weight: 3,
@@ -1118,29 +1008,23 @@ export class MapPublicComponent implements OnInit, OnDestroy {
     } catch (error) {
       const lat = (municipio as any).lat;
       const lng = (municipio as any).lng;
-
       if (lat && lng) {
         this.map.setView([lat, lng], 12);
       }
     }
   }
-
   clearSearch(): void {
     this.searchControl.setValue('');
-    
     this.filteredMunicipios = [];
-    this.busquedaActiva = false; // Desactiva la búsqueda activa al limpiar
-    
+    this.busquedaActiva = false; 
     if (this.limitesMunicipalesHighlight) {
       this.limitesMunicipalesHighlight.clearLayers();
     }
-    
     if (this.searchMarker) {
       this.map.removeLayer(this.searchMarker);
       this.searchMarker = null;
     }
-  
-    this.showModal = false; // Cierra el modal cuando se borra la búsqueda
+    this.showModal = false;
     this.map.setView([-16.54529, -64.7400], 6);
   }
 }

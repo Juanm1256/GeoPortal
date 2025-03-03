@@ -7,7 +7,7 @@ import { DepartamentoInforDTO } from '../../interfaces/departamento-infor-dto';
   providedIn: 'root'
 })
 export class DepartamentoinfoService {
-  private apiUrl = 'https://localhost:7297/api'; // Tu URL base
+  private apiUrl = 'https://localhost:7297/api';
 
   constructor(private http: HttpClient) {}
 

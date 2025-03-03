@@ -8,15 +8,11 @@ import { Subject } from 'rxjs';
 describe('ComponenteLayout', () => {
   let componente: LayoutComponent;
   let fixture: ComponentFixture<LayoutComponent>;
-
-  // Simulación de AuthService
   const authServiceStub = {
     getToken: jasmine.createSpy('getToken').and.returnValue(null),
     getUserRole: jasmine.createSpy('getUserRole').and.returnValue('admin'),
     logout: jasmine.createSpy('logout')
   };
-
-  // Simulación de ThemeService (usando un Subject para simular el observable)
   const isDarkModeSubject = new Subject<boolean>();
   const themeServiceStub = {
     isDarkMode$: isDarkModeSubject,
@@ -45,7 +41,6 @@ describe('ComponenteLayout', () => {
   });
 
   it('Debe suscribirse a ThemeService y actualizar isDarkMode', () => {
-    // Emitir valores para simular cambios en el tema
     isDarkModeSubject.next(true);
     fixture.detectChanges();
     expect(componente.isDarkMode).toBeTrue();

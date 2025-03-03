@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-
 @Pipe({
   name: 'filterone'
 })
@@ -7,12 +6,6 @@ export class FilteronePipe implements PipeTransform {
 
   transform(myObject: any[], campo:string, input: any) {
     if (!input) return myObject;
-    //tabla con multiples tablas sin un llamado de otro object 
-    //tabla con multiples tablas
-    //Filtro estudiante y administrador
-    
-    
-    //Buscador de Rol
     if(campo==="nombrerol"){
       const result=[];
       for (const rol of myObject) {
@@ -22,7 +15,6 @@ export class FilteronePipe implements PipeTransform {
       }
       return result;
     }
-    //tabla individual
     return myObject.filter(val => this.porFiltrado(val, campo, input));
   }
 
