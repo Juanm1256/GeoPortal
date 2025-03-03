@@ -30,7 +30,7 @@ describe('RolesService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verifica que no haya peticiones pendientes
+    httpMock.verify(); 
   });
 
   it('Debe crearse correctamente', () => {
@@ -94,7 +94,7 @@ describe('RolesService', () => {
 
   it('Debe manejar errores correctamente en ListarTodos', () => {
     service.ListarTodos().subscribe(roles => {
-      expect(roles.length).toBe(0); // Debe retornar un array vacío en caso de error
+      expect(roles.length).toBe(0);
     });
 
     const req = httpMock.expectOne(`${service['API']}/Roles/ListarTodos`);

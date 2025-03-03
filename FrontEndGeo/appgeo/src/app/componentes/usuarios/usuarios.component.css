@@ -1,63 +1,50 @@
-/* Aplica mayúsculas a todos los inputs excepto username y password */
 .form-control:not([formControlName="username"]):not([formControlName="password"]) {
   text-transform: uppercase;
 }
 
-/* ===========================
-   🔒 Input de Contraseña
-   =========================== */
-   .password-input-with-icon {
-    width: 100%;
-    padding: 10px 40px 10px 15px; /* Espaciado derecho para el ícono */
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    font-size: 16px;
-    color: #333;
-    outline: none;
-    transition: all 0.3s ease;
+.password-input-with-icon {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
 .password-input-with-icon:focus {
-    border-color: #2C5384;
-    box-shadow: 0 0 0 0.2rem rgba(44, 83, 132, 0.25);
+  border-color: #2C5384;
+  box-shadow: 0 0 0 0.2rem rgba(44, 83, 132, 0.25);
 }
 
 .password-input-with-icon::placeholder {
-    color: #666;
+  color: #666;
 }
 
-/* ===========================
-   👁️ Ícono del Ojo Dentro del Input
-   =========================== */
 .password-icon {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    font-size: 1.25rem;
-    color: #495057;
-    cursor: pointer;
-    transition: color 0.3s ease;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #495057;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .password-icon:hover {
-    color: #2C5384;
+  color: #2C5384;
 }
 
-/* ===========================
-   🌙 Modo Oscuro - Dark Theme
-   =========================== */
 .dark-theme .password-icon {
-    color: #ffffff;  /* 👁️ Ícono del ojo en color blanco */
+  color: #ffffff;
 }
 
 .dark-theme .password-icon:hover {
-    color: #bbbbbb;  /* 👁️ Color gris claro al pasar el mouse */
+  color: #bbbbbb;
 }
 
-/* ===========================
-   💾 Modal Personalizado
-   =========================== */
 .modal-custom {
   border-radius: 12px;
   overflow: hidden;
@@ -80,9 +67,6 @@
   text-align: right;
 }
 
-/* ===========================
-   📦 Contenedor Principal
-   =========================== */
 .main-content {
   border-radius: 12px;
   padding: 20px;
@@ -90,9 +74,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* ===========================
-   🟦 Encabezado del Módulo
-   =========================== */
 .header-custom {
   background-color: #2C5384;
   color: white;
@@ -103,9 +84,6 @@
   justify-content: space-between;
 }
 
-/* ===========================
-   🔍 Buscador
-   =========================== */
 .search-box {
   margin-top: 10px;
   margin-bottom: 20px;
@@ -119,9 +97,6 @@
   gap: 10px;
 }
 
-/* ===========================
-   🗂️ Tabla de Usuarios
-   =========================== */
 .table-custom thead {
   background-color: #2C5384;
   color: white;
@@ -134,18 +109,12 @@
   padding: 12px;
 }
 
-/* ===========================
-   📑 Paginación
-   =========================== */
 .ngb-pagination {
   margin-top: 20px;
   display: flex;
   justify-content: center;
 }
 
-/* ===========================
-   🔘 Botones de Acción
-   =========================== */
 .btn-dark {
   background-color: #343a40;
   border-color: #343a40;

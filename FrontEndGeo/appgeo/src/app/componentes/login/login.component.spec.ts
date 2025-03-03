@@ -33,13 +33,9 @@ describe('ComponenteLogin', () => {
     servicioRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     fixture.detectChanges();
   });
-
-  // ✅ 1. Creación del componente
   it('Debe crear el componente', () => {
     expect(componente).toBeTruthy();
   });
-
-  // ✅ 2. Validaciones del formulario
   it('Debe inicializar el formulario con valores vacíos', () => {
     expect(componente.form.get('usuario')?.value).toBe('');
     expect(componente.form.get('contraseña')?.value).toBe('');
@@ -68,8 +64,6 @@ describe('ComponenteLogin', () => {
     contraseña?.setValue('123');
     expect(contraseña?.invalid).toBeTrue();
   });
-
-  // ✅ 3. Mostrar/Ocultar Contraseña
   it('Debe alternar la visibilidad de la contraseña', () => {
     expect(componente.showPassword).toBeFalse();
     componente.togglePasswordVisibility();
@@ -77,8 +71,6 @@ describe('ComponenteLogin', () => {
     componente.togglePasswordVisibility();
     expect(componente.showPassword).toBeFalse();
   });
-
-  // ✅ 4. Método Guardar - Éxito en la autenticación
   it('Debe llamar a AuthService.login y guardar el token en caso de éxito (ADMINISTRADOR)', async () => {
     const respuestaMock = { Token: 'mockToken', Expira: new Date() };
     servicioAuth.login.and.returnValue(of(respuestaMock));    
@@ -104,8 +96,6 @@ describe('ComponenteLogin', () => {
     expect(servicioAuth.saveToken).toHaveBeenCalledWith('mockToken');
     expect(servicioRouter.navigate).toHaveBeenCalledWith(['/map-public']);
   });
-
-  // ✅ 5. Método Guardar - Manejo de errores
   it('Debe mostrar error si el inicio de sesión falla', async () => {
     const swalSpy = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
   
@@ -134,8 +124,6 @@ describe('ComponenteLogin', () => {
       text: 'El servidor no devolvió un token JWT'
     }));
   });
-
-  // ✅ 6. Método mostrarError
   it('Debe llamar a Swal.fire cuando mostrarError es invocado', async () => {
     const swalSpy = spyOn(Swal, 'fire');
     await componente['mostrarError']('Mensaje de error');
@@ -143,7 +131,7 @@ describe('ComponenteLogin', () => {
     expect(Swal.fire).toHaveBeenCalledWith(jasmine.objectContaining({
       icon: 'error',
       title: 'Error',
-      text: jasmine.any(String) // ✅ Permite cualquier mensaje de error
+      text: jasmine.any(String)
     }));
   });
 

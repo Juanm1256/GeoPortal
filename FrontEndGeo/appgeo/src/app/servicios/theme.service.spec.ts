@@ -6,7 +6,7 @@ describe('ThemeService', () => {
   let service: ThemeService;
 
   beforeEach(() => {
-    sessionStorage.clear(); // ✅ Limpia el almacenamiento antes de cada prueba
+    sessionStorage.clear();
     TestBed.configureTestingModule({});
     service = TestBed.inject(ThemeService);
   });
@@ -22,7 +22,7 @@ describe('ThemeService', () => {
       isDarkMode = value;
     });
 
-    expect(isDarkMode).toBeFalse(); // Por defecto debe ser false (modo claro)
+    expect(isDarkMode).toBeFalse();
   });
 
   it('Debe cargar el tema oscuro si estaba guardado en sessionStorage', () => {
@@ -34,28 +34,23 @@ describe('ThemeService', () => {
       isDarkMode = value;
     });
 
-    expect(isDarkMode).toBeTrue(); // Debe ser true si 'dark' estaba guardado
+    expect(isDarkMode).toBeTrue();
   });
 
   it('Debe alternar el tema correctamente', fakeAsync(() => {
   let isDarkMode!: boolean;
-
-  // Suscribirse al observable para recibir los cambios
   service.isDarkMode$.subscribe(value => {
     isDarkMode = value;
   });
 
-  // Cambiar a modo oscuro
   service.toggleTheme();
-  tick(); // Simular el tiempo necesario para que RxJS propague el cambio
-  expect(isDarkMode).toBeTrue(); // Ahora debe estar en modo oscuro
-  expect(sessionStorage.getItem('theme')).toBe('dark'); // El almacenamiento debe actualizarse
-
-  // Cambiar a modo claro
+  tick(); 
+  expect(isDarkMode).toBeTrue(); 
+  expect(sessionStorage.getItem('theme')).toBe('dark'); 
   service.toggleTheme();
   tick();
-  expect(isDarkMode).toBeFalse(); // Ahora debe estar en modo claro
-  expect(sessionStorage.getItem('theme')).toBe('light'); // El almacenamiento debe actualizarse nuevamente
+  expect(isDarkMode).toBeFalse(); 
+  expect(sessionStorage.getItem('theme')).toBe('light');
 }));
 
 
@@ -66,8 +61,8 @@ describe('ThemeService', () => {
     });
 
     service.toggleTheme();
-    tick(); // Simula el paso del tiempo para que RxJS propague el cambio
+    tick(); 
 
-    expect(isDarkMode).toBeTrue(); // Ahora sí debería reflejar el cambio
+    expect(isDarkMode).toBeTrue();
   }));
 });

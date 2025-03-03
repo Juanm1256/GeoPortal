@@ -1,11 +1,7 @@
-
-/* Aplica mayúsculas a todos los inputs excepto los que se excluyen */
 .form-control:not([formControlName="nombreEspecial"]) {
   text-transform: uppercase;
 }
-/* ===========================
-   💾 Modal Personalizado
-   =========================== */
+
 .modal-custom {
   border-radius: 12px;
   overflow: hidden;
@@ -28,9 +24,6 @@
   text-align: right;
 }
 
-/* ===========================
-   📦 Contenedor Principal
-   =========================== */
 .main-content {
   border-radius: 12px;
   padding: 20px;
@@ -38,9 +31,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* ===========================
-   🟦 Encabezado del Módulo
-   =========================== */
 .header-custom {
   background-color: #2C5384;
   color: white;
@@ -51,9 +41,6 @@
   justify-content: space-between;
 }
 
-/* ===========================
-   🔍 Buscador
-   =========================== */
 .search-box {
   margin-top: 10px;
   margin-bottom: 20px;
@@ -67,9 +54,6 @@
   gap: 10px;
 }
 
-/* ===========================
-   🗂️ Tabla de Roles
-   =========================== */
 .table-custom thead {
   background-color: #2C5384;
   color: white;
@@ -82,18 +66,12 @@
   padding: 12px;
 }
 
-/* ===========================
-   📑 Paginación
-   =========================== */
 .ngb-pagination {
   margin-top: 20px;
   display: flex;
   justify-content: center;
 }
 
-/* ===========================
-   🔘 Botones de Acción
-   =========================== */
 .btn-dark {
   background-color: #343a40;
   border-color: #343a40;
@@ -125,9 +103,6 @@
   border-color: #1e7e34;
 }
 
-/* ===========================
-   🌙 Dark Mode
-   =========================== */
 .dark-theme .modal-custom,
 .dark-theme .main-content {
   background-color: #1a1a1a;

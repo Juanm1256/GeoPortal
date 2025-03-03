@@ -12,7 +12,7 @@ describe('jwtInterceptor', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        provideHttpClient(withInterceptors([jwtInterceptor])) // ✅ Agrega el interceptor en pruebas
+        provideHttpClient(withInterceptors([jwtInterceptor]))
       ]
     });
 
@@ -21,11 +21,11 @@ describe('jwtInterceptor', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // ✅ Verifica que no haya solicitudes pendientes
+    httpMock.verify();
   });
 
   it('Debe crearse correctamente', () => {
-    expect(httpClient).toBeTruthy(); // ✅ Asegura que el `HttpClient` está disponible
+    expect(httpClient).toBeTruthy();
   });
 
 });

@@ -1,4 +1,3 @@
-<!-- Abrir Modal -->
 <ng-template #content let-modal>
   <div class="modal-content modal-custom" [ngClass]="{'dark-theme': isDarkMode}">
     <div class="modal-header modal-header-custom">
@@ -7,7 +6,6 @@
     </div>
     <div class="modal-body">
       <form [formGroup]="form" (ngSubmit)="Guardar()">
-        <!-- Nombres -->
         <div class="mb-3">
           <label for="nombres">Nombres</label>
           <input type="text" class="form-control" id="nombres" placeholder="Ingresa los nombres"
@@ -16,8 +14,6 @@
             {{ getErrorMessage('nombres') }}
           </small>
         </div>
-
-        <!-- Apellidos -->
         <div class="mb-3">
           <label for="apellidos">Apellidos</label>
           <input type="text" class="form-control" id="apellidos" placeholder="Ingresa los apellidos"
@@ -26,8 +22,6 @@
             {{ getErrorMessage('apellidos') }}
           </small>
         </div>
-
-        <!-- CI -->
         <div class="mb-3">
           <label for="ci">CI</label>
           <input type="text" class="form-control" id="ci" placeholder="Ingresa el CI" formControlName="ci"
@@ -46,8 +40,6 @@
             El rol es obligatorio.
           </small>
         </div>
-        
-        <!-- Username -->
         <div class="mb-3">
           <label for="username">Usuario</label>
           <input type="text" class="form-control" id="username" placeholder="Ingresa el nombre de usuario"
@@ -56,27 +48,19 @@
             {{ getErrorMessage('username') }}
           </small>
         </div>
-
-        <!-- Contraseña -->
         <div class="mb-3 position-relative">
           <label for="password">Contraseña</label>
           <div class="position-relative">
-              <input [type]="showPassword ? 'text' : 'password'" 
-                     class="form-control password-input-with-icon" 
-                     id="password" 
-                     placeholder="Ingresa la contraseña" 
-                     autocomplete="off" 
-                     formControlName="password" 
-                     required />
-              <i [ngClass]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" 
-                 class="password-icon" 
-                 (click)="togglePasswordVisibility()"></i>
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control password-input-with-icon"
+              id="password" placeholder="Ingresa la contraseña" autocomplete="off" formControlName="password"
+              required />
+            <i [ngClass]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" class="password-icon"
+              (click)="togglePasswordVisibility()"></i>
           </div>
           <small class="text-danger" *ngIf="getErrorMessage('password')">
             {{ getErrorMessage('password') }}
           </small>
         </div>
-
         <div class="modal-footer modal-footer-custom">
           <button type="button" class="btn btn-danger btn-rounded" (click)="modal.dismiss()">Cerrar</button>
           <button class="btn btn-success btn-rounded" [disabled]="form.invalid" type="submit">Guardar</button>
@@ -85,8 +69,6 @@
     </div>
   </div>
 </ng-template>
-
-<!-- Contenido Principal -->
 <div class="content-viewport main-content" [ngClass]="{'dark-theme': isDarkMode}">
   <div class="row py-4 align-items-center header-custom">
     <div class="col-sm-10">
@@ -98,8 +80,6 @@
       </button>
     </div>
   </div>
-
-  <!-- Buscador -->
   <div class="row mb-4 align-items-center search-box">
     <div class="col-md-5">
       <div class="input-group">
@@ -117,15 +97,11 @@
       </button>
     </div>
   </div>
-
-  <!-- Spinner de carga -->
   <div *ngIf="isLoading" class="d-flex justify-content-center mt-3">
     <div class="spinner-grow" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
-
-  <!-- Tabla de Usuarios -->
   <div class="table-responsive" *ngIf="!isLoading">
     <table class="table table-striped table-custom">
       <thead>

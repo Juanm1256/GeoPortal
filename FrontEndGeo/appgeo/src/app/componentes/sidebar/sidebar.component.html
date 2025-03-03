@@ -1,74 +1,71 @@
-<!-- Botón de Inicio -->
 <div class="sidebar-header">
   <a href="/dashboard" class="btn btn-inicio">
     <i class="bi bi-house-door-fill"></i>
     <span *ngIf="!isSidebarCollapsed">Inicio</span>
   </a>
 </div>
-<nav class="sidebar bg-light p-3" 
-     [class.collapsed]="isSidebarCollapsed" 
-     [class.dark]="isDarkMode">
-    <h5 class="text mb-4" *ngIf="!isSidebarCollapsed">
-      <i class="bi bi-grid-fill me-2"></i> MÓDULOS
-    </h5>
-    <div class="accordion" id="menuAccordion1">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseAccordionUser" [attr.aria-expanded]="!isSidebarCollapsed">
-            <i class="bi bi-people me-2"></i>
-            <span *ngIf="!isSidebarCollapsed">Gestión de Usuarios</span>
-          </button>
-        </h2>
-        <div id="collapseAccordionUser" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-          data-bs-parent="#menuAccordion">
-          <div class="accordion-body">
-            <ul class="list-unstyled">
-              <li class="mb-2">
-                <a href="usuarios" class="text-decoration-none">
-                  <i class="bi bi-person-circle me-2"></i>
-                  <span *ngIf="!isSidebarCollapsed">Administración de Usuarios</span>
-                </a>
-              </li>
-              <li class="mb-2">
-                <a href="roles" class="text-decoration-none">
-                  <i class="bi bi-person-badge me-2"></i>
-                  <span *ngIf="!isSidebarCollapsed">Administración de Roles</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+<nav class="sidebar bg-light p-3" [class.collapsed]="isSidebarCollapsed" [class.dark]="isDarkMode">
+  <h5 class="text mb-4" *ngIf="!isSidebarCollapsed">
+    <i class="bi bi-grid-fill me-2"></i> MÓDULOS
+  </h5>
+  <div class="accordion" id="menuAccordion1">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccordionUser"
+          [attr.aria-expanded]="!isSidebarCollapsed">
+          <i class="bi bi-people me-2"></i>
+          <span *ngIf="!isSidebarCollapsed">Gestión de Usuarios</span>
+        </button>
+      </h2>
+      <div id="collapseAccordionUser" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+        data-bs-parent="#menuAccordion">
+        <div class="accordion-body">
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <a href="usuarios" class="text-decoration-none">
+                <i class="bi bi-person-circle me-2"></i>
+                <span *ngIf="!isSidebarCollapsed">Administración de Usuarios</span>
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="roles" class="text-decoration-none">
+                <i class="bi bi-person-badge me-2"></i>
+                <span *ngIf="!isSidebarCollapsed">Administración de Roles</span>
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
-    <div class="accordion" id="menuAccordion1">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseAccordionGeo" [attr.aria-expanded]="!isSidebarCollapsed">
-            <i class="bi bi-globe-americas me-2"></i>
-            <span *ngIf="!isSidebarCollapsed">Geovisor</span>
-          </button>
-        </h2>
-        <div id="collapseAccordionGeo" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-          data-bs-parent="#menuAccordion">
-          <div class="accordion-body">
-            <ul class="list-unstyled">
-              <li class="mb-2">
-                <a href="map-private" class="text-decoration-none">
-                  <i class="bi bi-map me-2"></i>
-                  <span *ngIf="!isSidebarCollapsed">Geovisor Privado</span>
-                </a>
-              </li>
-              <li class="mb-2">
-                <a href="map-public" class="text-decoration-none">
-                  <i class="bi bi-map me-2"></i>
-                  <span *ngIf="!isSidebarCollapsed">Geovisor Publico</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+  </div>
+  <div class="accordion" id="menuAccordion1">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccordionGeo"
+          [attr.aria-expanded]="!isSidebarCollapsed">
+          <i class="bi bi-globe-americas me-2"></i>
+          <span *ngIf="!isSidebarCollapsed">Geovisor</span>
+        </button>
+      </h2>
+      <div id="collapseAccordionGeo" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+        data-bs-parent="#menuAccordion">
+        <div class="accordion-body">
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <a href="map-private" class="text-decoration-none">
+                <i class="bi bi-map me-2"></i>
+                <span *ngIf="!isSidebarCollapsed">Geovisor Privado</span>
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="map-public" class="text-decoration-none">
+                <i class="bi bi-map me-2"></i>
+                <span *ngIf="!isSidebarCollapsed">Geovisor Publico</span>
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
-  </nav>
+    </div>
+  </div>
+</nav>

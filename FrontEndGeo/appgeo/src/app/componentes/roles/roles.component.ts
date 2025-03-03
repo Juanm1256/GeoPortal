@@ -12,8 +12,6 @@ import { RolesPermisoService } from '../../servicios/roles-permiso.service';
 import { ThemeService } from '../../servicios/theme.service';
 import { Permisos } from '../../interfaces/permisos';
 import { Subscription, firstValueFrom } from 'rxjs';
-
-
 @Component({
   selector: 'app-roles',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPaginationModule, FilteronePipe],
@@ -21,7 +19,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
   styleUrl: './roles.component.css'
 })
 export class RolesComponent implements OnInit, OnDestroy {
-  isLoading: boolean = true; 
+  isLoading: boolean = true;
   isDarkMode: boolean = false;
   listaRol: Roles[] = [];
   permisosList: Permisos[] = [];
@@ -37,7 +35,7 @@ export class RolesComponent implements OnInit, OnDestroy {
   themeSubscription!: Subscription;
 
   constructor(
-    public themeService: ThemeService, 
+    public themeService: ThemeService,
     public modalService: NgbModal,
     private rolpermisoservice: RolesPermisoService,
     private rolservice: RolesService,
@@ -62,24 +60,19 @@ export class RolesComponent implements OnInit, OnDestroy {
       this.isLoading = false;
     }
   }
-
   async ngOnInit(): Promise<void> {
     try {
       await this.cargarRoles();
-  
       this.themeSubscription = this.themeService.isDarkMode$.subscribe(
         (isDark) => this.isDarkMode = isDark
       );
-  
       await Promise.all([
         this.listadoRol(),
         this.ListaPermiso()
       ]);
-  
       if (!this.form.contains('permisos')) {
         this.form.addControl('permisos', this.fb.array([]));
       }
-  
       Object.keys(this.form.controls).forEach((field) => {
         if (field !== 'nombreEspecial') {
           this.form.get(field)?.valueChanges.subscribe(value => {
@@ -89,16 +82,12 @@ export class RolesComponent implements OnInit, OnDestroy {
           });
         }
       });
-  
     } catch (error) {
     }
   }
-  
-
   toggleTheme() {
     this.themeService.toggleTheme();
   }
-
   async listadoRol(): Promise<void> {
     try {
       const data = await firstValueFrom(this.rolservice.ListarTodos());
@@ -107,7 +96,6 @@ export class RolesComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   async ListaPermiso(): Promise<void> {
     try {
       const data = await firstValueFrom(this.rolservice.ListarPermiso());
@@ -115,7 +103,6 @@ export class RolesComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   async Guardar(): Promise<void> {
     try {
       const rolDTO: RolPermisoDTO = {
@@ -123,7 +110,6 @@ export class RolesComponent implements OnInit, OnDestroy {
         estado: 'Activo',
         IdPermisos: this.form.get('permisos')?.value.filter((permiso: any) => permiso !== null)
       };
-  
       if (this.id == undefined) {
         await firstValueFrom(this.rolpermisoservice.insertar(rolDTO));
         Swal.fire({ icon: 'success', title: 'Rol Registrado!' });
@@ -131,7 +117,6 @@ export class RolesComponent implements OnInit, OnDestroy {
         await firstValueFrom(this.rolpermisoservice.modificar(rolDTO, this.id));
         Swal.fire({ icon: 'success', title: 'Rol Modificado!' });
       }
-  
       await this.listadoRol();
       this.form.reset();
       this.modalService.dismissAll();
@@ -146,7 +131,6 @@ export class RolesComponent implements OnInit, OnDestroy {
       }
     }
   }
-
   async Guardarinstruct(content: any): Promise<void> {
     try {
       await this.modalService.open(content);
@@ -157,20 +141,16 @@ export class RolesComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   async SeleccionarRol(content: any, rol: Roles): Promise<void> {
     try {
       await this.modalService.open(content);
       this.accion = "Editar";
       this.id = rol.nombre;
-    
       this.form.patchValue({
         nombre: rol.nombre,
       });
-    
       const permisosArray = this.form.get('permisos') as FormArray;
       permisosArray.clear();
-    
       if (rol.permisos && Array.isArray(rol.permisos)) {
         rol.permisos.forEach((permiso: any) => {
           permisosArray.push(new FormControl(permiso.idpermiso));
@@ -179,7 +159,6 @@ export class RolesComponent implements OnInit, OnDestroy {
     } catch (error) {
     }
   }
-
   async CambiarEstado(rol: Roles, accion: string): Promise<void> {
     try {
       const dto: RolPermisoDTO = {
@@ -187,29 +166,23 @@ export class RolesComponent implements OnInit, OnDestroy {
         estado: accion,
         IdPermisos: rol.permisos ? rol.permisos.map((p: any) => p.idpermiso).filter(id => id !== undefined) : []
       };
-  
       if (rol.nombre) {
         await firstValueFrom(this.rolpermisoservice.modificar(dto, rol.nombre));
-        
         Swal.fire({
           icon: accion === 'Inactivo' ? 'error' : 'success',
           title: `El rol ha sido ${accion === 'Inactivo' ? 'desactivado' : 'activado'}!`
         });
-        
         await this.listadoRol();
         this.form.reset();
       }
     } catch (error) {
     }
   }
-
   get permisos(): FormArray {
     return this.form.get('permisos') as FormArray;
   }
-  
   onCheckboxChange(e: any) {
     const permisos = this.permisos;
-  
     if (e.target.checked) {
       permisos.push(this.fb.control(e.target.value));
     } else {
@@ -224,7 +197,7 @@ export class RolesComponent implements OnInit, OnDestroy {
     if (control && control.invalid && (control.dirty || control.touched)) {
       const errors = control.errors;
       if (errors) {
-        const errorKey = Object.keys(errors)[0]; 
+        const errorKey = Object.keys(errors)[0];
         const mensajes = this.lista.mensajes[controlName];
         if (mensajes) {
           const mensaje = mensajes.find((msg) => msg.type === errorKey);
@@ -233,7 +206,7 @@ export class RolesComponent implements OnInit, OnDestroy {
       }
     }
     return null;
-  }  
+  }
   LimpiarSearch() {
     this.search = '';
   }

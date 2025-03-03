@@ -10,15 +10,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px; /* Ajusta la altura según necesites */
+  height: 200px;
 }
 
 .spinner-border {
   width: 3rem;
   height: 3rem;
 }
-
-/* 🔹 Estilo para el cuadro de color */
 .color-box {
   display: inline-block;
   width: 12px;
@@ -27,33 +25,28 @@
   margin-right: 8px;
   vertical-align: middle;
 }
-/* 🌀 Spinner de Carga para el Mapa */
 .loading-cursor {
   cursor: wait !important;
 }
-/* Contenedor del spinner */
 .spinner-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 80px;
 }
-
-/* Mensaje cuando no hay datos */
 .no-data-message {
   text-align: center;
   font-size: 16px;
   font-weight: bold;
   color: #666;
 }
-/* 📌 Modal más alto y desplazable */
 .draggable {
   z-index: 1050;
   position: fixed;
   top: 50px;
   left: 10%;
-  width: 550px; /* Ancho del modal */
-  max-height: 85vh; /* Usa hasta el 85% de la altura de la pantalla */
+  width: 550px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   border-radius: 10px;
@@ -64,59 +57,50 @@
   cursor: grabbing;
 }
 
-/* 📌 Contenido del modal debe ser flexible */
 .modal-content {
   display: flex;
   flex-direction: column;
   height: auto;
-  max-height: 85vh; /* Asegura que no se corte */
+  max-height: 85vh; 
   overflow: hidden;
 }
 
-/* 📌 Asegurar que el cuerpo del modal sea desplazable */
 .modal-body {
   flex-grow: 1;
-  max-height: 65vh; /* Usa hasta el 70% de la altura de la pantalla */
-  overflow-y: auto; /* Permite desplazamiento */
+  max-height: 65vh; 
+  overflow-y: auto;
   padding: 15px;
   border-top: 1px solid #090909;
 }
 
-/* 📌 Tabla dentro del modal */
 .modal-body table {
   width: 100%;
   border-collapse: collapse;
 }
 
-/* 📌 Celdas de la tabla */
 .modal-body th, .modal-body td {
   padding: 8px 10px;
   border-bottom: 1px solid #ddd;
   text-align: left;
-  vertical-align: top; /* ✅ Asegura que los textos alineen desde arriba */
-  word-wrap: break-word; /* ✅ Permite que los textos largos se ajusten */
-  white-space: normal; /* ✅ Evita que el texto se salga de la celda */
-}
-/* 📌 Ajuste específico para los ríos (columnas con texto largo) */
-.modal-body td.long-text {
-  max-width: 300px; /* ✅ Establece un ancho máximo */
-  word-wrap: break-word; /* ✅ Permite que el texto largo se divida en varias líneas */
-  white-space: normal; /* ✅ Permite el ajuste automático del texto */
-  text-align: justify; /* ✅ Justifica el texto para mejor legibilidad */
+  vertical-align: top;
+  word-wrap: break-word;
+  white-space: normal;
+}.modal-body td.long-text {
+  max-width: 300px;
+  word-wrap: break-word;
+  white-space: normal;
+  text-align: justify;
 }
 
-/* 📌 Estilo para los títulos de sección */
 .section-title {
   background-color: #f8f9fa;
   font-weight: bold;
 }
 
-/* 📌 Asegurar que el header se mantenga */
 .modal-header {
   flex-shrink: 0;
 }
 
-/* 📌 Caja de color para los valores con colores */
 .color-box {
   display: inline-block;
   width: 12px;
@@ -125,12 +109,6 @@
   border-radius: 3px;
 }
 
-
-/* ============================= */
-/*          MODO CLARO           */
-/* ============================= */
-
-/* Contenedor de herramientas */
 .toolbar {
   position: absolute;
   top: 50%;
@@ -146,7 +124,6 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Botones de herramientas */
 .tool-btn {
   background: #2C5384;
   border: none;
@@ -168,7 +145,6 @@
   display: none;
 }
 
-/* Mostrar el texto cuando el mouse pasa sobre el botón */
 .tool-btn:hover::after {
   content: attr(title);
   position: absolute;
@@ -185,19 +161,16 @@
   font-size: 18px;
 }
 
-/* Cambio de color al pasar el mouse */
 .tool-btn:hover {
   background: #142944;
 }
 
-/* Panel de capas oculto por defecto */
 .layer-panel {
   display: none;
   flex-direction: column;
   gap: 5px;
 }
 
-/* Mostrar el panel de capas cuando "Capas" está activo */
 .showLayers .tools {
   display: none;
 }
@@ -206,7 +179,6 @@
   display: flex;
 }
 
-/* Botones de capas */
 .layer-btn {
   background: #2C5384;
   border: none;
@@ -219,22 +191,18 @@
   border-radius: 5px;
 }
 
-/* Mantener visible el texto en la lista de capas */
 .layer-btn span {
   display: inline;
 }
 
-/* Efecto hover */
 .layer-btn:hover {
   background: #0f2e4f;
 }
 
-/* Mantener los botones en verde cuando la capa está activa */
 .layer-btn.active {
   background: #28a745 !important;
 }
 
-/* Panel de capas con scroll */
 .scrollable-layer-panel {
   max-height: 450px;
   overflow-y: auto;
@@ -242,7 +210,6 @@
   scrollbar-color: #888 #f1f1f1;
 }
 
-/* Scroll en WebKit */
 .scrollable-layer-panel::-webkit-scrollbar {
   width: 8px;
 }
@@ -260,7 +227,6 @@
   background: #555;
 }
 
-/* Panel lateral derecho */
 .sidebar-right {
   position: fixed;
   top: 0;
@@ -275,12 +241,10 @@
   overflow-y: auto;
 }
 
-/* Mostrar el panel cuando está abierto */
 .sidebar-right.open {
   right: 0;
 }
 
-/* Botón de cierre del panel lateral */
 .sidebar-header {
   background: #2C5384;
   color: white;
@@ -314,17 +278,15 @@
   transition: background 0.3s ease;
 }
 
-/* Hover */
+
 .sidebar-header .btn-close:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Contenido del panel */
 .sidebar-content {
   padding: 20px;
 }
 
-/* Botón para mostrar el panel lateral */
 .toggle-sidebar-btn {
   position: fixed;
   top: 50%;
@@ -346,7 +308,6 @@
   background: #142944;
 }
 
-/* Gráfico de torta */
 canvas#pieChart {
   width: 100%;
   max-width: 450px;
@@ -354,7 +315,6 @@ canvas#pieChart {
   display: block;
 }
 
-/* Leyenda del gráfico */
 .chart-legend {
   margin-top: 20px;
   border-top: 2px solid #2C5384;
@@ -381,7 +341,6 @@ canvas#pieChart {
   margin: 0 auto;
 }
 
-/* Leyenda de datos */
 .legend-item {
   display: flex;
   align-items: center;
@@ -397,16 +356,11 @@ canvas#pieChart {
   display: inline-block;
 }
 
-/* ============================= */
-/*        MODO NOCTURNO         */
-/* ============================= */
-
-.dark-theme .sidebar-content{
+.dark-theme .sidebar-content {
   background: #1e1e1e;
   color: #ffffff;
 }
 
-/* Herramientas en modo nocturno */
 .dark-theme .toolbar {
   background: rgba(50, 50, 50, 0.9);
   box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
@@ -421,7 +375,6 @@ canvas#pieChart {
   background: #0f3e78;
 }
 
-/* Botones de capas en modo nocturno */
 .dark-theme .layer-btn {
   background: #2C5384;
   color: white;
@@ -435,7 +388,6 @@ canvas#pieChart {
   background: #28a745 !important;
 }
 
-/* Panel lateral derecho en modo nocturno */
 .dark-theme .sidebar-right {
   background: #1e1e1e;
   color: #ffffff;
@@ -457,25 +409,22 @@ canvas#pieChart {
 }
 
 .dark-theme .toggle-sidebar-btn {
-  background: #2C5384!important;
-  color: white!important;
+  background: #2C5384 !important;
+  color: white !important;
 }
 
 .dark-theme .toggle-sidebar-btn:hover {
   background: #0f3e78;
 }
 
-/* Gráfico de torta en modo nocturno */
 .dark-theme canvas#pieChart {
   border: 2px solid #2C5384;
 }
 
-/* Leyenda del gráfico en modo nocturno */
 .dark-theme .chart-legend {
   border-top: 2px solid #2C5384;
 }
 
-/* Scroll en modo nocturno */
 .dark-theme .scrollable-layer-panel::-webkit-scrollbar-thumb {
   background: #2C5384;
 }
@@ -484,12 +433,10 @@ canvas#pieChart {
   background: #0f3e78;
 }
 
-/* Leyenda de datos */
 .dark-theme .legend-color {
   border: 1px solid #ffffff;
 }
 
-/* Contenedor de búsqueda */
 .map-search-container {
   position: absolute;
   top: 10px;
@@ -500,7 +447,6 @@ canvas#pieChart {
   max-width: 350px;
 }
 
-/* Caja de búsqueda */
 .search-box {
   background-color: white;
   border-radius: 4px;
@@ -513,14 +459,12 @@ canvas#pieChart {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Contenedor del input */
 .search-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-/* Input de búsqueda */
 .search-input {
   width: 100%;
   border: none;
@@ -529,14 +473,12 @@ canvas#pieChart {
   outline: none;
 }
 
-/* Ícono de búsqueda */
 .search-icon {
   position: absolute;
   right: 15px;
   color: #555;
 }
 
-/* Spinner de carga */
 .search-spinner {
   position: absolute;
   right: 15px;
@@ -557,7 +499,6 @@ canvas#pieChart {
   color: #333;
 }
 
-/* Estilos para modo oscuro */
 :host-context(.dark-theme) .clear-search-icon {
   color: #aaa;
 }
@@ -565,7 +506,7 @@ canvas#pieChart {
 :host-context(.dark-theme) .clear-search-icon:hover {
   color: #fff;
 }
-/* Resultados de búsqueda */
+
 .search-results {
   max-height: 300px;
   overflow-y: auto;
@@ -590,7 +531,6 @@ canvas#pieChart {
   background-color: #f9f9f9;
 }
 
-/* Elementos de municipio */
 .municipality-item {
   display: flex;
   flex-direction: column;
@@ -602,7 +542,6 @@ canvas#pieChart {
   margin-top: 2px;
 }
 
-/* Estilos para modo oscuro */
 :host-context(.dark-theme) .search-box {
   background-color: #2a2a2a;
   border: 1px solid #444;
